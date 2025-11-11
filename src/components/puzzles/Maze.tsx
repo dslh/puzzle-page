@@ -20,8 +20,8 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
       <div
         className={styles.mazeGrid}
         style={{
-          gridTemplateColumns: `repeat(${maze.width}, 40px)`,
-          gridTemplateRows: `repeat(${maze.height}, 40px)`,
+          gridTemplateColumns: `repeat(${maze.width}, 35px)`,
+          gridTemplateRows: `repeat(${maze.height}, 35px)`,
         }}
       >
         {maze.grid.map((row, y) =>

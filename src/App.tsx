@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Maze from './components/puzzles/Maze';
+import Sudoku from './components/puzzles/Sudoku';
 import styles from './App.module.css';
 
 function App() {
@@ -23,7 +24,14 @@ function App() {
       <div className={styles.page}>
         <h1 className={styles.pageTitle}>Puzzle Page</h1>
         <div className={styles.puzzleContainer}>
-          <Maze seed={puzzleSeed} width={6} height={6} />
+          <div className={styles.puzzleRow}>
+            <Maze seed={puzzleSeed} width={6} height={6} />
+            <Maze seed={puzzleSeed + 1} width={6} height={6} />
+          </div>
+          <div className={styles.puzzleRow}>
+            <Sudoku seed={puzzleSeed + 2} symbolSetIndex={0} />
+            <Sudoku seed={puzzleSeed + 3} symbolSetIndex={1} />
+          </div>
         </div>
       </div>
     </div>

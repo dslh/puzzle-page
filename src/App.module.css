@@ -22,7 +22,7 @@
 
 .pageTitle {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   font-size: 2rem;
   color: #333;
 }
@@ -30,8 +30,16 @@
 .puzzleContainer {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
+}
+
+.puzzleRow {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 /* Print styles */
@@ -44,8 +52,21 @@
     max-width: 100%;
     min-height: auto;
     margin: 0;
-    padding: 0;
+    padding: 1cm;
     box-shadow: none;
+  }
+
+  .pageTitle {
+    margin-bottom: 1cm;
+    font-size: 1.5rem;
+  }
+
+  .puzzleContainer {
+    gap: 1cm;
+  }
+
+  .puzzleRow {
+    gap: 1.5cm;
   }
 
   .controls {
