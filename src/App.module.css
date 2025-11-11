@@ -1,0 +1,54 @@
+.app {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.page {
+  max-width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 1.5cm;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pageTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.puzzleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Print styles */
+@media print {
+  .app {
+    padding: 0;
+  }
+
+  .page {
+    max-width: 100%;
+    min-height: auto;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .controls {
+    display: none;
+  }
+}
