@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { generateSudoku, type Sudoku as SudokuType } from '../../utils/sudokuGenerator';
+import { generateSudoku, type Sudoku as SudokuType } from './generator';
 import styles from './Sudoku.module.css';
 
 const COLORS = ['red', 'green', 'blue', 'yellow'] as const;

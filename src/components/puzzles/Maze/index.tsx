@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { generateMaze, type Maze as MazeType } from '../../utils/mazeGenerator';
+import { generateMaze, type Maze as MazeType } from './generator';
 import styles from './Maze.module.css';
 
 interface MazeProps {
