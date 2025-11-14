@@ -16,10 +16,8 @@ export default function Sudoku({ seed = 0 }: SudokuProps) {
   const renderColor = (colorIndex: number) => {
     return (
       <div
+        className={styles.colorCircle}
         style={{
-          width: '30px',
-          height: '30px',
-          borderRadius: '50%',
           backgroundColor: COLORS[colorIndex],
         }}
       />

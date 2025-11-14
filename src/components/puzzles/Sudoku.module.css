@@ -32,6 +32,14 @@
   background-color: #fff;
 }
 
+.colorCircle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 /* Thicker borders for grid structure */
 .cell:nth-child(4n+1) {
   border-left: 2px solid #000;
