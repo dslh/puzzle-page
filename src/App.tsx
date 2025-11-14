@@ -22,7 +22,6 @@ function App() {
       </div>
 
       <div className={styles.page}>
-        <h1 className={styles.pageTitle}>Puzzle Page</h1>
         <div className={styles.puzzleContainer}>
           <div className={styles.puzzleRow}>
             <Maze seed={puzzleSeed} width={6} height={6} />
