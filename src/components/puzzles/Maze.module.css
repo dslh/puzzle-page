@@ -13,6 +13,22 @@
   color: #333;
 }
 
+.mazeGoal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2rem;
+}
+
+.emoji {
+  font-size: 2rem;
+}
+
+.arrow {
+  font-size: 1.5rem;
+  color: #333;
+}
+
 .mazeSvg {
   background-color: #fff;
 }
