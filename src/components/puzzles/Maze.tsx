@@ -117,7 +117,8 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
                   y2={y * cellSize + offset}
                   stroke="#000"
                   strokeWidth={wallThickness}
-                  strokeLinecap="square"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               );
             }
@@ -132,7 +133,8 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
                   y2={(y + 1) * cellSize + offset}
                   stroke="#000"
                   strokeWidth={wallThickness}
-                  strokeLinecap="square"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               );
             }
@@ -147,7 +149,8 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
                   y2={(y + 1) * cellSize + offset}
                   stroke="#000"
                   strokeWidth={wallThickness}
-                  strokeLinecap="square"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               );
             }
@@ -162,7 +165,8 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
                   y2={(y + 1) * cellSize + offset}
                   stroke="#000"
                   strokeWidth={wallThickness}
-                  strokeLinecap="square"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               );
             }
