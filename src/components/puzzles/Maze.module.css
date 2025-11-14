@@ -13,71 +13,13 @@
   color: #333;
 }
 
-.mazeGrid {
-  display: grid;
-  border: 3px solid #000;
+.mazeSvg {
   background-color: #fff;
-}
-
-.cell {
-  position: relative;
-  width: 35px;
-  height: 35px;
-  background-color: #fff;
-}
-
-/* Cell walls */
-.cell.topWall {
-  border-top: 3px solid #000;
-}
-
-.cell.rightWall {
-  border-right: 3px solid #000;
-}
-
-.cell.bottomWall {
-  border-bottom: 3px solid #000;
-}
-
-.cell.leftWall {
-  border-left: 3px solid #000;
-}
-
-/* Start and end markers */
-.cell.start {
-  background-color: #90EE90;
-}
-
-.cell.start::after {
-  content: '🐭';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
-}
-
-.cell.end {
-  background-color: #FFB6C1;
-}
-
-.cell.end::after {
-  content: '🧀';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
 }
 
 /* Print styles */
 @media print {
   .mazeContainer {
     margin: 1cm 0;
-  }
-
-  .cell {
-    width: 35px;
-    height: 35px;
   }
 }
