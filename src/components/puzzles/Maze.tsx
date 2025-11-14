@@ -80,7 +80,7 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
       >
         {/* Draw cell backgrounds */}
         {maze.grid.map((row, y) =>
-          row.map((cell, x) => {
+          row.map((_cell, x) => {
             const isStart = x === maze.start.x && y === maze.start.y;
             const isEnd = x === maze.end.x && y === maze.end.y;
 
