@@ -1,0 +1,87 @@
+.sidebar {
+  width: 250px;
+  background: #f5f5f5;
+  border-right: 1px solid #ddd;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.puzzleList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.puzzleItem {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: grab;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.puzzleItem:hover {
+  border-color: #2196f3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  transform: translateY(-2px);
+}
+
+.puzzleItem:active {
+  cursor: grabbing;
+}
+
+.icon {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+}
+
+.instructions {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.instructions p {
+  margin: 0 0 8px 0;
+}
+
+.instructions p:last-child {
+  margin: 0;
+}
+
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+}
