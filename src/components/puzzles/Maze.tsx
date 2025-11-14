@@ -66,7 +66,6 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
 
   return (
     <div className={styles.mazeContainer}>
-      <h2 className={styles.mazeTitle}>Maze Puzzle</h2>
       <div className={styles.mazeGoal}>
         <span className={styles.emoji}>{theme.start}</span>
         <span className={styles.arrow}>→</span>
