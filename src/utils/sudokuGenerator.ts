@@ -46,28 +46,58 @@ export function generateSudoku(seed?: number): Sudoku {
     }
   }
 
-  // Randomly select 6-8 cells to be given (pre-filled)
-  const randomValue = random ? random.next() : Math.random();
-  const numGiven = 6 + Math.floor(randomValue * 3); // 6, 7, or 8
+  // Ensure at least one instance of each color (0, 1, 2, 3) is shown
+  const colorPositions: Map<number, Array<[number, number]>> = new Map();
 
-  const positions: Array<[number, number]> = [];
+  // Group positions by color value
   for (let row = 0; row < 4; row++) {
     for (let col = 0; col < 4; col++) {
-      positions.push([row, col]);
+      const colorValue = solution[row][col];
+      if (!colorPositions.has(colorValue)) {
+        colorPositions.set(colorValue, []);
+      }
+      colorPositions.get(colorValue)!.push([row, col]);
     }
   }
 
-  // Shuffle positions using Fisher-Yates
-  for (let i = positions.length - 1; i > 0; i--) {
+  // Select one position for each color to ensure all colors appear
+  const givenPositions: Set<string> = new Set();
+  for (let color = 0; color < 4; color++) {
+    const positions = colorPositions.get(color)!;
     const randomValue = random ? random.next() : Math.random();
-    const j = Math.floor(randomValue * (i + 1));
-    [positions[i], positions[j]] = [positions[j], positions[i]];
+    const selectedIndex = Math.floor(randomValue * positions.length);
+    const [row, col] = positions[selectedIndex];
+    grid[row][col].isGiven = true;
+    givenPositions.add(`${row},${col}`);
   }
 
-  // Mark first numGiven positions as given
-  for (let i = 0; i < numGiven; i++) {
-    const [row, col] = positions[i];
-    grid[row][col].isGiven = true;
+  // Randomly select additional cells to be given (total of 6-8)
+  const randomValue = random ? random.next() : Math.random();
+  const numGiven = 6 + Math.floor(randomValue * 3); // 6, 7, or 8
+  const additionalNeeded = numGiven - 4; // We already have 4 colors shown
+
+  if (additionalNeeded > 0) {
+    const remainingPositions: Array<[number, number]> = [];
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (!givenPositions.has(`${row},${col}`)) {
+          remainingPositions.push([row, col]);
+        }
+      }
+    }
+
+    // Shuffle remaining positions using Fisher-Yates
+    for (let i = remainingPositions.length - 1; i > 0; i--) {
+      const randomValue = random ? random.next() : Math.random();
+      const j = Math.floor(randomValue * (i + 1));
+      [remainingPositions[i], remainingPositions[j]] = [remainingPositions[j], remainingPositions[i]];
+    }
+
+    // Mark additional positions as given
+    for (let i = 0; i < additionalNeeded && i < remainingPositions.length; i++) {
+      const [row, col] = remainingPositions[i];
+      grid[row][col].isGiven = true;
+    }
   }
 
   return { grid, solution };
