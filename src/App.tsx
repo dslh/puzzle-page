@@ -28,8 +28,8 @@ function App() {
             <Maze seed={puzzleSeed + 1} width={6} height={6} />
           </div>
           <div className={styles.puzzleRow}>
-            <Sudoku seed={puzzleSeed + 2} symbolSetIndex={0} />
-            <Sudoku seed={puzzleSeed + 3} symbolSetIndex={1} />
+            <Sudoku seed={puzzleSeed + 2} config={{ mode: 'colours' }} />
+            <Sudoku seed={puzzleSeed + 3} config={{ mode: 'shapes' }} />
           </div>
         </div>
       </div>

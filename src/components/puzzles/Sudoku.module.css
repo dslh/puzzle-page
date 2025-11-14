@@ -6,20 +6,6 @@
   page-break-inside: avoid;
 }
 
-.sudokuTitle {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
-}
-
-.instructions {
-  font-size: 0.9rem;
-  margin: 0;
-  text-align: center;
-  color: #666;
-}
-
 .sudokuGrid {
   display: grid;
   grid-template-columns: repeat(4, 45px);

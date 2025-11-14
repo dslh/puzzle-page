@@ -1,38 +1,37 @@
-export interface SymbolSet {
-  name: string;
-  symbols: [string, string, string, string];
+export type SudokuMode = 'colours' | 'shapes' | 'characters';
+
+export interface SudokuConfig {
+  mode: SudokuMode;
+  characters?: [string, string, string, string];
 }
 
-export const SYMBOL_SETS: SymbolSet[] = [
-  {
-    name: 'Animals',
-    symbols: ['🐶', '🐱', '🐦', '🐠'],
-  },
-  {
-    name: 'Shapes',
-    symbols: ['⭐', '●', '▲', '■'],
-  },
-  {
-    name: 'Fruits',
-    symbols: ['🍎', '🍌', '🍇', '🍊'],
-  },
-  {
-    name: 'Weather',
-    symbols: ['☀️', '☁️', '🌙', '⚡'],
-  },
-  {
-    name: 'Nature',
-    symbols: ['🌸', '🌳', '🌈', '🦋'],
-  },
-  {
-    name: 'Vehicles',
-    symbols: ['🚗', '✈️', '🚂', '⛵'],
-  },
-];
+export const COLOURS = ['red', 'green', 'blue', 'yellow'] as const;
+export const SHAPES = ['circle', 'square', 'triangle', 'cross'] as const;
 
 /**
- * Get a symbol set by index, with wrapping
+ * Get the symbols for a given sudoku configuration
  */
-export function getSymbolSet(index: number): SymbolSet {
-  return SYMBOL_SETS[index % SYMBOL_SETS.length];
+export function getSymbols(config: SudokuConfig): [string, string, string, string] {
+  switch (config.mode) {
+    case 'colours':
+      return ['red', 'green', 'blue', 'yellow'];
+    case 'shapes':
+      return ['circle', 'square', 'triangle', 'cross'];
+    case 'characters':
+      return config.characters || ['A', 'B', 'C', 'D'];
+  }
+}
+
+/**
+ * Get display name for the mode
+ */
+export function getModeName(config: SudokuConfig): string {
+  switch (config.mode) {
+    case 'colours':
+      return 'colour';
+    case 'shapes':
+      return 'shape';
+    case 'characters':
+      return 'character';
+  }
 }
