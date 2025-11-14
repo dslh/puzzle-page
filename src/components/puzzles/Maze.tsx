@@ -95,6 +95,7 @@ export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
                 width={cellSize}
                 height={cellSize}
                 fill={isStart ? theme.startColor : theme.endColor}
+                opacity={0.5}
               />
             );
           })
