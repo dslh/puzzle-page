@@ -10,15 +10,17 @@ interface GridLayoutProps {
   onAddPuzzle: (puzzle: PlacedPuzzle) => void;
   onRemovePuzzle?: (id: string) => void;
   onRerollPuzzle?: (id: string) => void;
+  onUpdatePuzzle?: (id: string, x: number, y: number) => void;
 }
 
 interface DragState {
   type: string;
   width: number;
   height: number;
+  puzzleId?: string; // If present, we're moving an existing puzzle
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
 
@@ -49,8 +51,12 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
     if (!dragData) {
       const type = e.dataTransfer.types.find(t => t.startsWith('puzzle/'));
       if (type) {
-        const [, puzzleType, width, height] = type.split('/');
-        setDragData({ type: puzzleType, width: parseInt(width), height: parseInt(height) });
+        const parts = type.split('/');
+        const puzzleType = parts[1];
+        const width = parseInt(parts[2]);
+        const height = parseInt(parts[3]);
+        const puzzleId = parts[4]; // Will be undefined for new puzzles from sidebar
+        setDragData({ type: puzzleType, width, height, puzzleId });
       }
       return;
     }
@@ -76,20 +82,33 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
     if (!dragOver || !dragData) return;
 
-    const hasCollision = checkCollision(dragOver.x, dragOver.y, dragData.width, dragData.height);
+    // Exclude the puzzle being moved from collision detection
+    const hasCollision = checkCollision(
+      dragOver.x,
+      dragOver.y,
+      dragData.width,
+      dragData.height,
+      dragData.puzzleId
+    );
 
     if (!hasCollision) {
-      const newPuzzle: PlacedPuzzle = {
-        id: `${dragData.type}-${Date.now()}-${Math.random()}`,
-        type: dragData.type as 'maze' | 'sudoku',
-        x: dragOver.x,
-        y: dragOver.y,
-        seed: Date.now() + Math.floor(Math.random() * 1000),
-        width: dragData.width,
-        height: dragData.height,
-      };
+      if (dragData.puzzleId && onUpdatePuzzle) {
+        // Moving an existing puzzle
+        onUpdatePuzzle(dragData.puzzleId, dragOver.x, dragOver.y);
+      } else {
+        // Adding a new puzzle from sidebar
+        const newPuzzle: PlacedPuzzle = {
+          id: `${dragData.type}-${Date.now()}-${Math.random()}`,
+          type: dragData.type as 'maze' | 'sudoku',
+          x: dragOver.x,
+          y: dragOver.y,
+          seed: Date.now() + Math.floor(Math.random() * 1000),
+          width: dragData.width,
+          height: dragData.height,
+        };
 
-      onAddPuzzle(newPuzzle);
+        onAddPuzzle(newPuzzle);
+      }
     }
 
     setDragOver(null);
@@ -111,7 +130,13 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
             y < dragOver.y + dragData.height;
 
           if (isUnderDrag) {
-            const hasCollision = checkCollision(dragOver.x, dragOver.y, dragData.width, dragData.height);
+            const hasCollision = checkCollision(
+              dragOver.x,
+              dragOver.y,
+              dragData.width,
+              dragData.height,
+              dragData.puzzleId
+            );
             className += hasCollision ? ` ${styles.invalid}` : ` ${styles.valid}`;
           }
         }
@@ -150,9 +175,11 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         {renderGridCells()}
 
         {/* Render placed puzzles */}
-        {puzzles.map(puzzle => (
-          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} onRemove={onRemovePuzzle} onReroll={onRerollPuzzle} />
-        ))}
+        {puzzles
+          .filter(puzzle => !dragData?.puzzleId || puzzle.id !== dragData.puzzleId)
+          .map(puzzle => (
+            <PuzzleWrapper key={puzzle.id} puzzle={puzzle} onRemove={onRemovePuzzle} onReroll={onRerollPuzzle} />
+          ))}
 
         {/* Drag preview */}
         {dragOver && dragData && (

@@ -23,6 +23,14 @@ function App() {
     ));
   };
 
+  const handleUpdatePuzzle = (id: string, x: number, y: number) => {
+    setPuzzles(puzzles.map(p =>
+      p.id === id
+        ? { ...p, x, y }
+        : p
+    ));
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -52,6 +60,7 @@ function App() {
           onAddPuzzle={handleAddPuzzle}
           onRemovePuzzle={handleRemovePuzzle}
           onRerollPuzzle={handleRerollPuzzle}
+          onUpdatePuzzle={handleUpdatePuzzle}
         />
       </div>
     </div>

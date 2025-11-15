@@ -11,6 +11,13 @@ interface PuzzleWrapperProps {
 }
 
 export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrapperProps) {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    // Pass puzzle ID to indicate we're moving an existing puzzle
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData(`puzzle/${puzzle.type}/${puzzle.width}/${puzzle.height}/${puzzle.id}`, '');
+  };
+
   const renderPuzzle = () => {
     switch (puzzle.type) {
       case 'maze':
@@ -32,6 +39,14 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrap
         height: `${puzzle.height * CELL_SIZE_MM}mm`,
       }}
     >
+      <div
+        className={styles.dragHandle}
+        draggable
+        onDragStart={handleDragStart}
+        title="Drag to reposition"
+      >
+        ⋮⋮
+      </div>
       <div className={styles.buttonGroup}>
         {onReroll && (
           <button
