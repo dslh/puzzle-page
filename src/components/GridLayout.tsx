@@ -9,6 +9,7 @@ interface GridLayoutProps {
   puzzles: PlacedPuzzle[];
   onAddPuzzle: (puzzle: PlacedPuzzle) => void;
   onRemovePuzzle?: (id: string) => void;
+  onRerollPuzzle?: (id: string) => void;
 }
 
 interface DragState {
@@ -17,7 +18,7 @@ interface DragState {
   height: number;
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
 
@@ -150,7 +151,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle }: Gri
 
         {/* Render placed puzzles */}
         {puzzles.map(puzzle => (
-          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} onRemove={onRemovePuzzle} />
+          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} onRemove={onRemovePuzzle} onReroll={onRerollPuzzle} />
         ))}
 
         {/* Drag preview */}

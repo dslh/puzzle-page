@@ -15,6 +15,14 @@ function App() {
     setPuzzles(puzzles.filter(p => p.id !== id));
   };
 
+  const handleRerollPuzzle = (id: string) => {
+    setPuzzles(puzzles.map(p =>
+      p.id === id
+        ? { ...p, seed: Date.now() + Math.floor(Math.random() * 1000) }
+        : p
+    ));
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -43,6 +51,7 @@ function App() {
           puzzles={puzzles}
           onAddPuzzle={handleAddPuzzle}
           onRemovePuzzle={handleRemovePuzzle}
+          onRerollPuzzle={handleRerollPuzzle}
         />
       </div>
     </div>

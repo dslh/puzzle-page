@@ -7,9 +7,10 @@ import styles from './PuzzleWrapper.module.css';
 interface PuzzleWrapperProps {
   puzzle: PlacedPuzzle;
   onRemove?: (id: string) => void;
+  onReroll?: (id: string) => void;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrapperProps) {
   const renderPuzzle = () => {
     switch (puzzle.type) {
       case 'maze':
@@ -31,15 +32,26 @@ export default function PuzzleWrapper({ puzzle, onRemove }: PuzzleWrapperProps) 
         height: `${puzzle.height * CELL_SIZE_MM}mm`,
       }}
     >
-      {onRemove && (
-        <button
-          className={styles.deleteButton}
-          onClick={() => onRemove(puzzle.id)}
-          title="Remove puzzle"
-        >
-          ×
-        </button>
-      )}
+      <div className={styles.buttonGroup}>
+        {onReroll && (
+          <button
+            className={styles.rerollButton}
+            onClick={() => onReroll(puzzle.id)}
+            title="Re-roll puzzle"
+          >
+            🎲
+          </button>
+        )}
+        {onRemove && (
+          <button
+            className={styles.deleteButton}
+            onClick={() => onRemove(puzzle.id)}
+            title="Remove puzzle"
+          >
+            ×
+          </button>
+        )}
+      </div>
       <div className={styles.content}>{renderPuzzle()}</div>
     </div>
   );
