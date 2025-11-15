@@ -1,4 +1,4 @@
-export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong';
+export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong' | 'patternsequence';
 
 export interface PlacedPuzzle {
   id: string;
@@ -53,6 +53,18 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
     width: 4,
     height: 1,
     label: "Which Doesn't Belong?",
+    resizable: {
+      width: false,
+      height: true,
+      minHeight: 1,
+      maxHeight: GRID_ROWS,
+    },
+  },
+  {
+    type: 'patternsequence',
+    width: 6,
+    height: 2,
+    label: 'Pattern Sequence',
     resizable: {
       width: false,
       height: true,
