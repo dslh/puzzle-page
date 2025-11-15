@@ -11,6 +11,7 @@ interface GridLayoutProps {
   onRemovePuzzle?: (id: string) => void;
   onRerollPuzzle?: (id: string) => void;
   onUpdatePuzzle?: (id: string, x: number, y: number) => void;
+  onResizePuzzle?: (id: string, width: number, height: number) => void;
 }
 
 interface DragState {
@@ -20,7 +21,7 @@ interface DragState {
   puzzleId?: string; // If present, we're moving an existing puzzle
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
 
@@ -178,7 +179,13 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         {puzzles
           .filter(puzzle => !dragData?.puzzleId || puzzle.id !== dragData.puzzleId)
           .map(puzzle => (
-            <PuzzleWrapper key={puzzle.id} puzzle={puzzle} onRemove={onRemovePuzzle} onReroll={onRerollPuzzle} />
+            <PuzzleWrapper
+              key={puzzle.id}
+              puzzle={puzzle}
+              onRemove={onRemovePuzzle}
+              onReroll={onRerollPuzzle}
+              onResize={onResizePuzzle}
+            />
           ))}
 
         {/* Drag preview */}

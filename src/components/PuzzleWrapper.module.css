@@ -8,7 +8,10 @@
 
 .wrapper:hover .deleteButton,
 .wrapper:hover .rerollButton,
-.wrapper:hover .dragHandle {
+.wrapper:hover .dragHandle,
+.wrapper:hover .resizeHandleRight,
+.wrapper:hover .resizeHandleBottom,
+.wrapper:hover .resizeHandleCorner {
   opacity: 1;
 }
 
@@ -100,9 +103,74 @@
   transform: scale(1.1);
 }
 
+/* Resize handles */
+.resizeHandleRight,
+.resizeHandleBottom,
+.resizeHandleCorner {
+  position: absolute;
+  background: #607d8b;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 99;
+}
+
+.resizeHandleRight {
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 40px;
+  cursor: ew-resize;
+  border-radius: 4px;
+}
+
+.resizeHandleRight:hover {
+  background: #455a64;
+  width: 10px;
+  right: -5px;
+}
+
+.resizeHandleBottom {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 8px;
+  width: 40px;
+  cursor: ns-resize;
+  border-radius: 4px;
+}
+
+.resizeHandleBottom:hover {
+  background: #455a64;
+  height: 10px;
+  bottom: -5px;
+}
+
+.resizeHandleCorner {
+  right: -4px;
+  bottom: -4px;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  border-radius: 0 0 4px 0;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+}
+
+.resizeHandleCorner:hover {
+  background: #455a64;
+  width: 18px;
+  height: 18px;
+  right: -5px;
+  bottom: -5px;
+}
+
 @media print {
   .buttonGroup,
-  .dragHandle {
+  .dragHandle,
+  .resizeHandleRight,
+  .resizeHandleBottom,
+  .resizeHandleCorner {
     display: none !important;
   }
 }

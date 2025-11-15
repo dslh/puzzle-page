@@ -1,4 +1,4 @@
-import { CELL_SIZE_MM } from '../types/puzzle';
+import { CELL_SIZE_MM, getMazeDimensions, getPuzzleDefinition } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import Maze from './puzzles/Maze';
 import Sudoku from './puzzles/Sudoku';
@@ -9,9 +9,13 @@ interface PuzzleWrapperProps {
   puzzle: PlacedPuzzle;
   onRemove?: (id: string) => void;
   onReroll?: (id: string) => void;
+  onResize?: (id: string, width: number, height: number) => void;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: PuzzleWrapperProps) {
+  const puzzleDef = getPuzzleDefinition(puzzle.type);
+  const resizable = puzzleDef?.resizable;
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.stopPropagation();
     // Pass puzzle ID to indicate we're moving an existing puzzle
@@ -19,10 +23,70 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrap
     e.dataTransfer.setData(`puzzle/${puzzle.type}/${puzzle.width}/${puzzle.height}/${puzzle.id}`, '');
   };
 
+  const handleResizeStart = (e: React.MouseEvent, direction: 'right' | 'bottom' | 'corner') => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!onResize || !resizable) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = puzzle.width;
+    const startHeight = puzzle.height;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      // Calculate how many grid cells we've moved
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      // Convert pixel delta to grid cells (approximate, will be refined by grid snapping)
+      // Using rough estimate: each grid cell is about 19mm ≈ 72px at 96 DPI
+      const cellSizePx = 72;
+      const deltaCellsX = Math.round(deltaX / cellSizePx);
+      const deltaCellsY = Math.round(deltaY / cellSizePx);
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+
+      if (direction === 'right' || direction === 'corner') {
+        if (resizable.width) {
+          newWidth = Math.max(
+            resizable.minWidth || 1,
+            Math.min(resizable.maxWidth || 10, startWidth + deltaCellsX)
+          );
+        }
+      }
+
+      if (direction === 'bottom' || direction === 'corner') {
+        if (resizable.height) {
+          newHeight = Math.max(
+            resizable.minHeight || 1,
+            Math.min(resizable.maxHeight || 14, startHeight + deltaCellsY)
+          );
+        }
+      }
+
+      // Only update if size changed
+      if (newWidth !== puzzle.width || newHeight !== puzzle.height) {
+        onResize(puzzle.id, newWidth, newHeight);
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   const renderPuzzle = () => {
     switch (puzzle.type) {
-      case 'maze':
-        return <Maze width={6} height={6} seed={puzzle.seed} />;
+      case 'maze': {
+        const mazeDims = getMazeDimensions(puzzle.width, puzzle.height);
+        return <Maze width={mazeDims.width} height={mazeDims.height} seed={puzzle.seed} />;
+      }
       case 'sudoku3x3':
         return <Sudoku size={3} seed={puzzle.seed} />;
       case 'sudoku4x4':
@@ -73,6 +137,33 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrap
         )}
       </div>
       <div className={styles.content}>{renderPuzzle()}</div>
+
+      {/* Resize handles */}
+      {resizable && onResize && (
+        <>
+          {resizable.width && (
+            <div
+              className={styles.resizeHandleRight}
+              onMouseDown={(e) => handleResizeStart(e, 'right')}
+              title="Resize width"
+            />
+          )}
+          {resizable.height && (
+            <div
+              className={styles.resizeHandleBottom}
+              onMouseDown={(e) => handleResizeStart(e, 'bottom')}
+              title="Resize height"
+            />
+          )}
+          {resizable.width && resizable.height && (
+            <div
+              className={styles.resizeHandleCorner}
+              onMouseDown={(e) => handleResizeStart(e, 'corner')}
+              title="Resize both"
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

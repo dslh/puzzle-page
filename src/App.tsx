@@ -31,6 +31,31 @@ function App() {
     ));
   };
 
+  const handleResizePuzzle = (id: string, width: number, height: number) => {
+    // Find the puzzle being resized
+    const puzzle = puzzles.find(p => p.id === id);
+    if (!puzzle) return;
+
+    // Check for collisions with other puzzles
+    const hasCollision = puzzles.some(other => {
+      if (other.id === id) return false; // Don't check against itself
+
+      const xOverlap = puzzle.x < other.x + other.width && puzzle.x + width > other.x;
+      const yOverlap = puzzle.y < other.y + other.height && puzzle.y + height > other.y;
+
+      return xOverlap && yOverlap;
+    });
+
+    // Only update if no collision
+    if (!hasCollision) {
+      setPuzzles(puzzles.map(p =>
+        p.id === id
+          ? { ...p, width, height }
+          : p
+      ));
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -61,6 +86,7 @@ function App() {
           onRemovePuzzle={handleRemovePuzzle}
           onRerollPuzzle={handleRerollPuzzle}
           onUpdatePuzzle={handleUpdatePuzzle}
+          onResizePuzzle={handleResizePuzzle}
         />
       </div>
     </div>
