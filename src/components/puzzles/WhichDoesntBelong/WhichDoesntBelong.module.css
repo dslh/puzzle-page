@@ -1,0 +1,50 @@
+.container {
+  width: 76mm; /* 4 cells × 19mm */
+  height: 19mm; /* 1 cell × 19mm */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 2mm;
+}
+
+.hint {
+  font-size: 12pt;
+  line-height: 1;
+  color: #333;
+  margin-bottom: 1mm;
+  align-self: flex-start;
+}
+
+.itemsContainer {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  gap: 1mm;
+}
+
+.item {
+  font-size: 28pt;
+  line-height: 1;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Print-specific styles */
+@media print {
+  .container {
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+
+  .hint {
+    color: #000;
+  }
+}

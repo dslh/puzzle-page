@@ -1,4 +1,4 @@
-export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4';
+export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong';
 
 export interface PlacedPuzzle {
   id: string;
@@ -21,6 +21,7 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
   { type: 'maze', width: 4, height: 4, label: 'Maze (4×4)' },
   { type: 'sudoku3x3', width: 3, height: 3, label: 'Sudoku (3×3)' },
   { type: 'sudoku4x4', width: 3, height: 3, label: 'Sudoku (4×4)' },
+  { type: 'whichdoesntbelong', width: 4, height: 1, label: "Which Doesn't Belong?" },
 ];
 
 export const GRID_COLS = 10;

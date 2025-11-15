@@ -2,6 +2,7 @@ import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import Maze from './puzzles/Maze';
 import Sudoku from './puzzles/Sudoku';
+import WhichDoesntBelong from './puzzles/WhichDoesntBelong';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -26,6 +27,8 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrap
         return <Sudoku size={3} seed={puzzle.seed} />;
       case 'sudoku4x4':
         return <Sudoku size={4} seed={puzzle.seed} />;
+      case 'whichdoesntbelong':
+        return <WhichDoesntBelong seed={puzzle.seed} />;
       default:
         return null;
     }
