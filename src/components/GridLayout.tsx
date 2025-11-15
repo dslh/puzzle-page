@@ -54,7 +54,11 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle }: Gri
       return;
     }
 
-    const rect = e.currentTarget.getBoundingClientRect();
+    // Get the actual grid element's position, not the container
+    const gridElement = e.currentTarget.querySelector(`.${styles.grid}`) as HTMLElement;
+    if (!gridElement) return;
+
+    const rect = gridElement.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / (rect.width / GRID_COLS));
     const y = Math.floor((e.clientY - rect.top) / (rect.height / GRID_ROWS));
 

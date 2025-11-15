@@ -18,8 +18,8 @@ export interface PuzzleDefinition {
 }
 
 export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
-  { type: 'maze', width: 6, height: 6, label: 'Maze (6×6)' },
-  { type: 'sudoku', width: 4, height: 4, label: 'Sudoku (4×4)' },
+  { type: 'maze', width: 4, height: 4, label: 'Maze (4×4)' },
+  { type: 'sudoku', width: 3, height: 3, label: 'Sudoku (3×3)' },
 ];
 
 export const GRID_COLS = 10;
