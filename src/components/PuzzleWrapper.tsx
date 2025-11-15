@@ -22,8 +22,10 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll }: PuzzleWrap
     switch (puzzle.type) {
       case 'maze':
         return <Maze width={6} height={6} seed={puzzle.seed} />;
-      case 'sudoku':
-        return <Sudoku seed={puzzle.seed} />;
+      case 'sudoku3x3':
+        return <Sudoku size={3} seed={puzzle.seed} />;
+      case 'sudoku4x4':
+        return <Sudoku size={4} seed={puzzle.seed} />;
       default:
         return null;
     }

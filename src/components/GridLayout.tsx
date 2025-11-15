@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { DragEvent } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
-import type { PlacedPuzzle } from '../types/puzzle';
+import type { PlacedPuzzle, PuzzleType } from '../types/puzzle';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
 
@@ -99,7 +99,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         // Adding a new puzzle from sidebar
         const newPuzzle: PlacedPuzzle = {
           id: `${dragData.type}-${Date.now()}-${Math.random()}`,
-          type: dragData.type as 'maze' | 'sudoku',
+          type: dragData.type as PuzzleType,
           x: dragOver.x,
           y: dragOver.y,
           seed: Date.now() + Math.floor(Math.random() * 1000),

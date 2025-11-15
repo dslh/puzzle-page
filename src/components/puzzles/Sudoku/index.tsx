@@ -2,31 +2,46 @@ import { useMemo } from 'react';
 import { generateSudoku, type Sudoku as SudokuType } from './generator';
 import styles from './Sudoku.module.css';
 
-const COLORS = ['red', 'green', 'blue', 'yellow'] as const;
+const COLOR_SETS = {
+  3: ['red', 'green', 'blue'] as const,
+  4: ['red', 'green', 'blue', 'yellow'] as const,
+};
 
 interface SudokuProps {
+  size: number;
   seed?: number;
 }
 
-export default function Sudoku({ seed = 0 }: SudokuProps) {
+export default function Sudoku({ size, seed = 0 }: SudokuProps) {
   const puzzle: SudokuType = useMemo(() => {
-    return generateSudoku(seed);
-  }, [seed]);
+    return generateSudoku(size, seed);
+  }, [size, seed]);
+
+  const colors = COLOR_SETS[size as keyof typeof COLOR_SETS];
 
   const renderColor = (colorIndex: number) => {
     return (
       <div
         className={styles.colorCircle}
         style={{
-          backgroundColor: COLORS[colorIndex],
+          backgroundColor: colors[colorIndex],
         }}
       />
     );
   };
 
+  // Calculate cell size based on grid size to maintain reasonable dimensions
+  const cellSize = size === 3 ? 50 : 45;
+
   return (
     <div className={styles.sudokuContainer}>
-      <div className={styles.sudokuGrid}>
+      <div
+        className={styles.sudokuGrid}
+        style={{
+          gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${size}, ${cellSize}px)`,
+        }}
+      >
         {puzzle.grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
             const cellClasses = [
