@@ -52,23 +52,6 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
 ];
 
 /**
- * Calculate maze grid dimensions from allocated grid cells
- * Formula: 2:1 ratio with margins
- * - Horizontal: 1 maze cell margin on each side (2 total)
- * - Vertical: 1.5 maze cells at top + 0.5 at bottom (2 total)
- *
- * Examples:
- * - 4x4 grid cells → 6x6 maze
- * - 5x5 grid cells → 8x8 maze
- */
-export function getMazeDimensions(gridWidth: number, gridHeight: number): { width: number; height: number } {
-  return {
-    width: gridWidth * 2 - 2,
-    height: gridHeight * 2 - 2,
-  };
-}
-
-/**
  * Get puzzle definition by type
  */
 export function getPuzzleDefinition(type: PuzzleType): PuzzleDefinition | undefined {

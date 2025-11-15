@@ -3,8 +3,8 @@ import { generateMaze, type Maze as MazeType } from './generator';
 import styles from './Maze.module.css';
 
 interface MazeProps {
-  width?: number;
-  height?: number;
+  gridWidth?: number;  // Grid cells allocated (e.g., 4)
+  gridHeight?: number; // Grid cells allocated (e.g., 4)
   seed?: number;
 }
 
@@ -49,7 +49,27 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-export default function Maze({ width = 6, height = 6, seed = 0 }: MazeProps) {
+/**
+ * Calculate maze grid dimensions from allocated grid cells
+ * Formula: 2:1 ratio with margins
+ * - Horizontal: 1 maze cell margin on each side (2 total)
+ * - Vertical: 1.5 maze cells at top + 0.5 at bottom (2 total)
+ *
+ * Examples:
+ * - 4x4 grid cells → 6x6 maze
+ * - 5x5 grid cells → 8x8 maze
+ */
+function getMazeDimensions(gridWidth: number, gridHeight: number): { width: number; height: number } {
+  return {
+    width: gridWidth * 2 - 2,
+    height: gridHeight * 2 - 2,
+  };
+}
+
+export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0 }: MazeProps) {
+  // Convert grid cells to maze cells
+  const { width, height } = getMazeDimensions(gridWidth, gridHeight);
+
   const maze: MazeType = useMemo(() => {
     return generateMaze(width, height, seed);
   }, [width, height, seed]);

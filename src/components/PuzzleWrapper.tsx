@@ -1,4 +1,4 @@
-import { CELL_SIZE_MM, getMazeDimensions, getPuzzleDefinition } from '../types/puzzle';
+import { CELL_SIZE_MM, getPuzzleDefinition } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import Maze from './puzzles/Maze';
 import Sudoku from './puzzles/Sudoku';
@@ -83,10 +83,8 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
 
   const renderPuzzle = () => {
     switch (puzzle.type) {
-      case 'maze': {
-        const mazeDims = getMazeDimensions(puzzle.width, puzzle.height);
-        return <Maze width={mazeDims.width} height={mazeDims.height} seed={puzzle.seed} />;
-      }
+      case 'maze':
+        return <Maze gridWidth={puzzle.width} gridHeight={puzzle.height} seed={puzzle.seed} />;
       case 'sudoku3x3':
         return <Sudoku size={3} seed={puzzle.seed} />;
       case 'sudoku4x4':
