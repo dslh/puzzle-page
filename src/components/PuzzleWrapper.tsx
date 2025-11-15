@@ -4,6 +4,7 @@ import Maze from './puzzles/Maze';
 import Sudoku from './puzzles/Sudoku';
 import WhichDoesntBelong from './puzzles/WhichDoesntBelong';
 import PatternSequence from './puzzles/PatternSequence';
+import Matching from './puzzles/Matching';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -94,6 +95,8 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
         return <WhichDoesntBelong gridHeight={puzzle.height} seed={puzzle.seed} />;
       case 'patternsequence':
         return <PatternSequence gridHeight={puzzle.height} seed={puzzle.seed} />;
+      case 'matching':
+        return <Matching gridHeight={puzzle.height} seed={puzzle.seed} />;
       default:
         return null;
     }

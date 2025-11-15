@@ -1,4 +1,4 @@
-export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong' | 'patternsequence';
+export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong' | 'patternsequence' | 'matching';
 
 export interface PlacedPuzzle {
   id: string;
@@ -69,6 +69,18 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
       width: false,
       height: true,
       minHeight: 1,
+      maxHeight: GRID_ROWS,
+    },
+  },
+  {
+    type: 'matching',
+    width: 4,
+    height: 4,
+    label: 'Matching',
+    resizable: {
+      width: false,
+      height: true,
+      minHeight: 4,
       maxHeight: GRID_ROWS,
     },
   },
