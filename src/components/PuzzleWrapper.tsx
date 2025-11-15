@@ -90,7 +90,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
       case 'sudoku4x4':
         return <Sudoku size={4} seed={puzzle.seed} />;
       case 'whichdoesntbelong':
-        return <WhichDoesntBelong seed={puzzle.seed} />;
+        return <WhichDoesntBelong gridHeight={puzzle.height} seed={puzzle.seed} />;
       default:
         return null;
     }

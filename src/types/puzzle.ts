@@ -48,7 +48,18 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
   },
   { type: 'sudoku3x3', width: 3, height: 3, label: 'Sudoku (3×3)' },
   { type: 'sudoku4x4', width: 3, height: 3, label: 'Sudoku (4×4)' },
-  { type: 'whichdoesntbelong', width: 4, height: 1, label: "Which Doesn't Belong?" },
+  {
+    type: 'whichdoesntbelong',
+    width: 4,
+    height: 1,
+    label: "Which Doesn't Belong?",
+    resizable: {
+      width: false,
+      height: true,
+      minHeight: 1,
+      maxHeight: GRID_ROWS,
+    },
+  },
 ];
 
 /**

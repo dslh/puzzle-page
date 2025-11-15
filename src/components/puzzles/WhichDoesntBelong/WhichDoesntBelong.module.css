@@ -1,6 +1,13 @@
 .container {
-  width: 76mm; /* 4 cells × 19mm */
-  height: 19mm; /* 1 cell × 19mm */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  box-sizing: border-box;
+}
+
+.row {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -10,13 +17,17 @@
   border-radius: 4px;
   box-sizing: border-box;
   padding: 2mm;
+  flex: 1;
+  min-height: 0;
 }
 
 .hint {
   font-size: 8pt;
   color: #333;
-  margin-bottom: 1mm;
-  align-self: flex-start;
+  margin-bottom: 2mm;
+  text-align: left;
+  width: 100%;
+  padding-left: 2mm;
 }
 
 .itemsContainer {
