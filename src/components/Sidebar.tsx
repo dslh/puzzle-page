@@ -21,7 +21,7 @@ export default function Sidebar() {
             onDragStart={(e) => handleDragStart(e, puzzle.type, puzzle.width, puzzle.height)}
           >
             <div className={styles.icon}>
-              {puzzle.type === 'maze' ? '🧩' : puzzle.type === 'whichdoesntbelong' ? '🤔' : puzzle.type === 'matching' ? '🔗' : '🔢'}
+              {puzzle.icon}
             </div>
             <div className={styles.label}>{puzzle.label}</div>
             <div className={styles.hint}>Drag to grid →</div>

@@ -24,6 +24,7 @@ export interface PuzzleDefinition {
   width: number;
   height: number;
   label: string;
+  icon: string;
   resizable?: ResizableConfig;
 }
 
@@ -37,6 +38,7 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
     width: 4,
     height: 4,
     label: 'Maze (4×4)',
+    icon: '🧩',
     resizable: {
       width: true,
       height: true,
@@ -46,13 +48,14 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
       maxHeight: GRID_ROWS,
     },
   },
-  { type: 'sudoku3x3', width: 3, height: 3, label: 'Sudoku (3×3)' },
-  { type: 'sudoku4x4', width: 3, height: 3, label: 'Sudoku (4×4)' },
+  { type: 'sudoku3x3', width: 3, height: 3, label: 'Sudoku (3×3)', icon: '🔢' },
+  { type: 'sudoku4x4', width: 3, height: 3, label: 'Sudoku (4×4)', icon: '🔢' },
   {
     type: 'whichdoesntbelong',
     width: 4,
     height: 1,
     label: "Which Doesn't Belong?",
+    icon: '🤔',
     resizable: {
       width: false,
       height: true,
@@ -65,6 +68,7 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
     width: 6,
     height: 2,
     label: 'Pattern Sequence',
+    icon: '🔢',
     resizable: {
       width: false,
       height: true,
@@ -77,6 +81,7 @@ export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
     width: 4,
     height: 4,
     label: 'Matching',
+    icon: '🔗',
     resizable: {
       width: false,
       height: true,
