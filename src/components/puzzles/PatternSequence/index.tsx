@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { generatePatternSequence, type PatternType } from './generator';
+import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './PatternSequence.module.css';
 
 // Seeded random number generator (matching the one in generator.ts)
@@ -16,12 +17,7 @@ class SeededRandom {
   }
 }
 
-interface PatternSequenceProps {
-  gridHeight?: number; // Number of grid cells (rows) allocated
-  seed: number;
-}
-
-export default function PatternSequence({ gridHeight = 1, seed }: PatternSequenceProps) {
+export default function PatternSequence({ gridHeight = 1, seed }: PuzzleProps) {
   // Generate one pattern per row with mixed types
   const patterns = useMemo(() => {
     const masterRng = new SeededRandom(seed);

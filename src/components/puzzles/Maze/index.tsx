@@ -1,12 +1,7 @@
 import { useMemo } from 'react';
 import { generateMaze, type Maze as MazeType } from './generator';
+import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Maze.module.css';
-
-interface MazeProps {
-  gridWidth?: number;  // Grid cells allocated (e.g., 4)
-  gridHeight?: number; // Grid cells allocated (e.g., 4)
-  seed?: number;
-}
 
 interface MazeTheme {
   start: string;
@@ -66,7 +61,7 @@ function getMazeDimensions(gridWidth: number, gridHeight: number): { width: numb
   };
 }
 
-export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0 }: MazeProps) {
+export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0 }: PuzzleProps) {
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight);
 

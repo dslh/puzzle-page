@@ -1,3 +1,5 @@
+import type React from 'react';
+
 export type PuzzleType = 'maze' | 'sudoku3x3' | 'sudoku4x4' | 'whichdoesntbelong' | 'patternsequence' | 'matching';
 
 export interface PlacedPuzzle {
@@ -10,6 +12,16 @@ export interface PlacedPuzzle {
   height: number; // cells height (6 for maze, 3 for sudoku3x3, 3 for sudoku4x4)
 }
 
+/**
+ * Standard props interface for all puzzle components
+ */
+export interface PuzzleProps<TConfig = unknown> {
+  gridWidth: number;   // Grid cells allocated (width)
+  gridHeight: number;  // Grid cells allocated (height)
+  seed: number;        // For deterministic generation
+  config?: TConfig;    // Optional puzzle-specific configuration
+}
+
 export interface ResizableConfig {
   width: boolean;
   height: boolean;
@@ -19,81 +31,18 @@ export interface ResizableConfig {
   maxHeight?: number;
 }
 
-export interface PuzzleDefinition {
+export interface PuzzleDefinition<TConfig = unknown> {
   type: PuzzleType;
-  width: number;
-  height: number;
   label: string;
   icon: string;
+  component: React.ComponentType<PuzzleProps<TConfig>>;
+  defaultWidth: number;
+  defaultHeight: number;
   resizable?: ResizableConfig;
+  configComponent?: React.ComponentType<any>; // For future configuration UI
+  defaultConfig?: TConfig; // For future default configuration
 }
 
 export const GRID_COLS = 10;
 export const GRID_ROWS = 14;
 export const CELL_SIZE_MM = 19;
-
-export const PUZZLE_DEFINITIONS: PuzzleDefinition[] = [
-  {
-    type: 'maze',
-    width: 4,
-    height: 4,
-    label: 'Maze (4×4)',
-    icon: '🧩',
-    resizable: {
-      width: true,
-      height: true,
-      minWidth: 4,
-      maxWidth: GRID_COLS,
-      minHeight: 4,
-      maxHeight: GRID_ROWS,
-    },
-  },
-  { type: 'sudoku3x3', width: 3, height: 3, label: 'Sudoku (3×3)', icon: '🔢' },
-  { type: 'sudoku4x4', width: 3, height: 3, label: 'Sudoku (4×4)', icon: '🔢' },
-  {
-    type: 'whichdoesntbelong',
-    width: 4,
-    height: 1,
-    label: "Which Doesn't Belong?",
-    icon: '🤔',
-    resizable: {
-      width: false,
-      height: true,
-      minHeight: 1,
-      maxHeight: GRID_ROWS,
-    },
-  },
-  {
-    type: 'patternsequence',
-    width: 6,
-    height: 2,
-    label: 'Pattern Sequence',
-    icon: '🔢',
-    resizable: {
-      width: false,
-      height: true,
-      minHeight: 1,
-      maxHeight: GRID_ROWS,
-    },
-  },
-  {
-    type: 'matching',
-    width: 4,
-    height: 4,
-    label: 'Matching',
-    icon: '🔗',
-    resizable: {
-      width: false,
-      height: true,
-      minHeight: 4,
-      maxHeight: GRID_ROWS,
-    },
-  },
-];
-
-/**
- * Get puzzle definition by type
- */
-export function getPuzzleDefinition(type: PuzzleType): PuzzleDefinition | undefined {
-  return PUZZLE_DEFINITIONS.find(def => def.type === type);
-}

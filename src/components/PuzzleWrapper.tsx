@@ -1,10 +1,6 @@
-import { CELL_SIZE_MM, getPuzzleDefinition } from '../types/puzzle';
+import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
-import Maze from './puzzles/Maze';
-import Sudoku from './puzzles/Sudoku';
-import WhichDoesntBelong from './puzzles/WhichDoesntBelong';
-import PatternSequence from './puzzles/PatternSequence';
-import Matching from './puzzles/Matching';
+import { getPuzzleDefinition } from './puzzles';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -84,22 +80,31 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
   };
 
   const renderPuzzle = () => {
-    switch (puzzle.type) {
-      case 'maze':
-        return <Maze gridWidth={puzzle.width} gridHeight={puzzle.height} seed={puzzle.seed} />;
-      case 'sudoku3x3':
-        return <Sudoku size={3} seed={puzzle.seed} />;
-      case 'sudoku4x4':
-        return <Sudoku size={4} seed={puzzle.seed} />;
-      case 'whichdoesntbelong':
-        return <WhichDoesntBelong gridHeight={puzzle.height} seed={puzzle.seed} />;
-      case 'patternsequence':
-        return <PatternSequence gridHeight={puzzle.height} seed={puzzle.seed} />;
-      case 'matching':
-        return <Matching gridHeight={puzzle.height} seed={puzzle.seed} />;
-      default:
-        return null;
+    // Map legacy sudoku4x4 type to sudoku3x3 definition
+    const lookupType = puzzle.type === 'sudoku4x4' ? 'sudoku3x3' : puzzle.type;
+    const definition = getPuzzleDefinition(lookupType);
+
+    if (!definition) {
+      console.error(`Unknown puzzle type: ${puzzle.type}`);
+      return null;
     }
+
+    const Component = definition.component as React.ComponentType<any>;
+
+    // Build config based on puzzle type
+    // For legacy sudoku4x4, override the config
+    const config = puzzle.type === 'sudoku4x4'
+      ? { size: 4 as const }
+      : definition.defaultConfig;
+
+    return (
+      <Component
+        gridWidth={puzzle.width}
+        gridHeight={puzzle.height}
+        seed={puzzle.seed}
+        config={config}
+      />
+    );
   };
 
   return (

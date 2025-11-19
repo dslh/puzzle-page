@@ -1,12 +1,7 @@
 import { useMemo } from 'react';
 import { generateMatchingPuzzle } from './generator';
+import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Matching.module.css';
-
-interface Props {
-  gridHeight?: number;
-  gridWidth?: number;
-  seed: number;
-}
 
 class SeededRandom {
   private seed: number;
@@ -34,7 +29,7 @@ class SeededRandom {
   }
 }
 
-export default function Matching({ gridHeight = 4, seed }: Props) {
+export default function Matching({ gridHeight = 4, seed }: PuzzleProps) {
   const puzzle = useMemo(() => {
     const basePuzzle = generateMatchingPuzzle(seed, gridHeight);
 

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { generateSudoku, type Sudoku as SudokuType } from './generator';
+import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Sudoku.module.css';
 
 const COLOR_SETS = {
@@ -7,12 +8,12 @@ const COLOR_SETS = {
   4: ['red', 'green', 'blue', 'yellow'] as const,
 };
 
-interface SudokuProps {
-  size: number;
-  seed?: number;
+export interface SudokuConfig {
+  size: 3 | 4;
 }
 
-export default function Sudoku({ size, seed = 0 }: SudokuProps) {
+export default function Sudoku({ seed = 0, config }: PuzzleProps<SudokuConfig>) {
+  const size = config?.size ?? 3;
   const puzzle: SudokuType = useMemo(() => {
     return generateSudoku(size, seed);
   }, [size, seed]);

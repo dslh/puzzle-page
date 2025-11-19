@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react';
-import { PUZZLE_DEFINITIONS } from '../types/puzzle';
+import { PUZZLE_DEFINITIONS } from './puzzles';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
@@ -18,7 +18,7 @@ export default function Sidebar() {
             key={puzzle.type}
             className={styles.puzzleItem}
             draggable
-            onDragStart={(e) => handleDragStart(e, puzzle.type, puzzle.width, puzzle.height)}
+            onDragStart={(e) => handleDragStart(e, puzzle.type, puzzle.defaultWidth, puzzle.defaultHeight)}
           >
             <div className={styles.icon}>
               {puzzle.icon}

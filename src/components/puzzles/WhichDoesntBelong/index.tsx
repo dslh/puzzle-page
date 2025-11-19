@@ -1,13 +1,9 @@
 import { useMemo } from 'react';
 import { generateWhichDoesntBelong } from './generator';
+import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './WhichDoesntBelong.module.css';
 
-interface WhichDoesntBelongProps {
-  gridHeight?: number; // Number of grid cells (rows) allocated
-  seed: number;
-}
-
-export default function WhichDoesntBelong({ gridHeight = 1, seed }: WhichDoesntBelongProps) {
+export default function WhichDoesntBelong({ gridHeight = 1, seed }: PuzzleProps) {
   // Generate one puzzle per row
   const puzzles = useMemo(() => {
     return Array.from({ length: gridHeight }, (_, i) =>
