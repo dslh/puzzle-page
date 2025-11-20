@@ -11,11 +11,13 @@ export default function Sidebar() {
     // Use custom type to pass puzzle data, including config for Sudoku
     e.dataTransfer.effectAllowed = 'copy';
 
-    // Include config in dataTransfer for configurable puzzles
+    // Format: puzzle/{type}/{width}/{height}/{puzzleId}/{config}
+    // For new puzzles, puzzleId slot is empty
     let dataString = `puzzle/${type}/${width}/${height}`;
-    if (type === 'sudoku3x3') {
+
+    if (type === 'sudoku') {
       const config: SudokuConfig = { size: sudokuSize };
-      dataString += `/${JSON.stringify(config)}`;
+      dataString += `//${JSON.stringify(config)}`; // Empty puzzleId slot
     }
 
     e.dataTransfer.setData(dataString, '');
@@ -27,7 +29,7 @@ export default function Sidebar() {
       <div className={styles.puzzleList}>
         {PUZZLE_DEFINITIONS.map((puzzle) => {
           const ConfigComponent = puzzle.configComponent;
-          const isSudoku = puzzle.type === 'sudoku3x3';
+          const isSudoku = puzzle.type === 'sudoku';
 
           return (
             <div

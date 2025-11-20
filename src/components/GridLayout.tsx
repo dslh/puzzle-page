@@ -60,29 +60,16 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         const width = parseInt(parts[2]);
         const height = parseInt(parts[3]);
 
-        // Determine if parts[4] is a puzzleId or config JSON
-        let puzzleId: string | undefined = undefined;
+        // parts[4] is always puzzleId (may be empty string or undefined)
+        // parts[5] is always config (if present)
+        const puzzleId = parts[4] || undefined;
         let config: unknown = undefined;
 
-        if (parts[4]) {
-          if (parts[4].startsWith('{')) {
-            // parts[4] is config (new puzzle from sidebar)
-            try {
-              config = JSON.parse(decodeURIComponent(parts[4]));
-            } catch (e) {
-              console.error('Failed to parse config from drag data:', e);
-            }
-          } else {
-            // parts[4] is a puzzleId (moving existing puzzle)
-            puzzleId = parts[4];
-            // Check for config in parts[5]
-            if (parts[5] && parts[5].startsWith('{')) {
-              try {
-                config = JSON.parse(decodeURIComponent(parts[5]));
-              } catch (e) {
-                console.error('Failed to parse config from drag data:', e);
-              }
-            }
+        if (parts[5]) {
+          try {
+            config = JSON.parse(decodeURIComponent(parts[5]));
+          } catch (e) {
+            console.error('Failed to parse config from drag data:', e);
           }
         }
 

@@ -59,7 +59,7 @@ function App() {
   const handleConfigChange = (id: string, config: unknown) => {
     setPuzzles(puzzles.map(p =>
       p.id === id
-        ? { ...p, config, seed: Date.now() + Math.floor(Math.random() * 1000) }
+        ? { ...p, config }
         : p
     ));
   };

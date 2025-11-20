@@ -81,9 +81,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
   };
 
   const renderPuzzle = () => {
-    // Map legacy sudoku4x4 type to sudoku3x3 definition
-    const lookupType = puzzle.type === 'sudoku4x4' ? 'sudoku3x3' : puzzle.type;
-    const definition = getPuzzleDefinition(lookupType);
+    const definition = getPuzzleDefinition(puzzle.type);
 
     if (!definition) {
       console.error(`Unknown puzzle type: ${puzzle.type}`);
@@ -93,12 +91,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     const Component = definition.component as React.ComponentType<any>;
 
     // Use puzzle's stored config, fallback to definition default
-    // Special case: legacy sudoku4x4 gets size: 4 config
-    const config = puzzle.config !== undefined
-      ? puzzle.config
-      : puzzle.type === 'sudoku4x4'
-      ? { size: 4 as const }
-      : definition.defaultConfig;
+    const config = puzzle.config ?? definition.defaultConfig;
 
     return (
       <Component

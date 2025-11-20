@@ -107,9 +107,9 @@
 /* Config panel */
 .configPanel {
   position: absolute;
-  top: -12px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: white;
   border: 2px solid #ddd;
   border-radius: 4px;
@@ -118,6 +118,7 @@
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 100;
+  pointer-events: auto;
 }
 
 /* Resize handles */

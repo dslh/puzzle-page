@@ -3,8 +3,8 @@ import Sudoku, { type SudokuConfig } from './index';
 import SudokuConfigBar from './SudokuConfigBar';
 
 export const puzzleDefinition: PuzzleDefinition<SudokuConfig> = {
-  type: 'sudoku3x3',
-  label: 'Sudoku (3×3)',
+  type: 'sudoku',
+  label: 'Sudoku',
   icon: '🔢',
   component: Sudoku,
   configComponent: SudokuConfigBar,
