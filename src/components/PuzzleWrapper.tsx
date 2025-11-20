@@ -150,9 +150,9 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
             const currentConfig = puzzle.config ?? puzzleDef.defaultConfig;
             return (
               <ConfigComponent
-                value={(currentConfig as any)?.size ?? 3}
-                onChange={(size: number) => {
-                  onConfigChange(puzzle.id, { size });
+                value={currentConfig}
+                onChange={(newConfig: unknown) => {
+                  onConfigChange(puzzle.id, newConfig);
                 }}
               />
             );

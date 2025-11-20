@@ -46,8 +46,8 @@ export default function Sidebar() {
               {isSudoku && ConfigComponent && (
                 <div className={styles.configSection}>
                   <ConfigComponent
-                    value={sudokuSize}
-                    onChange={setSudokuSize}
+                    value={{ size: sudokuSize }}
+                    onChange={(config: SudokuConfig) => setSudokuSize(config.size)}
                   />
                 </div>
               )}
