@@ -75,7 +75,7 @@ export default function Matching({ gridHeight = 4, seed }: PuzzleProps) {
         <div className={styles.column}>
           {puzzle.shuffledRight.map((emoji, index) => (
             <div key={index} className={styles.item}>
-              <span className={styles.emoji}>{emoji}</span>
+              <span className={`${styles.emoji} ${styles.silhouette}`}>{emoji}</span>
             </div>
           ))}
         </div>
