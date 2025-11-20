@@ -23,7 +23,7 @@
 }
 
 .connectingSpace {
-  flex: 0 0 60%;
+  flex: 0 0 52%;
   position: relative;
   border-left: 1px dashed #ccc;
   border-right: 1px dashed #ccc;
