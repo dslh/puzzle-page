@@ -8,9 +8,10 @@ interface PuzzleWrapperProps {
   onRemove?: (id: string) => void;
   onReroll?: (id: string) => void;
   onResize?: (id: string, width: number, height: number) => void;
+  onConfigChange?: (id: string, config: unknown) => void;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
 
@@ -91,9 +92,11 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
 
     const Component = definition.component as React.ComponentType<any>;
 
-    // Build config based on puzzle type
-    // For legacy sudoku4x4, override the config
-    const config = puzzle.type === 'sudoku4x4'
+    // Use puzzle's stored config, fallback to definition default
+    // Special case: legacy sudoku4x4 gets size: 4 config
+    const config = puzzle.config !== undefined
+      ? puzzle.config
+      : puzzle.type === 'sudoku4x4'
       ? { size: 4 as const }
       : definition.defaultConfig;
 
@@ -145,6 +148,25 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize }: 
           </button>
         )}
       </div>
+
+      {/* Config UI */}
+      {puzzleDef?.configComponent && onConfigChange && (
+        <div className={styles.configPanel}>
+          {(() => {
+            const ConfigComponent = puzzleDef.configComponent as React.ComponentType<any>;
+            const currentConfig = puzzle.config ?? puzzleDef.defaultConfig;
+            return (
+              <ConfigComponent
+                value={(currentConfig as any)?.size ?? 3}
+                onChange={(size: number) => {
+                  onConfigChange(puzzle.id, { size });
+                }}
+              />
+            );
+          })()}
+        </div>
+      )}
+
       <div className={styles.content}>{renderPuzzle()}</div>
 
       {/* Resize handles */}

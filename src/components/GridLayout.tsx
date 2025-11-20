@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { DragEvent } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle, PuzzleType } from '../types/puzzle';
+import { getPuzzleDefinition } from './puzzles';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
 
@@ -12,6 +13,7 @@ interface GridLayoutProps {
   onRerollPuzzle?: (id: string) => void;
   onUpdatePuzzle?: (id: string, x: number, y: number) => void;
   onResizePuzzle?: (id: string, width: number, height: number) => void;
+  onConfigChange?: (id: string, config: unknown) => void;
 }
 
 interface DragState {
@@ -19,9 +21,10 @@ interface DragState {
   width: number;
   height: number;
   puzzleId?: string; // If present, we're moving an existing puzzle
+  config?: unknown; // Optional config from sidebar
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
 
@@ -56,8 +59,34 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         const puzzleType = parts[1];
         const width = parseInt(parts[2]);
         const height = parseInt(parts[3]);
-        const puzzleId = parts[4]; // Will be undefined for new puzzles from sidebar
-        setDragData({ type: puzzleType, width, height, puzzleId });
+
+        // Determine if parts[4] is a puzzleId or config JSON
+        let puzzleId: string | undefined = undefined;
+        let config: unknown = undefined;
+
+        if (parts[4]) {
+          if (parts[4].startsWith('{')) {
+            // parts[4] is config (new puzzle from sidebar)
+            try {
+              config = JSON.parse(decodeURIComponent(parts[4]));
+            } catch (e) {
+              console.error('Failed to parse config from drag data:', e);
+            }
+          } else {
+            // parts[4] is a puzzleId (moving existing puzzle)
+            puzzleId = parts[4];
+            // Check for config in parts[5]
+            if (parts[5] && parts[5].startsWith('{')) {
+              try {
+                config = JSON.parse(decodeURIComponent(parts[5]));
+              } catch (e) {
+                console.error('Failed to parse config from drag data:', e);
+              }
+            }
+          }
+        }
+
+        setDragData({ type: puzzleType, width, height, puzzleId, config });
       }
       return;
     }
@@ -98,6 +127,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         onUpdatePuzzle(dragData.puzzleId, dragOver.x, dragOver.y);
       } else {
         // Adding a new puzzle from sidebar
+        const definition = getPuzzleDefinition(dragData.type);
         const newPuzzle: PlacedPuzzle = {
           id: `${dragData.type}-${Date.now()}-${Math.random()}`,
           type: dragData.type as PuzzleType,
@@ -106,6 +136,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
           seed: Date.now() + Math.floor(Math.random() * 1000),
           width: dragData.width,
           height: dragData.height,
+          config: dragData.config ?? definition?.defaultConfig,
         };
 
         onAddPuzzle(newPuzzle);
@@ -185,6 +216,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
               onRemove={onRemovePuzzle}
               onReroll={onRerollPuzzle}
               onResize={onResizePuzzle}
+              onConfigChange={onConfigChange}
             />
           ))}
 

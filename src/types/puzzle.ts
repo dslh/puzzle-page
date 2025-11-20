@@ -10,6 +10,7 @@ export interface PlacedPuzzle {
   seed: number;
   width: number; // cells width (6 for maze, 3 for sudoku3x3, 3 for sudoku4x4)
   height: number; // cells height (6 for maze, 3 for sudoku3x3, 3 for sudoku4x4)
+  config?: unknown; // Puzzle-specific configuration (e.g., sudoku size)
 }
 
 /**
