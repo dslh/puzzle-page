@@ -1,14 +1,19 @@
 import type { PuzzleDefinition } from '../../../types/puzzle';
 import { GRID_COLS, GRID_ROWS } from '../../../types/puzzle';
-import Maze from './index';
+import Maze, { type MazeConfig } from './index';
+import MazeConfigBar from './MazeConfigBar';
 
-export const puzzleDefinition: PuzzleDefinition = {
+export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
   type: 'maze',
   label: 'Maze (4×4)',
   icon: '🧩',
   component: Maze,
+  configComponent: MazeConfigBar,
   defaultWidth: 4,
   defaultHeight: 4,
+  defaultConfig: {
+    cellSizeRatio: 2,
+  },
   resizable: {
     width: true,
     height: true,

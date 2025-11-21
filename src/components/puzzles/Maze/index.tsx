@@ -3,6 +3,10 @@ import { generateMaze, type Maze as MazeType } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Maze.module.css';
 
+export interface MazeConfig {
+  cellSizeRatio: 2 | 3 | 4;
+}
+
 interface MazeTheme {
   start: string;
   end: string;
@@ -46,24 +50,30 @@ function seededRandom(seed: number): number {
 
 /**
  * Calculate maze grid dimensions from allocated grid cells
- * Formula: 2:1 ratio with margins
+ * Formula: ratio:1 with margins
  * - Horizontal: 1 maze cell margin on each side (2 total)
  * - Vertical: 1.5 maze cells at top + 0.5 at bottom (2 total)
  *
- * Examples:
+ * Examples (ratio=2):
  * - 4x4 grid cells → 6x6 maze
  * - 5x5 grid cells → 8x8 maze
+ *
+ * Examples (ratio=3):
+ * - 4x4 grid cells → 10x10 maze
+ * - 5x5 grid cells → 13x13 maze
  */
-function getMazeDimensions(gridWidth: number, gridHeight: number): { width: number; height: number } {
+function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number): { width: number; height: number } {
   return {
-    width: gridWidth * 2 - 2,
-    height: gridHeight * 2 - 2,
+    width: gridWidth * ratio - 2,
+    height: gridHeight * ratio - 2,
   };
 }
 
-export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0 }: PuzzleProps) {
+export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
+  const ratio = config?.cellSizeRatio ?? 2;
+
   // Convert grid cells to maze cells
-  const { width, height } = getMazeDimensions(gridWidth, gridHeight);
+  const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
 
   const maze: MazeType = useMemo(() => {
     return generateMaze(width, height, seed);
@@ -74,18 +84,21 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0 }: Puzzle
     return MAZE_THEMES[themeIndex];
   }, [seed]);
 
-  const cellSize = 35;
+  // Calculate cell size dynamically based on available grid space
+  // Grid cells are approximately 72px (19mm at 96 DPI)
+  const GRID_CELL_SIZE_PX = 72;
   const wallThickness = 3;
+
+  // Calculate the maximum cell size that fits in the available space
+  const availableWidth = gridWidth * GRID_CELL_SIZE_PX - wallThickness;
+  const availableHeight = gridHeight * GRID_CELL_SIZE_PX - wallThickness;
+  const cellSize = Math.floor(Math.min(availableWidth / maze.width, availableHeight / maze.height));
+
   const svgWidth = maze.width * cellSize + wallThickness;
   const svgHeight = maze.height * cellSize + wallThickness;
 
   return (
     <div className={styles.mazeContainer}>
-      <div className={styles.mazeGoal}>
-        <span className={styles.emoji}>{theme.start}</span>
-        <span className={styles.arrow}>→</span>
-        <span className={styles.emoji}>{theme.end}</span>
-      </div>
       <svg
         className={styles.mazeSvg}
         width={svgWidth}
