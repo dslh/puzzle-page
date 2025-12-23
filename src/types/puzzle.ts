@@ -1,6 +1,6 @@
 import type React from 'react';
 
-export type PuzzleType = 'maze' | 'sudoku' | 'whichdoesntbelong' | 'patternsequence' | 'matching';
+export type PuzzleType = 'maze' | 'sudoku' | 'whichdoesntbelong' | 'patternsequence' | 'matching' | 'picturescramble';
 
 export interface PlacedPuzzle {
   id: string;

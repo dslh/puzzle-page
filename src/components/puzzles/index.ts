@@ -3,6 +3,7 @@ import { puzzleDefinition as sudoku } from './Sudoku/definition';
 import { puzzleDefinition as whichDoesntBelong } from './WhichDoesntBelong/definition';
 import { puzzleDefinition as patternSequence } from './PatternSequence/definition';
 import { puzzleDefinition as matching } from './Matching/definition';
+import { puzzleDefinition as pictureScramble } from './PictureScramble/definition';
 
 /**
  * Registry of all available puzzle types
@@ -14,6 +15,7 @@ export const PUZZLE_DEFINITIONS = [
   whichDoesntBelong,
   patternSequence,
   matching,
+  pictureScramble,
 ] as const;
 
 /**
