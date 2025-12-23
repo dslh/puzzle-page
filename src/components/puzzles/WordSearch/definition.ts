@@ -14,6 +14,7 @@ export const puzzleDefinition: PuzzleDefinition<WordSearchConfig> = {
   defaultConfig: {
     difficulty: 1,
     wordCount: 3,
+    limitedLetters: false,
   },
   resizable: {
     width: true,

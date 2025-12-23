@@ -6,6 +6,7 @@ import styles from './WordSearch.module.css';
 export interface WordSearchConfig {
   difficulty: 1 | 2 | 3 | 4;
   wordCount: 3 | 4 | 5;
+  limitedLetters: boolean;
 }
 
 const GRID_CELL_PX = 72; // 19mm at 96 DPI
@@ -26,13 +27,14 @@ export default function WordSearch({
 }: PuzzleProps<WordSearchConfig>) {
   const difficulty = config?.difficulty ?? 1;
   const wordCount = config?.wordCount ?? 3;
+  const limitedLetters = config?.limitedLetters ?? false;
 
   // Calculate internal grid size based on puzzle dimensions
   const internalGridSize = calculateGridSize(gridWidth, gridHeight);
 
   const puzzle = useMemo(
-    () => generateWordSearch(seed, difficulty, wordCount, internalGridSize),
-    [seed, difficulty, wordCount, internalGridSize]
+    () => generateWordSearch(seed, difficulty, wordCount, internalGridSize, limitedLetters),
+    [seed, difficulty, wordCount, internalGridSize, limitedLetters]
   );
 
   // Calculate cell size based on available grid space

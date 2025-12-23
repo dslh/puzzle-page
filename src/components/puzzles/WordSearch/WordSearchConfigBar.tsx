@@ -21,12 +21,12 @@ const DIFFICULTY_TOOLTIPS: Record<number, string> = {
 };
 
 export default function WordSearchConfigBar({ value, onChange }: ConfigBarProps) {
-  const { difficulty, wordCount } = value;
+  const { difficulty, wordCount, limitedLetters } = value;
 
   return (
     <div className={styles.configContainer}>
       <div className={styles.configGroup}>
-        <span className={styles.label}>Difficulty:</span>
+        <span className={styles.label}>Directions:</span>
         <div className={styles.buttonBar}>
           {([1, 2, 3, 4] as const).map((level) => (
             <button
@@ -56,6 +56,17 @@ export default function WordSearchConfigBar({ value, onChange }: ConfigBarProps)
             </button>
           ))}
         </div>
+      </div>
+
+      <div className={styles.configGroup}>
+        <button
+          type="button"
+          className={`${styles.toggleButton} ${limitedLetters ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, limitedLetters: !limitedLetters })}
+          title="Only use letters from the hidden words (harder)"
+        >
+          ABC
+        </button>
       </div>
     </div>
   );

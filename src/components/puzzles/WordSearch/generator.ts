@@ -146,7 +146,8 @@ export function generateWordSearch(
   seed: number,
   difficulty: 1 | 2 | 3 | 4,
   wordCount: 3 | 4 | 5,
-  gridSize: number
+  gridSize: number,
+  limitedLetters: boolean = false
 ): WordSearchPuzzle {
   const random = new SeededRandom(seed);
 
@@ -188,11 +189,17 @@ export function generateWordSearch(
   }
 
   // Fill remaining cells with random letters
-  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  // If limitedLetters is true, only use letters from the placed words
+  const ALL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const wordLetters = limitedLetters
+    ? [...new Set(placedWords.flatMap(w => w.word.split('')))].join('')
+    : ALL_LETTERS;
+  const fillLetters = wordLetters.length > 0 ? wordLetters : ALL_LETTERS;
+
   for (let y = 0; y < gridSize; y++) {
     for (let x = 0; x < gridSize; x++) {
       if (grid[y][x] === '') {
-        grid[y][x] = LETTERS[random.nextInt(LETTERS.length)];
+        grid[y][x] = fillLetters[random.nextInt(fillLetters.length)];
       }
     }
   }
