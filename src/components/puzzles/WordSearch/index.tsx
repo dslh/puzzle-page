@@ -10,6 +10,14 @@ export interface WordSearchConfig {
 
 const GRID_CELL_PX = 72; // 19mm at 96 DPI
 
+// Calculate internal grid size based on allocated puzzle space
+function calculateGridSize(gridWidth: number, gridHeight: number): number {
+  // Use smaller dimension, leaving 1 cell worth of space for clues
+  const size = Math.min(gridWidth, gridHeight - 1);
+  // Clamp to reasonable bounds: 5 (easy) to 9 (challenging)
+  return Math.max(5, Math.min(9, size));
+}
+
 export default function WordSearch({
   gridWidth,
   gridHeight,
@@ -19,9 +27,12 @@ export default function WordSearch({
   const difficulty = config?.difficulty ?? 1;
   const wordCount = config?.wordCount ?? 3;
 
+  // Calculate internal grid size based on puzzle dimensions
+  const internalGridSize = calculateGridSize(gridWidth, gridHeight);
+
   const puzzle = useMemo(
-    () => generateWordSearch(seed, difficulty, wordCount),
-    [seed, difficulty, wordCount]
+    () => generateWordSearch(seed, difficulty, wordCount, internalGridSize),
+    [seed, difficulty, wordCount, internalGridSize]
   );
 
   // Calculate cell size based on available grid space

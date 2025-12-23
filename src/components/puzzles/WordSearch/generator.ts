@@ -145,10 +145,14 @@ function tryPlaceWord(
 export function generateWordSearch(
   seed: number,
   difficulty: 1 | 2 | 3 | 4,
-  wordCount: 3 | 4 | 5
+  wordCount: 3 | 4 | 5,
+  gridSize: number
 ): WordSearchPuzzle {
   const random = new SeededRandom(seed);
-  const gridSize = 7; // Fixed 7x7 grid for ages 4-5
+
+  // Filter words that can fit in this grid size
+  const maxWordLength = gridSize;
+  const availableWords = WORD_LIST.filter(w => w.word.length <= maxWordLength);
 
   // Initialize empty grid
   const grid: string[][] = Array(gridSize)
@@ -158,8 +162,8 @@ export function generateWordSearch(
   // Get available directions for this difficulty
   const availableDirections = DIRECTIONS_BY_DIFFICULTY[difficulty];
 
-  // Shuffle and select words
-  const shuffledWords = random.shuffle([...WORD_LIST]);
+  // Shuffle and select words from those that fit
+  const shuffledWords = random.shuffle([...availableWords]);
   const selectedWords: WordEntry[] = shuffledWords.slice(0, wordCount + 2); // Select extra in case some fail
 
   // Sort by word length (longest first for better placement)
