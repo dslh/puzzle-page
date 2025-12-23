@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   generateWeavingMaze,
   type WeavingMaze as WeavingMazeType,
@@ -64,6 +64,15 @@ function getMazeDimensions(
   };
 }
 
+interface PathSegment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  key: string;
+  linecap?: 'round' | 'butt';
+}
+
 export default function WeavingMaze({
   gridWidth = 5,
   gridHeight = 5,
@@ -96,17 +105,16 @@ export default function WeavingMaze({
   );
 
   const pathWidth = Math.max(8, Math.floor(cellSize * 0.55));
-  const borderWidth = 2;
-  const gapSize = pathWidth + 6;
+  const borderWidth = 3;
+  const gapSize = pathWidth + borderWidth * 2 + 4;
 
   const svgWidth = maze.width * cellSize + margin * 2;
   const svgHeight = maze.height * cellSize + margin * 2;
   const offset = margin;
 
-  // Collect all path segments, separating under and over paths
-  const underPaths: React.ReactNode[] = [];
-  const overPaths: React.ReactNode[] = [];
-  const borderPaths: React.ReactNode[] = [];
+  // Collect path segments in layers
+  const underSegments: PathSegment[] = [];
+  const overSegments: PathSegment[] = [];
 
   maze.grid.forEach((row, y) => {
     row.forEach((cell, x) => {
@@ -114,246 +122,110 @@ export default function WeavingMaze({
       const cy = y * cellSize + cellSize / 2 + offset;
 
       if (cell.crossing) {
-        // Handle crossing cell - draw under paths with gap
         const overDir = cell.crossing.overDirection;
 
         if (overDir === 'vertical') {
           // Horizontal is under (draw with gap), vertical is over
           if (cell.connections.left) {
-            const x1 = x * cellSize + offset;
-            const x2 = cx - gapSize / 2;
-            underPaths.push(
-              <line
-                key={`under-h-left-${x}-${y}`}
-                x1={x1}
-                y1={cy}
-                x2={x2}
-                y2={cy}
-                stroke="#e0e0e0"
-                strokeWidth={pathWidth}
-                strokeLinecap="round"
-              />
-            );
-            borderPaths.push(
-              <line
-                key={`border-h-left-top-${x}-${y}`}
-                x1={x1}
-                y1={cy - pathWidth / 2}
-                x2={x2}
-                y2={cy - pathWidth / 2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />,
-              <line
-                key={`border-h-left-bot-${x}-${y}`}
-                x1={x1}
-                y1={cy + pathWidth / 2}
-                x2={x2}
-                y2={cy + pathWidth / 2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />
-            );
+            underSegments.push({
+              x1: x * cellSize + offset,
+              y1: cy,
+              x2: cx - gapSize / 2,
+              y2: cy,
+              key: `under-h-left-${x}-${y}`,
+              linecap: 'butt', // Flat end at gap
+            });
           }
           if (cell.connections.right) {
-            const x1 = cx + gapSize / 2;
-            const x2 = (x + 1) * cellSize + offset;
-            underPaths.push(
-              <line
-                key={`under-h-right-${x}-${y}`}
-                x1={x1}
-                y1={cy}
-                x2={x2}
-                y2={cy}
-                stroke="#e0e0e0"
-                strokeWidth={pathWidth}
-                strokeLinecap="round"
-              />
-            );
-            borderPaths.push(
-              <line
-                key={`border-h-right-top-${x}-${y}`}
-                x1={x1}
-                y1={cy - pathWidth / 2}
-                x2={x2}
-                y2={cy - pathWidth / 2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />,
-              <line
-                key={`border-h-right-bot-${x}-${y}`}
-                x1={x1}
-                y1={cy + pathWidth / 2}
-                x2={x2}
-                y2={cy + pathWidth / 2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />
-            );
+            underSegments.push({
+              x1: cx + gapSize / 2,
+              y1: cy,
+              x2: (x + 1) * cellSize + offset,
+              y2: cy,
+              key: `under-h-right-${x}-${y}`,
+              linecap: 'butt', // Flat end at gap
+            });
           }
-          // Vertical over path
-          const y1 = y * cellSize + offset;
-          const y2 = (y + 1) * cellSize + offset;
-          overPaths.push(
-            <line
-              key={`over-v-${x}-${y}`}
-              x1={cx}
-              y1={y1}
-              x2={cx}
-              y2={y2}
-              stroke="#e0e0e0"
-              strokeWidth={pathWidth}
-              strokeLinecap="round"
-            />
-          );
-          overPaths.push(
-            <line
-              key={`border-over-v-left-${x}-${y}`}
-              x1={cx - pathWidth / 2}
-              y1={y1}
-              x2={cx - pathWidth / 2}
-              y2={y2}
-              stroke="#666"
-              strokeWidth={borderWidth}
-            />,
-            <line
-              key={`border-over-v-right-${x}-${y}`}
-              x1={cx + pathWidth / 2}
-              y1={y1}
-              x2={cx + pathWidth / 2}
-              y2={y2}
-              stroke="#666"
-              strokeWidth={borderWidth}
-            />
-          );
+          // Vertical over path - full length with flat ends
+          overSegments.push({
+            x1: cx,
+            y1: y * cellSize + offset,
+            x2: cx,
+            y2: (y + 1) * cellSize + offset,
+            key: `over-v-${x}-${y}`,
+            linecap: 'butt',
+          });
         } else {
           // Vertical is under (draw with gap), horizontal is over
           if (cell.connections.top) {
-            const y1 = y * cellSize + offset;
-            const y2 = cy - gapSize / 2;
-            underPaths.push(
-              <line
-                key={`under-v-top-${x}-${y}`}
-                x1={cx}
-                y1={y1}
-                x2={cx}
-                y2={y2}
-                stroke="#e0e0e0"
-                strokeWidth={pathWidth}
-                strokeLinecap="round"
-              />
-            );
-            borderPaths.push(
-              <line
-                key={`border-v-top-left-${x}-${y}`}
-                x1={cx - pathWidth / 2}
-                y1={y1}
-                x2={cx - pathWidth / 2}
-                y2={y2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />,
-              <line
-                key={`border-v-top-right-${x}-${y}`}
-                x1={cx + pathWidth / 2}
-                y1={y1}
-                x2={cx + pathWidth / 2}
-                y2={y2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />
-            );
+            underSegments.push({
+              x1: cx,
+              y1: y * cellSize + offset,
+              x2: cx,
+              y2: cy - gapSize / 2,
+              key: `under-v-top-${x}-${y}`,
+              linecap: 'butt', // Flat end at gap
+            });
           }
           if (cell.connections.bottom) {
-            const y1 = cy + gapSize / 2;
-            const y2 = (y + 1) * cellSize + offset;
-            underPaths.push(
-              <line
-                key={`under-v-bottom-${x}-${y}`}
-                x1={cx}
-                y1={y1}
-                x2={cx}
-                y2={y2}
-                stroke="#e0e0e0"
-                strokeWidth={pathWidth}
-                strokeLinecap="round"
-              />
-            );
-            borderPaths.push(
-              <line
-                key={`border-v-bot-left-${x}-${y}`}
-                x1={cx - pathWidth / 2}
-                y1={y1}
-                x2={cx - pathWidth / 2}
-                y2={y2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />,
-              <line
-                key={`border-v-bot-right-${x}-${y}`}
-                x1={cx + pathWidth / 2}
-                y1={y1}
-                x2={cx + pathWidth / 2}
-                y2={y2}
-                stroke="#666"
-                strokeWidth={borderWidth}
-              />
-            );
+            underSegments.push({
+              x1: cx,
+              y1: cy + gapSize / 2,
+              x2: cx,
+              y2: (y + 1) * cellSize + offset,
+              key: `under-v-bottom-${x}-${y}`,
+              linecap: 'butt', // Flat end at gap
+            });
           }
-          // Horizontal over path
-          const x1 = x * cellSize + offset;
-          const x2 = (x + 1) * cellSize + offset;
-          overPaths.push(
-            <line
-              key={`over-h-${x}-${y}`}
-              x1={x1}
-              y1={cy}
-              x2={x2}
-              y2={cy}
-              stroke="#e0e0e0"
-              strokeWidth={pathWidth}
-              strokeLinecap="round"
-            />
-          );
-          overPaths.push(
-            <line
-              key={`border-over-h-top-${x}-${y}`}
-              x1={x1}
-              y1={cy - pathWidth / 2}
-              x2={x2}
-              y2={cy - pathWidth / 2}
-              stroke="#666"
-              strokeWidth={borderWidth}
-            />,
-            <line
-              key={`border-over-h-bot-${x}-${y}`}
-              x1={x1}
-              y1={cy + pathWidth / 2}
-              x2={x2}
-              y2={cy + pathWidth / 2}
-              stroke="#666"
-              strokeWidth={borderWidth}
-            />
-          );
+          // Horizontal over path - full length with flat ends
+          overSegments.push({
+            x1: x * cellSize + offset,
+            y1: cy,
+            x2: (x + 1) * cellSize + offset,
+            y2: cy,
+            key: `over-h-${x}-${y}`,
+            linecap: 'butt',
+          });
         }
       } else {
         // Regular cell - draw path segments from center to connected edges
-        renderRegularCell(
-          cell,
-          x,
-          y,
-          cx,
-          cy,
-          cellSize,
-          offset,
-          pathWidth,
-          borderWidth,
-          underPaths,
-          borderPaths
-        );
+        collectRegularCellSegments(cell, x, y, cx, cy, cellSize, offset, underSegments);
       }
     });
   });
+
+  const renderSegments = (segments: PathSegment[], prefix: string, skipBorder = false) => (
+    <>
+      {/* Border layer (thicker, darker) - skip for over segments */}
+      {!skipBorder && segments.map((seg) => (
+        <line
+          key={`${prefix}-border-${seg.key}`}
+          x1={seg.x1}
+          y1={seg.y1}
+          x2={seg.x2}
+          y2={seg.y2}
+          stroke="#666"
+          strokeWidth={pathWidth + borderWidth * 2}
+          strokeLinecap={seg.linecap ?? 'round'}
+          strokeLinejoin="round"
+        />
+      ))}
+      {/* Fill layer (thinner, lighter) */}
+      {segments.map((seg) => (
+        <line
+          key={`${prefix}-fill-${seg.key}`}
+          x1={seg.x1}
+          y1={seg.y1}
+          x2={seg.x2}
+          y2={seg.y2}
+          stroke="#e0e0e0"
+          strokeWidth={pathWidth}
+          strokeLinecap={seg.linecap ?? 'round'}
+          strokeLinejoin="round"
+        />
+      ))}
+    </>
+  );
 
   return (
     <div className={styles.mazeContainer}>
@@ -382,14 +254,78 @@ export default function WeavingMaze({
           opacity={0.5}
         />
 
-        {/* Layer 1: Under paths and regular paths */}
-        <g className={styles.pathsUnder}>{underPaths}</g>
+        {/* Layer 1: Under paths (includes regular paths and under-segments at crossings) */}
+        <g className={styles.pathsUnder}>
+          {renderSegments(underSegments, 'under')}
+        </g>
 
-        {/* Layer 2: Border paths for under layer */}
-        <g className={styles.pathBorders}>{borderPaths}</g>
+        {/* Layer 2: Over paths at crossings */}
+        <g className={styles.pathsOver}>
+          {/* Side borders only (no end caps) */}
+          {overSegments.map((seg) => {
+            const isVertical = seg.x1 === seg.x2;
+            const halfPath = pathWidth / 2;
 
-        {/* Layer 3: Over paths at crossings (rendered on top) */}
-        <g className={styles.pathsOver}>{overPaths}</g>
+            if (isVertical) {
+              // Vertical bridge: draw left and right border lines
+              return (
+                <g key={`over-borders-${seg.key}`}>
+                  <line
+                    x1={seg.x1 - halfPath}
+                    y1={seg.y1}
+                    x2={seg.x2 - halfPath}
+                    y2={seg.y2}
+                    stroke="#666"
+                    strokeWidth={borderWidth}
+                  />
+                  <line
+                    x1={seg.x1 + halfPath}
+                    y1={seg.y1}
+                    x2={seg.x2 + halfPath}
+                    y2={seg.y2}
+                    stroke="#666"
+                    strokeWidth={borderWidth}
+                  />
+                </g>
+              );
+            } else {
+              // Horizontal bridge: draw top and bottom border lines
+              return (
+                <g key={`over-borders-${seg.key}`}>
+                  <line
+                    x1={seg.x1}
+                    y1={seg.y1 - halfPath}
+                    x2={seg.x2}
+                    y2={seg.y2 - halfPath}
+                    stroke="#666"
+                    strokeWidth={borderWidth}
+                  />
+                  <line
+                    x1={seg.x1}
+                    y1={seg.y1 + halfPath}
+                    x2={seg.x2}
+                    y2={seg.y2 + halfPath}
+                    stroke="#666"
+                    strokeWidth={borderWidth}
+                  />
+                </g>
+              );
+            }
+          })}
+          {/* Fill layer */}
+          {overSegments.map((seg) => (
+            <line
+              key={`over-fill-${seg.key}`}
+              x1={seg.x1}
+              y1={seg.y1}
+              x2={seg.x2}
+              y2={seg.y2}
+              stroke="#e0e0e0"
+              strokeWidth={pathWidth}
+              strokeLinecap="butt"
+            />
+          ))}
+        </g>
 
         {/* Start marker */}
         <text
@@ -417,7 +353,7 @@ export default function WeavingMaze({
   );
 }
 
-function renderRegularCell(
+function collectRegularCellSegments(
   cell: WeavingCell,
   x: number,
   y: number,
@@ -425,153 +361,45 @@ function renderRegularCell(
   cy: number,
   cellSize: number,
   offset: number,
-  pathWidth: number,
-  borderWidth: number,
-  paths: React.ReactNode[],
-  borders: React.ReactNode[]
+  segments: PathSegment[]
 ) {
-  // Draw path from center to each connected direction
   if (cell.connections.top) {
-    const y1 = y * cellSize + offset;
-    paths.push(
-      <line
-        key={`path-top-${x}-${y}`}
-        x1={cx}
-        y1={cy}
-        x2={cx}
-        y2={y1}
-        stroke="#e0e0e0"
-        strokeWidth={pathWidth}
-        strokeLinecap="round"
-      />
-    );
-    borders.push(
-      <line
-        key={`border-top-left-${x}-${y}`}
-        x1={cx - pathWidth / 2}
-        y1={cy}
-        x2={cx - pathWidth / 2}
-        y2={y1}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />,
-      <line
-        key={`border-top-right-${x}-${y}`}
-        x1={cx + pathWidth / 2}
-        y1={cy}
-        x2={cx + pathWidth / 2}
-        y2={y1}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />
-    );
+    segments.push({
+      x1: cx,
+      y1: cy,
+      x2: cx,
+      y2: y * cellSize + offset,
+      key: `path-top-${x}-${y}`,
+    });
   }
 
   if (cell.connections.right) {
-    const x2 = (x + 1) * cellSize + offset;
-    paths.push(
-      <line
-        key={`path-right-${x}-${y}`}
-        x1={cx}
-        y1={cy}
-        x2={x2}
-        y2={cy}
-        stroke="#e0e0e0"
-        strokeWidth={pathWidth}
-        strokeLinecap="round"
-      />
-    );
-    borders.push(
-      <line
-        key={`border-right-top-${x}-${y}`}
-        x1={cx}
-        y1={cy - pathWidth / 2}
-        x2={x2}
-        y2={cy - pathWidth / 2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />,
-      <line
-        key={`border-right-bot-${x}-${y}`}
-        x1={cx}
-        y1={cy + pathWidth / 2}
-        x2={x2}
-        y2={cy + pathWidth / 2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />
-    );
+    segments.push({
+      x1: cx,
+      y1: cy,
+      x2: (x + 1) * cellSize + offset,
+      y2: cy,
+      key: `path-right-${x}-${y}`,
+    });
   }
 
   if (cell.connections.bottom) {
-    const y2 = (y + 1) * cellSize + offset;
-    paths.push(
-      <line
-        key={`path-bottom-${x}-${y}`}
-        x1={cx}
-        y1={cy}
-        x2={cx}
-        y2={y2}
-        stroke="#e0e0e0"
-        strokeWidth={pathWidth}
-        strokeLinecap="round"
-      />
-    );
-    borders.push(
-      <line
-        key={`border-bottom-left-${x}-${y}`}
-        x1={cx - pathWidth / 2}
-        y1={cy}
-        x2={cx - pathWidth / 2}
-        y2={y2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />,
-      <line
-        key={`border-bottom-right-${x}-${y}`}
-        x1={cx + pathWidth / 2}
-        y1={cy}
-        x2={cx + pathWidth / 2}
-        y2={y2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />
-    );
+    segments.push({
+      x1: cx,
+      y1: cy,
+      x2: cx,
+      y2: (y + 1) * cellSize + offset,
+      key: `path-bottom-${x}-${y}`,
+    });
   }
 
   if (cell.connections.left) {
-    const x1 = x * cellSize + offset;
-    paths.push(
-      <line
-        key={`path-left-${x}-${y}`}
-        x1={cx}
-        y1={cy}
-        x2={x1}
-        y2={cy}
-        stroke="#e0e0e0"
-        strokeWidth={pathWidth}
-        strokeLinecap="round"
-      />
-    );
-    borders.push(
-      <line
-        key={`border-left-top-${x}-${y}`}
-        x1={cx}
-        y1={cy - pathWidth / 2}
-        x2={x1}
-        y2={cy - pathWidth / 2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />,
-      <line
-        key={`border-left-bot-${x}-${y}`}
-        x1={cx}
-        y1={cy + pathWidth / 2}
-        x2={x1}
-        y2={cy + pathWidth / 2}
-        stroke="#666"
-        strokeWidth={borderWidth}
-      />
-    );
+    segments.push({
+      x1: cx,
+      y1: cy,
+      x2: x * cellSize + offset,
+      y2: cy,
+      key: `path-left-${x}-${y}`,
+    });
   }
 }
