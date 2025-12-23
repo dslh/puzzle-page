@@ -1,4 +1,5 @@
 import { puzzleDefinition as maze } from './Maze/definition';
+import { puzzleDefinition as weavingMaze } from './WeavingMaze/definition';
 import { puzzleDefinition as sudoku } from './Sudoku/definition';
 import { puzzleDefinition as whichDoesntBelong } from './WhichDoesntBelong/definition';
 import { puzzleDefinition as patternSequence } from './PatternSequence/definition';
@@ -12,6 +13,7 @@ import { puzzleDefinition as wordSearch } from './WordSearch/definition';
  */
 export const PUZZLE_DEFINITIONS = [
   maze,
+  weavingMaze,
   sudoku,
   whichDoesntBelong,
   patternSequence,

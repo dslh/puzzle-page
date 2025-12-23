@@ -1,0 +1,28 @@
+.mazeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  page-break-inside: avoid;
+}
+
+.mazeSvg {
+  background-color: #fff;
+}
+
+.pathsUnder line {
+  stroke-linecap: round;
+}
+
+.pathsOver line {
+  stroke-linecap: round;
+}
+
+.pathBorders line {
+  stroke-linecap: butt;
+}
+
+@media print {
+  .mazeContainer {
+    margin: 1cm 0;
+  }
+}
