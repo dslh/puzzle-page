@@ -1,0 +1,69 @@
+export interface WordEntry {
+  word: string;
+  emoji: string;
+}
+
+export const WORD_LIST: WordEntry[] = [
+  // Animals (3-4 letters)
+  { word: 'CAT', emoji: '🐱' },
+  { word: 'DOG', emoji: '🐕' },
+  { word: 'BEE', emoji: '🐝' },
+  { word: 'COW', emoji: '🐄' },
+  { word: 'PIG', emoji: '🐷' },
+  { word: 'HEN', emoji: '🐔' },
+  { word: 'ANT', emoji: '🐜' },
+  { word: 'BAT', emoji: '🦇' },
+  { word: 'FOX', emoji: '🦊' },
+  { word: 'OWL', emoji: '🦉' },
+  { word: 'BUG', emoji: '🐛' },
+  { word: 'FISH', emoji: '🐟' },
+  { word: 'BEAR', emoji: '🐻' },
+  { word: 'FROG', emoji: '🐸' },
+  { word: 'DUCK', emoji: '🦆' },
+  { word: 'BIRD', emoji: '🐦' },
+  { word: 'LION', emoji: '🦁' },
+  { word: 'CRAB', emoji: '🦀' },
+  { word: 'GOAT', emoji: '🐐' },
+
+  // Food (3-4 letters)
+  { word: 'CAKE', emoji: '🍰' },
+  { word: 'PIE', emoji: '🥧' },
+  { word: 'EGG', emoji: '🥚' },
+  { word: 'HAM', emoji: '🍖' },
+  { word: 'NUT', emoji: '🥜' },
+  { word: 'PEA', emoji: '🫛' },
+  { word: 'CORN', emoji: '🌽' },
+  { word: 'PEAR', emoji: '🍐' },
+  { word: 'SOUP', emoji: '🍲' },
+  { word: 'TACO', emoji: '🌮' },
+
+  // Nature (3-4 letters)
+  { word: 'SUN', emoji: '☀️' },
+  { word: 'MOON', emoji: '🌙' },
+  { word: 'STAR', emoji: '⭐' },
+  { word: 'TREE', emoji: '🌲' },
+  { word: 'LEAF', emoji: '🍃' },
+  { word: 'RAIN', emoji: '🌧️' },
+  { word: 'SNOW', emoji: '❄️' },
+  { word: 'ROCK', emoji: '🪨' },
+  { word: 'WAVE', emoji: '🌊' },
+  { word: 'ROSE', emoji: '🌹' },
+
+  // Objects (3-4 letters)
+  { word: 'CAR', emoji: '🚗' },
+  { word: 'BUS', emoji: '🚌' },
+  { word: 'HAT', emoji: '🎩' },
+  { word: 'CUP', emoji: '🥤' },
+  { word: 'KEY', emoji: '🔑' },
+  { word: 'BED', emoji: '🛏️' },
+  { word: 'BALL', emoji: '⚽' },
+  { word: 'BOAT', emoji: '⛵' },
+  { word: 'BOOK', emoji: '📚' },
+  { word: 'BELL', emoji: '🔔' },
+  { word: 'DOOR', emoji: '🚪' },
+  { word: 'GIFT', emoji: '🎁' },
+  { word: 'SOCK', emoji: '🧦' },
+  { word: 'KITE', emoji: '🪁' },
+  { word: 'LAMP', emoji: '💡' },
+  { word: 'DRUM', emoji: '🥁' },
+];
