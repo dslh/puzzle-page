@@ -111,6 +111,42 @@ function placeWord(
   }
 }
 
+// Find all possible intersection placements for a word
+function findIntersectionPlacements(
+  grid: string[][],
+  word: string,
+  directions: Direction[],
+  gridSize: number
+): Array<{ startX: number; startY: number; direction: Direction }> {
+  const placements: Array<{ startX: number; startY: number; direction: Direction }> = [];
+
+  // For each cell in the grid that has a letter
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      const gridLetter = grid[y][x];
+      if (gridLetter === '') continue;
+
+      // For each position in the word that matches this letter
+      for (let charIndex = 0; charIndex < word.length; charIndex++) {
+        if (word[charIndex] !== gridLetter) continue;
+
+        // Try each direction
+        for (const direction of directions) {
+          // Calculate starting position so word[charIndex] lands on (x, y)
+          const startX = x - charIndex * direction.dx;
+          const startY = y - charIndex * direction.dy;
+
+          if (canPlaceWord(grid, word, startX, startY, direction, gridSize)) {
+            placements.push({ startX, startY, direction });
+          }
+        }
+      }
+    }
+  }
+
+  return placements;
+}
+
 function tryPlaceWord(
   grid: string[][],
   wordEntry: WordEntry,
@@ -120,8 +156,26 @@ function tryPlaceWord(
 ): PlacedWord | null {
   const word = wordEntry.word;
   const shuffledDirs = random.shuffle([...directions]);
-  const attempts = 50;
 
+  // First, try to find placements that overlap with existing words
+  const intersectionPlacements = findIntersectionPlacements(grid, word, shuffledDirs, gridSize);
+
+  if (intersectionPlacements.length > 0) {
+    // Shuffle and try intersection placements first
+    const shuffledPlacements = random.shuffle(intersectionPlacements);
+    const placement = shuffledPlacements[0];
+    placeWord(grid, word, placement.startX, placement.startY, placement.direction);
+    return {
+      word,
+      emoji: wordEntry.emoji,
+      startX: placement.startX,
+      startY: placement.startY,
+      direction: placement.direction,
+    };
+  }
+
+  // Fall back to random placement if no intersections found
+  const attempts = 50;
   for (let attempt = 0; attempt < attempts; attempt++) {
     const direction = shuffledDirs[random.nextInt(shuffledDirs.length)];
     const startX = random.nextInt(gridSize);
