@@ -7,12 +7,19 @@ export interface WeavingCell {
     bottom: boolean;
     left: boolean;
   };
-  crossing: { overDirection: 'horizontal' | 'vertical' } | null;
   visited: boolean;
+}
+
+export interface Bridge {
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  direction: 'horizontal' | 'vertical';
+  segments: { x: number; y: number }[];
 }
 
 export interface WeavingMaze {
   grid: WeavingCell[][];
+  bridges: Bridge[];
   width: number;
   height: number;
   start: { x: number; y: number };
@@ -34,6 +41,12 @@ class SeededRandom {
   }
 }
 
+interface BridgeOpportunity {
+  target: WeavingCell;
+  segments: WeavingCell[];
+  direction: 'horizontal' | 'vertical';
+}
+
 export function generateWeavingMaze(
   width: number,
   height: number,
@@ -41,18 +54,42 @@ export function generateWeavingMaze(
   crossingDensity: CrossingDensity = 'medium'
 ): WeavingMaze {
   const rng = new SeededRandom(seed);
-
-  // Phase 1: Initialize grid with no connections
   const grid = initializeGrid(width, height);
+  const bridges: Bridge[] = [];
+  const bridgeProbability = getBridgeProbability(crossingDensity);
 
-  // Phase 2: Generate base maze using recursive backtracking
-  generateBaseMaze(grid, width, height, rng);
+  // Start at top-left
+  const start = grid[0][0];
+  start.visited = true;
+  const stack: WeavingCell[] = [start];
 
-  // Phase 3: Insert crossings based on density
-  insertCrossings(grid, width, height, rng, crossingDensity);
+  while (stack.length > 0) {
+    const current = stack[stack.length - 1];
+
+    // Find both options
+    const bridgeResult = findBridgeOpportunity(current, grid, width, height, rng);
+    const neighbors = getUnvisitedNeighbors(current, grid, width, height);
+
+    if (bridgeResult && neighbors.length > 0) {
+      // Both available - use probability to decide
+      if (rng.next() < bridgeProbability) {
+        useBridge(current, bridgeResult, bridges, stack);
+      } else {
+        useNeighbor(current, neighbors, stack, rng);
+      }
+    } else if (bridgeResult) {
+      useBridge(current, bridgeResult, bridges, stack);
+    } else if (neighbors.length > 0) {
+      useNeighbor(current, neighbors, stack, rng);
+    } else {
+      // No moves available, backtrack
+      stack.pop();
+    }
+  }
 
   return {
     grid,
+    bridges,
     width,
     height,
     start: { x: 0, y: 0 },
@@ -69,7 +106,6 @@ function initializeGrid(width: number, height: number): WeavingCell[][] {
         x,
         y,
         connections: { top: false, right: false, bottom: false, left: false },
-        crossing: null,
         visited: false,
       };
     }
@@ -77,29 +113,138 @@ function initializeGrid(width: number, height: number): WeavingCell[][] {
   return grid;
 }
 
-function generateBaseMaze(
+function getBridgeProbability(density: CrossingDensity): number {
+  switch (density) {
+    case 'few':
+      return 0.3;
+    case 'medium':
+      return 0.6;
+    case 'many':
+      return 0.9;
+  }
+}
+
+function useBridge(
+  current: WeavingCell,
+  bridgeResult: BridgeOpportunity,
+  bridges: Bridge[],
+  stack: WeavingCell[]
+): void {
+  const bridge: Bridge = {
+    start: { x: current.x, y: current.y },
+    end: { x: bridgeResult.target.x, y: bridgeResult.target.y },
+    direction: bridgeResult.direction,
+    segments: bridgeResult.segments.map((cell) => ({ x: cell.x, y: cell.y })),
+  };
+  bridges.push(bridge);
+  bridgeResult.target.visited = true;
+  stack.push(bridgeResult.target);
+}
+
+function useNeighbor(
+  current: WeavingCell,
+  neighbors: WeavingCell[],
+  stack: WeavingCell[],
+  rng: SeededRandom
+): void {
+  const next = neighbors[Math.floor(rng.next() * neighbors.length)];
+  addConnection(current, next);
+  next.visited = true;
+  stack.push(next);
+}
+
+function findBridgeOpportunity(
+  current: WeavingCell,
   grid: WeavingCell[][],
   width: number,
   height: number,
   rng: SeededRandom
-): void {
-  const stack: WeavingCell[] = [];
-  const startCell = grid[0][0];
-  startCell.visited = true;
-  stack.push(startCell);
+): BridgeOpportunity | null {
+  const opportunities: BridgeOpportunity[] = [];
 
-  while (stack.length > 0) {
-    const current = stack[stack.length - 1];
-    const neighbors = getUnvisitedNeighbors(current, grid, width, height);
+  // Scan all four directions
+  const directions: Array<{ dx: number; dy: number; dir: 'horizontal' | 'vertical' }> = [
+    { dx: 0, dy: -1, dir: 'vertical' },   // up
+    { dx: 0, dy: 1, dir: 'vertical' },    // down
+    { dx: 1, dy: 0, dir: 'horizontal' },  // right
+    { dx: -1, dy: 0, dir: 'horizontal' }, // left
+  ];
 
-    if (neighbors.length > 0) {
-      const next = neighbors[Math.floor(rng.next() * neighbors.length)];
-      addConnection(current, next);
-      next.visited = true;
-      stack.push(next);
-    } else {
-      stack.pop();
+  for (const { dx, dy, dir } of directions) {
+    const result = scanForBridgeTarget(current, dx, dy, dir, grid, width, height);
+    if (result) {
+      opportunities.push(result);
     }
+  }
+
+  if (opportunities.length === 0) {
+    return null;
+  }
+
+  return opportunities[Math.floor(rng.next() * opportunities.length)];
+}
+
+function scanForBridgeTarget(
+  start: WeavingCell,
+  dx: number,
+  dy: number,
+  bridgeDirection: 'horizontal' | 'vertical',
+  grid: WeavingCell[][],
+  width: number,
+  height: number
+): BridgeOpportunity | null {
+  let x = start.x;
+  let y = start.y;
+  const bridgeCells: WeavingCell[] = [];
+
+  while (true) {
+    // Move one step in scan direction
+    x += dx;
+    y += dy;
+
+    // Out of bounds?
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return null;
+    }
+
+    const cell = grid[y][x];
+
+    // Found an unvisited cell - valid bridge target!
+    if (!cell.visited) {
+      if (bridgeCells.length === 0) {
+        // Adjacent unvisited cell - not a bridge, just normal connection
+        return null;
+      }
+      return {
+        target: cell,
+        segments: bridgeCells,
+        direction: bridgeDirection,
+      };
+    }
+
+    // Cell is visited - can we bridge over it?
+    if (canBridgeOver(cell, bridgeDirection)) {
+      bridgeCells.push(cell);
+    } else {
+      // Obstacle - can't bridge here
+      return null;
+    }
+  }
+}
+
+function canBridgeOver(cell: WeavingCell, bridgeDirection: 'horizontal' | 'vertical'): boolean {
+  if (bridgeDirection === 'horizontal') {
+    // Horizontal bridge needs complete vertical passage underneath
+    const hasPerpendicularPassage = cell.connections.top && cell.connections.bottom;
+    // Must not have horizontal passages (would be hidden by bridge)
+    const hasParallelPassage = cell.connections.left || cell.connections.right;
+    return hasPerpendicularPassage && !hasParallelPassage;
+  } else {
+    // Vertical bridge needs complete horizontal passage underneath
+    const hasPerpendicularPassage = cell.connections.left && cell.connections.right;
+    // Must not have vertical passages (would be hidden by bridge)
+    const hasParallelPassage = cell.connections.top || cell.connections.bottom;
+    return hasPerpendicularPassage && !hasParallelPassage;
   }
 }
 
@@ -136,98 +281,5 @@ function addConnection(a: WeavingCell, b: WeavingCell): void {
   } else if (dy === -1) {
     a.connections.top = true;
     b.connections.bottom = true;
-  }
-}
-
-function insertCrossings(
-  grid: WeavingCell[][],
-  width: number,
-  height: number,
-  rng: SeededRandom,
-  density: CrossingDensity
-): void {
-  const maxCrossings = getMaxCrossings(width, height, density);
-  let crossingsAdded = 0;
-
-  // Find all candidate cells (interior cells that form straight corridors)
-  const candidates: WeavingCell[] = [];
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      candidates.push(grid[y][x]);
-    }
-  }
-
-  // Shuffle candidates
-  shuffleArray(candidates, rng);
-
-  for (const cell of candidates) {
-    if (crossingsAdded >= maxCrossings) break;
-
-    const { connections } = cell;
-    const isHorizontalCorridor =
-      connections.left &&
-      connections.right &&
-      !connections.top &&
-      !connections.bottom;
-    const isVerticalCorridor =
-      connections.top &&
-      connections.bottom &&
-      !connections.left &&
-      !connections.right;
-
-    if (isHorizontalCorridor) {
-      // Try to add vertical crossing (vertical goes over)
-      const top = grid[cell.y - 1][cell.x];
-      const bottom = grid[cell.y + 1][cell.x];
-
-      // Can add crossing if top and bottom neighbors aren't already connected to this cell
-      if (!cell.connections.top && !cell.connections.bottom) {
-        // Add the perpendicular connection
-        cell.connections.top = true;
-        cell.connections.bottom = true;
-        top.connections.bottom = true;
-        bottom.connections.top = true;
-
-        cell.crossing = { overDirection: 'vertical' };
-        crossingsAdded++;
-      }
-    } else if (isVerticalCorridor) {
-      // Try to add horizontal crossing (horizontal goes over)
-      const left = grid[cell.y][cell.x - 1];
-      const right = grid[cell.y][cell.x + 1];
-
-      if (!cell.connections.left && !cell.connections.right) {
-        cell.connections.left = true;
-        cell.connections.right = true;
-        left.connections.right = true;
-        right.connections.left = true;
-
-        cell.crossing = { overDirection: 'horizontal' };
-        crossingsAdded++;
-      }
-    }
-  }
-}
-
-function getMaxCrossings(
-  width: number,
-  height: number,
-  density: CrossingDensity
-): number {
-  const minDim = Math.min(width, height);
-  switch (density) {
-    case 'few':
-      return Math.max(1, Math.floor(minDim / 4));
-    case 'medium':
-      return Math.max(2, Math.floor(minDim / 2));
-    case 'many':
-      return Math.max(3, minDim);
-  }
-}
-
-function shuffleArray<T>(array: T[], rng: SeededRandom): void {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(rng.next() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
   }
 }

@@ -3,6 +3,7 @@ import {
   generateWeavingMaze,
   type WeavingMaze as WeavingMazeType,
   type WeavingCell,
+  type Bridge,
   type CrossingDensity,
 } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
@@ -73,6 +74,22 @@ interface PathSegment {
   linecap?: 'round' | 'butt';
 }
 
+// Find if a bridge passes over a given cell
+function findBridgePassingOver(
+  x: number,
+  y: number,
+  bridges: Bridge[]
+): Bridge | null {
+  for (const bridge of bridges) {
+    for (const segment of bridge.segments) {
+      if (segment.x === x && segment.y === y) {
+        return bridge;
+      }
+    }
+  }
+  return null;
+}
+
 export default function WeavingMaze({
   gridWidth = 5,
   gridHeight = 5,
@@ -116,47 +133,20 @@ export default function WeavingMaze({
   const underSegments: PathSegment[] = [];
   const overSegments: PathSegment[] = [];
 
+  // Collect regular cell path segments
   maze.grid.forEach((row, y) => {
     row.forEach((cell, x) => {
       const cx = x * cellSize + cellSize / 2 + offset;
       const cy = y * cellSize + cellSize / 2 + offset;
 
-      if (cell.crossing) {
-        const overDir = cell.crossing.overDirection;
+      const bridgeOver = findBridgePassingOver(x, y, maze.bridges);
 
-        if (overDir === 'vertical') {
-          // Horizontal is under (draw with gap), vertical is over
-          if (cell.connections.left) {
-            underSegments.push({
-              x1: x * cellSize + offset,
-              y1: cy,
-              x2: cx - gapSize / 2,
-              y2: cy,
-              key: `under-h-left-${x}-${y}`,
-              linecap: 'butt', // Flat end at gap
-            });
-          }
-          if (cell.connections.right) {
-            underSegments.push({
-              x1: cx + gapSize / 2,
-              y1: cy,
-              x2: (x + 1) * cellSize + offset,
-              y2: cy,
-              key: `under-h-right-${x}-${y}`,
-              linecap: 'butt', // Flat end at gap
-            });
-          }
-          // Vertical over path - full length with flat ends
-          overSegments.push({
-            x1: cx,
-            y1: y * cellSize + offset,
-            x2: cx,
-            y2: (y + 1) * cellSize + offset,
-            key: `over-v-${x}-${y}`,
-            linecap: 'butt',
-          });
-        } else {
-          // Vertical is under (draw with gap), horizontal is over
+      if (bridgeOver) {
+        // This cell has a bridge passing over it - draw with gap
+        const bridgeDir = bridgeOver.direction;
+
+        if (bridgeDir === 'horizontal') {
+          // Horizontal bridge passes over - vertical passages get gap
           if (cell.connections.top) {
             underSegments.push({
               x1: cx,
@@ -164,7 +154,7 @@ export default function WeavingMaze({
               x2: cx,
               y2: cy - gapSize / 2,
               key: `under-v-top-${x}-${y}`,
-              linecap: 'butt', // Flat end at gap
+              linecap: 'butt',
             });
           }
           if (cell.connections.bottom) {
@@ -174,18 +164,69 @@ export default function WeavingMaze({
               x2: cx,
               y2: (y + 1) * cellSize + offset,
               key: `under-v-bottom-${x}-${y}`,
-              linecap: 'butt', // Flat end at gap
+              linecap: 'butt',
             });
           }
-          // Horizontal over path - full length with flat ends
-          overSegments.push({
-            x1: x * cellSize + offset,
-            y1: cy,
-            x2: (x + 1) * cellSize + offset,
-            y2: cy,
-            key: `over-h-${x}-${y}`,
-            linecap: 'butt',
-          });
+          // Horizontal connections are under but continuous (no gap)
+          if (cell.connections.left) {
+            underSegments.push({
+              x1: x * cellSize + offset,
+              y1: cy,
+              x2: cx,
+              y2: cy,
+              key: `path-left-${x}-${y}`,
+            });
+          }
+          if (cell.connections.right) {
+            underSegments.push({
+              x1: cx,
+              y1: cy,
+              x2: (x + 1) * cellSize + offset,
+              y2: cy,
+              key: `path-right-${x}-${y}`,
+            });
+          }
+        } else {
+          // Vertical bridge passes over - horizontal passages get gap
+          if (cell.connections.left) {
+            underSegments.push({
+              x1: x * cellSize + offset,
+              y1: cy,
+              x2: cx - gapSize / 2,
+              y2: cy,
+              key: `under-h-left-${x}-${y}`,
+              linecap: 'butt',
+            });
+          }
+          if (cell.connections.right) {
+            underSegments.push({
+              x1: cx + gapSize / 2,
+              y1: cy,
+              x2: (x + 1) * cellSize + offset,
+              y2: cy,
+              key: `under-h-right-${x}-${y}`,
+              linecap: 'butt',
+            });
+          }
+          // Vertical connections are under but continuous (no gap)
+          if (cell.connections.top) {
+            underSegments.push({
+              x1: cx,
+              y1: y * cellSize + offset,
+              x2: cx,
+              y2: cy,
+              key: `path-top-${x}-${y}`,
+            });
+          }
+          if (cell.connections.bottom) {
+            underSegments.push({
+              x1: cx,
+              y1: cy,
+              x2: cx,
+              y2: (y + 1) * cellSize + offset,
+              key: `path-bottom-${x}-${y}`,
+            });
+          }
         }
       } else {
         // Regular cell - draw path segments from center to connected edges
@@ -194,10 +235,27 @@ export default function WeavingMaze({
     });
   });
 
-  const renderSegments = (segments: PathSegment[], prefix: string, skipBorder = false) => (
+  // Collect bridge segments (over layer)
+  maze.bridges.forEach((bridge, bridgeIndex) => {
+    const startCx = bridge.start.x * cellSize + cellSize / 2 + offset;
+    const startCy = bridge.start.y * cellSize + cellSize / 2 + offset;
+    const endCx = bridge.end.x * cellSize + cellSize / 2 + offset;
+    const endCy = bridge.end.y * cellSize + cellSize / 2 + offset;
+
+    overSegments.push({
+      x1: startCx,
+      y1: startCy,
+      x2: endCx,
+      y2: endCy,
+      key: `bridge-${bridgeIndex}`,
+      linecap: 'butt',
+    });
+  });
+
+  const renderSegments = (segments: PathSegment[], prefix: string) => (
     <>
-      {/* Border layer (thicker, darker) - skip for over segments */}
-      {!skipBorder && segments.map((seg) => (
+      {/* Border layer (thicker, darker) */}
+      {segments.map((seg) => (
         <line
           key={`${prefix}-border-${seg.key}`}
           x1={seg.x1}
@@ -259,7 +317,7 @@ export default function WeavingMaze({
           {renderSegments(underSegments, 'under')}
         </g>
 
-        {/* Layer 2: Over paths at crossings */}
+        {/* Layer 2: Over paths (bridges) */}
         <g className={styles.pathsOver}>
           {/* Side borders only (no end caps) */}
           {overSegments.map((seg) => {
