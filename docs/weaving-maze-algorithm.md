@@ -17,6 +17,8 @@ A · · · · · · · B             A══════════════
                               (bridge passes over three vertical passages)
 ```
 
+Bridges always form clean plus-sign crossings: a straight bridge over a straight passage.
+
 ## Data Structures
 
 ### Cell
@@ -34,23 +36,26 @@ interface Cell {
     west: boolean;
   };
 
-  // Bridge information (null if no bridge passes through this cell)
-  bridge: BridgeInfo | null;
-
   // Used during generation
   visited: boolean;
 }
 ```
 
-### BridgeInfo
+### Bridge
+
+A bridge is a first-class object connecting two cells while passing over intermediate cells:
 
 ```typescript
-interface BridgeInfo {
-  // Direction the bridge travels through this cell
+interface Bridge {
+  // Endpoint cells (where the bridge connects to the maze)
+  start: {x: number, y: number};
+  end: {x: number, y: number};
+
+  // Direction the bridge travels
   direction: 'horizontal' | 'vertical';
 
-  // Is this cell an endpoint of the bridge, or a middle segment?
-  isEndpoint: boolean;
+  // Cells the bridge passes over (in order from start to end)
+  segments: {x: number, y: number}[];
 }
 ```
 
@@ -62,8 +67,8 @@ interface Grid {
   height: number;
   cells: Cell[][];
 
-  // Quick lookup: cells that have bridges passing through them
-  bridgeCells: Set<Cell>;
+  // All bridges in the maze
+  bridges: Bridge[];
 }
 ```
 
@@ -85,6 +90,7 @@ interface GeneratorState {
 ```
 function generateWeavingMaze(width, height, seed):
     grid = initializeGrid(width, height)
+    grid.bridges = []
     rng = SeededRandom(seed)
 
     // Start at top-left
@@ -95,26 +101,25 @@ function generateWeavingMaze(width, height, seed):
     while stack is not empty:
         current = stack.top()
 
-        // Try to find an unvisited neighbor (standard DFS)
-        neighbors = getUnvisitedNeighbors(current, grid)
+        // Prefer bridges - creates more interesting weaving mazes
+        bridgeResult = findBridgeOpportunity(current, grid, rng)
 
-        if neighbors is not empty:
-            // Standard maze carving
-            next = randomChoice(neighbors, rng)
-            connect(current, next)
-            next.visited = true
-            stack.push(next)
+        if bridgeResult exists:
+            createBridge(current, bridgeResult, grid)
+            bridgeResult.target.visited = true
+            stack.push(bridgeResult.target)
 
         else:
-            // Dead end - look for bridge opportunities
-            bridgeTarget = findBridgeOpportunity(current, grid, rng)
+            // No bridge available - try direct neighbor
+            neighbors = getUnvisitedNeighbors(current, grid)
 
-            if bridgeTarget exists:
-                createBridge(current, bridgeTarget, grid)
-                bridgeTarget.visited = true
-                stack.push(bridgeTarget)
+            if neighbors is not empty:
+                next = randomChoice(neighbors, rng)
+                connect(current, next)
+                next.visited = true
+                stack.push(next)
             else:
-                // True dead end, backtrack
+                // No moves available, backtrack
                 stack.pop()
 
     return grid
@@ -124,17 +129,17 @@ function generateWeavingMaze(width, height, seed):
 
 A bridge opportunity exists when:
 1. There's a straight line of cells between `current` and an unvisited cell
-2. ALL intermediate cells have passages running **perpendicular** to the bridge direction
-3. None of the intermediate cells are already bridge endpoints
+2. ALL intermediate cells have **straight passages perpendicular** to the bridge direction
+3. NO intermediate cells have passages parallel to the bridge direction
 
 ```
 function findBridgeOpportunity(current, grid, rng):
     opportunities = []
 
     for each direction in [North, South, East, West]:
-        target = scanForBridgeTarget(current, direction, grid)
-        if target exists:
-            opportunities.append({direction, target})
+        result = scanForBridgeTarget(current, direction, grid)
+        if result exists:
+            opportunities.append(result)
 
     if opportunities is empty:
         return null
@@ -146,9 +151,8 @@ function findBridgeOpportunity(current, grid, rng):
 
 ```
 function scanForBridgeTarget(start, direction, grid):
-    // Direction we're scanning (e.g., East)
-    // Perpendicular direction (e.g., North-South for an East scan)
-    perpendicular = getPerpendicularAxis(direction)
+    // Determine bridge orientation from scan direction
+    bridgeDirection = isHorizontal(direction) ? 'horizontal' : 'vertical'
 
     x, y = start.x, start.y
     bridgeCells = []  // Cells we'd bridge over
@@ -170,11 +174,12 @@ function scanForBridgeTarget(start, direction, grid):
                 return null
             return {
                 target: cell,
-                bridgeOver: bridgeCells
+                segments: bridgeCells,
+                direction: bridgeDirection
             }
 
         // Cell is visited - can we bridge over it?
-        if canBridgeOver(cell, perpendicular):
+        if canBridgeOver(cell, bridgeDirection):
             bridgeCells.append(cell)
         else:
             // Obstacle - can't bridge here
@@ -183,76 +188,54 @@ function scanForBridgeTarget(start, direction, grid):
 
 ### Checking if a Cell Can Be Bridged Over
 
+A cell can be bridged over only if it forms a clean plus-sign crossing:
+- Must have a **complete straight passage** perpendicular to the bridge
+- Must have **no passages** parallel to the bridge (which would be hidden underneath)
+
 ```
 function canBridgeOver(cell, bridgeDirection):
-    // Cell must have a passage perpendicular to bridge direction
     if bridgeDirection == 'horizontal':
-        // Horizontal bridge needs vertical passage underneath
-        hasPerpendicularPassage = cell.connections.north or cell.connections.south
+        // Horizontal bridge needs complete vertical passage underneath
+        hasPerpendicularPassage = cell.connections.north AND cell.connections.south
+        // Must not have horizontal passages (would be hidden by bridge)
+        hasParallelPassage = cell.connections.east OR cell.connections.west
     else:
-        // Vertical bridge needs horizontal passage underneath
-        hasPerpendicularPassage = cell.connections.east or cell.connections.west
+        // Vertical bridge needs complete horizontal passage underneath
+        hasPerpendicularPassage = cell.connections.east AND cell.connections.west
+        // Must not have vertical passages (would be hidden by bridge)
+        hasParallelPassage = cell.connections.north OR cell.connections.south
 
-    if not hasPerpendicularPassage:
-        return false
-
-    // Cell must not already be a bridge endpoint
-    // (Middle segments of existing bridges are OK to cross over)
-    if cell.bridge and cell.bridge.isEndpoint:
-        return false
-
-    // Cell must not already have a bridge in the SAME direction
-    // (Can't stack bridges going the same way)
-    if cell.bridge and cell.bridge.direction == bridgeDirection:
-        return false
-
-    return true
+    return hasPerpendicularPassage AND NOT hasParallelPassage
 ```
 
 ### Creating a Bridge
 
 ```
-function createBridge(start, bridgeInfo, grid):
-    {target, bridgeOver} = bridgeInfo
-    direction = getDirection(start, target)
-
-    // Mark start as bridge endpoint
-    start.bridge = {
-        direction: direction,
-        isEndpoint: true
+function createBridge(start, bridgeResult, grid):
+    bridge = Bridge {
+        start: {x: start.x, y: start.y},
+        end: {x: bridgeResult.target.x, y: bridgeResult.target.y},
+        direction: bridgeResult.direction,
+        segments: bridgeResult.segments.map(cell => {x: cell.x, y: cell.y})
     }
 
-    // Mark intermediate cells as bridge middle segments
-    for cell in bridgeOver:
-        if cell.bridge is null:
-            cell.bridge = {
-                direction: direction,
-                isEndpoint: false
-            }
-        // If cell already has a bridge (perpendicular), it becomes a double-crossing
-        // The existing bridge info is preserved; this is handled in rendering
-
-    // Mark target as bridge endpoint
-    target.bridge = {
-        direction: direction,
-        isEndpoint: true
-    }
-
-    // Create logical connections for pathfinding
-    // (The bridge connects start to target, but does NOT connect to intermediate cells)
-    connectBridge(start, target, direction)
+    grid.bridges.append(bridge)
 ```
 
-## Rendering Considerations
+Note: Bridges represent direct connections for pathfinding purposes. The bridge connects `start` to `end` but does NOT connect to intermediate segment cells.
 
-When rendering, cells with `bridge` info need special treatment:
+## Rendering
 
-1. **Bridge endpoints**: Draw the path entering/exiting the cell, connecting to the bridge
-2. **Bridge middle segments**:
-   - Draw the underlying passage (perpendicular to bridge)
-   - Draw the bridge passing over with side-rails but no end caps
-3. **Double crossings**: A cell where two bridges cross (rare but possible with this algorithm)
-   - Render as a 4-way crossing with appropriate layering
+Render the maze in two passes:
+
+1. **Draw all cell passages**: For each cell, draw its north/south/east/west connections as normal passages.
+
+2. **Draw all bridges**: For each bridge in `grid.bridges`:
+   - Draw the bridge from `start` to `end` as an elevated passage
+   - Over each `segment` cell, draw the bridge with side-rails (no end caps)
+   - The underlying passage in segment cells remains visible beneath the bridge
+
+Since bridges only cross straight perpendicular passages, every crossing forms a clean plus-sign shape.
 
 ## Properties
 
@@ -262,6 +245,7 @@ This algorithm guarantees:
 - **All cells reachable**: DFS visits every cell before completing
 - **Organic bridge placement**: Bridges appear where needed, not randomly placed
 - **Multi-cell bridges**: Natural support for bridges spanning many parallel passages
+- **Clean crossings**: Every bridge forms a plus-sign intersection
 - **Deterministic**: Same seed produces same maze
 
 ## Complexity
@@ -279,22 +263,25 @@ Step 1-8: Normal DFS carves passages
     │ A → B → C │
     │     ↓     │
     │     D → E │
-    │     ↓     │
+    │     ↓   ↓ │
     │     F   · │  (· = unvisited)
     └───────────┘
 
-Step 9: At F, dead end. Scan for bridges...
-        East scan: D has N-S passage ✓, E has N-S passage ✓, unvisited cell at (4,2) ✓
+Step 9: At F, dead end (no unvisited neighbors).
+        Scan for bridge opportunities...
+        East scan finds cells with vertical passages, then unvisited cell G.
         Bridge opportunity found!
 
-Step 10: Create bridge F →→→ G (over D and E's passages)
+Step 10: Create bridge from F to G
     ┌───────────┐
     │ A → B → C │
     │     ↓     │
     │     D → E │
     │     ↓   ↓ │
-    │     F ═══ G │  (═ = bridge)
+    │     F ═══ G │  (═ = bridge passing over vertical passages)
     └───────────┘
+
+    Bridge stored: {start: F, end: G, direction: 'horizontal', segments: [...]}
 
 Continue DFS from G...
 ```
@@ -303,11 +290,24 @@ Continue DFS from G...
 
 ### Controlling Bridge Frequency
 
-Add a probability check before accepting bridge opportunities:
+The default algorithm prefers bridges whenever available. To reduce bridge frequency, add a coin-flip when both a bridge and direct neighbor are available:
 
 ```
-if randomFloat(rng) > BRIDGE_PROBABILITY:
-    continue  // Skip this opportunity, keep looking or backtrack
+bridgeResult = findBridgeOpportunity(current, grid, rng)
+neighbors = getUnvisitedNeighbors(current, grid)
+
+if bridgeResult exists AND neighbors is not empty:
+    // Both options available - randomize
+    if randomFloat(rng) < BRIDGE_PROBABILITY:
+        take the bridge
+    else:
+        take a neighbor
+else if bridgeResult exists:
+    take the bridge
+else if neighbors is not empty:
+    take a neighbor
+else:
+    backtrack
 ```
 
 ### Minimum Bridge Length
@@ -315,7 +315,7 @@ if randomFloat(rng) > BRIDGE_PROBABILITY:
 Only accept bridges that span at least N cells:
 
 ```
-if bridgeOver.length < MIN_BRIDGE_LENGTH:
+if segments.length < MIN_BRIDGE_LENGTH:
     continue
 ```
 
