@@ -252,6 +252,40 @@ export default function WeavingMaze({
     });
   });
 
+  // Find cells that need end caps (bridge endpoints with no local connections)
+  const deadEndCaps: { cx: number; cy: number; key: string }[] = [];
+  maze.bridges.forEach((bridge, bridgeIndex) => {
+    // Check start cell
+    const startCell = maze.grid[bridge.start.y][bridge.start.x];
+    const startHasConnections =
+      startCell.connections.top ||
+      startCell.connections.right ||
+      startCell.connections.bottom ||
+      startCell.connections.left;
+    if (!startHasConnections) {
+      deadEndCaps.push({
+        cx: bridge.start.x * cellSize + cellSize / 2 + offset,
+        cy: bridge.start.y * cellSize + cellSize / 2 + offset,
+        key: `cap-start-${bridgeIndex}`,
+      });
+    }
+
+    // Check end cell
+    const endCell = maze.grid[bridge.end.y][bridge.end.x];
+    const endHasConnections =
+      endCell.connections.top ||
+      endCell.connections.right ||
+      endCell.connections.bottom ||
+      endCell.connections.left;
+    if (!endHasConnections) {
+      deadEndCaps.push({
+        cx: bridge.end.x * cellSize + cellSize / 2 + offset,
+        cy: bridge.end.y * cellSize + cellSize / 2 + offset,
+        key: `cap-end-${bridgeIndex}`,
+      });
+    }
+  });
+
   const renderSegments = (segments: PathSegment[], prefix: string) => (
     <>
       {/* Border layer (thicker, darker) */}
@@ -319,6 +353,23 @@ export default function WeavingMaze({
 
         {/* Layer 2: Over paths (bridges) */}
         <g className={styles.pathsOver}>
+          {/* Dead end caps for bridge endpoints with no local connections */}
+          {deadEndCaps.map((cap) => (
+            <g key={cap.key}>
+              <circle
+                cx={cap.cx}
+                cy={cap.cy}
+                r={pathWidth / 2 + borderWidth}
+                fill="#666"
+              />
+              <circle
+                cx={cap.cx}
+                cy={cap.cy}
+                r={pathWidth / 2}
+                fill="#e0e0e0"
+              />
+            </g>
+          ))}
           {/* Side borders only (no end caps) */}
           {overSegments.map((seg) => {
             const isVertical = seg.x1 === seg.x2;
