@@ -201,13 +201,44 @@ export function generateWordSearch(
   difficulty: 1 | 2 | 3 | 4,
   wordCount: 3 | 4 | 5,
   gridSize: number,
-  limitedLetters: boolean = false
+  limitedLetters: boolean = false,
+  customWordsText: string = ''
 ): WordSearchPuzzle {
   const random = new SeededRandom(seed);
 
   // Filter words that can fit in this grid size
   const maxWordLength = gridSize;
+
+  // Parse custom words from text input and convert to WordEntry format (no emoji)
+  const validCustomWords: WordEntry[] = customWordsText
+    .toUpperCase()
+    .split(/[,\s]+/)
+    .map(w => w.replace(/[^A-Z]/g, ''))
+    .filter(w => w.length > 0 && w.length <= maxWordLength)
+    .map(word => ({ word, emoji: '' }));
+
+  // Get available predefined words
   const availableWords = WORD_LIST.filter(w => w.word.length <= maxWordLength);
+
+  // Sort custom words by length (longest first for better placement)
+  validCustomWords.sort((a, b) => b.word.length - a.word.length);
+
+  // Fill remaining slots with random predefined words if needed
+  const remainingSlots = wordCount + 2 - validCustomWords.length; // +2 extra in case some fail
+  let predefinedWords: WordEntry[] = [];
+  if (remainingSlots > 0) {
+    const shuffledWords = random.shuffle([...availableWords]);
+    // Filter out any words that match custom words
+    const customWordSet = new Set(validCustomWords.map(w => w.word));
+    predefinedWords = shuffledWords
+      .filter(w => !customWordSet.has(w.word))
+      .slice(0, remainingSlots);
+    // Sort predefined words by length
+    predefinedWords.sort((a, b) => b.word.length - a.word.length);
+  }
+
+  // Custom words first, then predefined (ensures custom words are prioritized)
+  const selectedWords: WordEntry[] = [...validCustomWords, ...predefinedWords];
 
   // Initialize empty grid
   const grid: string[][] = Array(gridSize)
@@ -216,13 +247,6 @@ export function generateWordSearch(
 
   // Get available directions for this difficulty
   const availableDirections = DIRECTIONS_BY_DIFFICULTY[difficulty];
-
-  // Shuffle and select words from those that fit
-  const shuffledWords = random.shuffle([...availableWords]);
-  const selectedWords: WordEntry[] = shuffledWords.slice(0, wordCount + 2); // Select extra in case some fail
-
-  // Sort by word length (longest first for better placement)
-  selectedWords.sort((a, b) => b.word.length - a.word.length);
 
   const placedWords: PlacedWord[] = [];
 

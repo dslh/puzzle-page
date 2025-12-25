@@ -76,3 +76,17 @@
   border-color: #2196f3;
   text-decoration: none;
 }
+
+.textInput {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  min-width: 120px;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: #2196f3;
+}

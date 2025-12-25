@@ -68,6 +68,17 @@ export default function WordSearchConfigBar({ value, onChange }: ConfigBarProps)
           ABC
         </button>
       </div>
+
+      <div className={styles.configGroup}>
+        <span className={styles.label}>Custom:</span>
+        <input
+          type="text"
+          className={styles.textInput}
+          placeholder="CAT, DOG, FISH..."
+          value={value.customWordsText ?? ''}
+          onChange={(e) => onChange({ ...value, customWordsText: e.target.value })}
+        />
+      </div>
     </div>
   );
 }

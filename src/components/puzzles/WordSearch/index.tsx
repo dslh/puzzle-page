@@ -7,6 +7,7 @@ export interface WordSearchConfig {
   difficulty: 1 | 2 | 3 | 4;
   wordCount: 3 | 4 | 5;
   limitedLetters: boolean;
+  customWordsText?: string;
 }
 
 const GRID_CELL_PX = 72; // 19mm at 96 DPI
@@ -28,13 +29,14 @@ export default function WordSearch({
   const difficulty = config?.difficulty ?? 1;
   const wordCount = config?.wordCount ?? 3;
   const limitedLetters = config?.limitedLetters ?? false;
+  const customWordsText = config?.customWordsText ?? '';
 
   // Calculate internal grid size based on puzzle dimensions
   const internalGridSize = calculateGridSize(gridWidth, gridHeight);
 
   const puzzle = useMemo(
-    () => generateWordSearch(seed, difficulty, wordCount, internalGridSize, limitedLetters),
-    [seed, difficulty, wordCount, internalGridSize, limitedLetters]
+    () => generateWordSearch(seed, difficulty, wordCount, internalGridSize, limitedLetters, customWordsText),
+    [seed, difficulty, wordCount, internalGridSize, limitedLetters, customWordsText]
   );
 
   // Calculate cell size based on available grid space
