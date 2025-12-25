@@ -7,7 +7,8 @@ export type PuzzleType = 'maze'
                        | 'patternsequence'
                        | 'matching'
                        | 'picturescramble'
-                       | 'wordsearch';
+                       | 'wordsearch'
+                       | 'lasermaze';
 
 export interface PlacedPuzzle {
   id: string;
