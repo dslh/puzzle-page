@@ -12,6 +12,7 @@ export default function WeavingMazeConfigBar({
 }: WeavingMazeConfigBarProps) {
   const ratio = value.cellSizeRatio;
   const density = value.crossingDensity;
+  const branchiness = value.branchiness;
 
   return (
     <div className={styles.configContainer}>
@@ -65,6 +66,32 @@ export default function WeavingMazeConfigBar({
           title="Many crossings (harder)"
         >
           Many
+        </button>
+      </div>
+      <div className={styles.buttonBar}>
+        <button
+          type="button"
+          className={`${styles.button} ${branchiness === 'low' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, branchiness: 'low' })}
+          title="Long corridors, few branches"
+        >
+          Windy
+        </button>
+        <button
+          type="button"
+          className={`${styles.button} ${branchiness === 'medium' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, branchiness: 'medium' })}
+          title="Balanced corridors and branches"
+        >
+          Mixed
+        </button>
+        <button
+          type="button"
+          className={`${styles.button} ${branchiness === 'high' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, branchiness: 'high' })}
+          title="Many branches, shorter corridors"
+        >
+          Branchy
         </button>
       </div>
     </div>

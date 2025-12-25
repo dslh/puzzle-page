@@ -14,6 +14,7 @@ export const puzzleDefinition: PuzzleDefinition<WeavingMazeConfig> = {
   defaultConfig: {
     cellSizeRatio: 2,
     crossingDensity: 'medium',
+    branchiness: 'medium',
   },
   resizable: {
     width: true,

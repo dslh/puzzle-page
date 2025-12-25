@@ -27,6 +27,7 @@ export interface WeavingMaze {
 }
 
 export type CrossingDensity = 'few' | 'medium' | 'many';
+export type Branchiness = 'low' | 'medium' | 'high';
 
 class SeededRandom {
   private seed: number;
@@ -51,12 +52,14 @@ export function generateWeavingMaze(
   width: number,
   height: number,
   seed: number,
-  crossingDensity: CrossingDensity = 'medium'
+  crossingDensity: CrossingDensity = 'medium',
+  branchiness: Branchiness = 'medium'
 ): WeavingMaze {
   const rng = new SeededRandom(seed);
   const grid = initializeGrid(width, height);
   const bridges: Bridge[] = [];
   const bridgeProbability = getBridgeProbability(crossingDensity);
+  const branchProbability = getBranchProbability(branchiness);
 
   // Start at top-left
   const start = grid[0][0];
@@ -64,7 +67,12 @@ export function generateWeavingMaze(
   const stack: WeavingCell[] = [start];
 
   while (stack.length > 0) {
-    const current = stack[stack.length - 1];
+    // Growing Tree algorithm: sometimes pick random cell from stack (creates branches)
+    // vs always picking newest (pure DFS, creates long corridors)
+    const index = rng.next() < branchProbability
+      ? Math.floor(rng.next() * stack.length)
+      : stack.length - 1;
+    const current = stack[index];
 
     // Find both options
     const bridgeResult = findBridgeOpportunity(current, grid, width, height, rng);
@@ -82,8 +90,8 @@ export function generateWeavingMaze(
     } else if (neighbors.length > 0) {
       useNeighbor(current, neighbors, stack, rng);
     } else {
-      // No moves available, backtrack
-      stack.pop();
+      // No moves available - remove this cell from the stack
+      stack.splice(index, 1);
     }
   }
 
@@ -121,6 +129,17 @@ function getBridgeProbability(density: CrossingDensity): number {
       return 0.6;
     case 'many':
       return 0.9;
+  }
+}
+
+function getBranchProbability(branchiness: Branchiness): number {
+  switch (branchiness) {
+    case 'low':
+      return 0.0;  // Pure DFS - long corridors
+    case 'medium':
+      return 0.3;  // Mix of corridors and branches
+    case 'high':
+      return 0.6;  // More branches, shorter corridors
   }
 }
 

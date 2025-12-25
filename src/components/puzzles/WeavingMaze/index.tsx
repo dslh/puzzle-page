@@ -5,6 +5,7 @@ import {
   type WeavingCell,
   type Bridge,
   type CrossingDensity,
+  type Branchiness,
 } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './WeavingMaze.module.css';
@@ -12,6 +13,7 @@ import styles from './WeavingMaze.module.css';
 export interface WeavingMazeConfig {
   cellSizeRatio: 2 | 3 | 4;
   crossingDensity: CrossingDensity;
+  branchiness: Branchiness;
 }
 
 interface MazeTheme {
@@ -98,12 +100,13 @@ export default function WeavingMaze({
 }: PuzzleProps<WeavingMazeConfig>) {
   const ratio = config?.cellSizeRatio ?? 2;
   const crossingDensity = config?.crossingDensity ?? 'medium';
+  const branchiness = config?.branchiness ?? 'medium';
 
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
 
   const maze: WeavingMazeType = useMemo(() => {
-    return generateWeavingMaze(width, height, seed, crossingDensity);
-  }, [width, height, seed, crossingDensity]);
+    return generateWeavingMaze(width, height, seed, crossingDensity, branchiness);
+  }, [width, height, seed, crossingDensity, branchiness]);
 
   const theme = useMemo(() => {
     const themeIndex = Math.floor(
