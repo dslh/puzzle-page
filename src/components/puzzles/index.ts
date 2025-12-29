@@ -7,6 +7,7 @@ import { puzzleDefinition as matching } from './Matching/definition';
 import { puzzleDefinition as pictureScramble } from './PictureScramble/definition';
 import { puzzleDefinition as wordSearch } from './WordSearch/definition';
 import { puzzleDefinition as laserMaze } from './LaserMaze/definition';
+import { puzzleDefinition as oddOneOut } from './OddOneOut/definition';
 
 /**
  * Registry of all available puzzle types
@@ -22,6 +23,7 @@ export const PUZZLE_DEFINITIONS = [
   pictureScramble,
   wordSearch,
   laserMaze,
+  oddOneOut,
 ] as const;
 
 /**
