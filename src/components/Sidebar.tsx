@@ -1,26 +1,49 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { DragEvent } from 'react';
 import { PUZZLE_DEFINITIONS } from './puzzles';
-import type { SudokuConfig } from './puzzles/Sudoku';
+import { useDragConfig } from '../contexts/DragConfigContext';
+import type { PuzzleType } from '../types/puzzle';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
-  const [sudokuSize, setSudokuSize] = useState<3 | 4>(3);
+  // Generic config state: maps puzzle type to its current config
+  // Initialized from defaultConfig for each puzzle that has one
+  const [configs, setConfigs] = useState<Record<string, unknown>>(() => {
+    const initial: Record<string, unknown> = {};
+    for (const puzzle of PUZZLE_DEFINITIONS) {
+      if (puzzle.defaultConfig !== undefined) {
+        initial[puzzle.type] = puzzle.defaultConfig;
+      }
+    }
+    return initial;
+  });
 
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, type: string, width: number, height: number) => {
-    // Use custom type to pass puzzle data, including config for Sudoku
+  const { setDragConfig } = useDragConfig();
+
+  const handleConfigChange = useCallback((puzzleType: PuzzleType, newConfig: unknown) => {
+    setConfigs(prev => ({
+      ...prev,
+      [puzzleType]: newConfig,
+    }));
+  }, []);
+
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, type: PuzzleType, width: number, height: number) => {
     e.dataTransfer.effectAllowed = 'copy';
 
-    // Format: puzzle/{type}/{width}/{height}/{puzzleId}/{config}
-    // For new puzzles, puzzleId slot is empty
-    let dataString = `puzzle/${type}/${width}/${height}`;
+    // Simplified dataTransfer format - no config in string
+    // Format: puzzle/{type}/{width}/{height}
+    e.dataTransfer.setData(`puzzle/${type}/${width}/${height}`, '');
 
-    if (type === 'sudoku') {
-      const config: SudokuConfig = { size: sudokuSize };
-      dataString += `//${JSON.stringify(config)}`; // Empty puzzleId slot
+    // Pass config via context instead
+    const currentConfig = configs[type];
+    if (currentConfig !== undefined) {
+      setDragConfig({ puzzleType: type, config: currentConfig });
     }
+  };
 
-    e.dataTransfer.setData(dataString, '');
+  const handleDragEnd = () => {
+    // Clear drag config when drag ends (whether dropped or cancelled)
+    setDragConfig(null);
   };
 
   return (
@@ -29,7 +52,7 @@ export default function Sidebar() {
       <div className={styles.puzzleList}>
         {PUZZLE_DEFINITIONS.map((puzzle) => {
           const ConfigComponent = puzzle.configComponent;
-          const isSudoku = puzzle.type === 'sudoku';
+          const currentConfig = configs[puzzle.type];
 
           return (
             <div
@@ -37,18 +60,26 @@ export default function Sidebar() {
               className={styles.puzzleItem}
               draggable
               onDragStart={(e) => handleDragStart(e, puzzle.type, puzzle.defaultWidth, puzzle.defaultHeight)}
+              onDragEnd={handleDragEnd}
             >
-              <div className={styles.icon}>
-                {puzzle.icon}
-              </div>
+              <div className={styles.icon}>{puzzle.icon}</div>
               <div className={styles.label}>{puzzle.label}</div>
-              <div className={styles.hint}>Drag to grid →</div>
-              {isSudoku && ConfigComponent && (
+              <div className={styles.hint}>Drag to grid</div>
+              {ConfigComponent && currentConfig !== undefined && (
                 <div className={styles.configSection}>
-                  <ConfigComponent
-                    value={{ size: sudokuSize }}
-                    onChange={(config: SudokuConfig) => setSudokuSize(config.size)}
-                  />
+                  {(() => {
+                    // Cast needed: registry aggregates heterogeneous puzzle types
+                    const Config = ConfigComponent as React.ComponentType<{
+                      value: unknown;
+                      onChange: (config: unknown) => void;
+                    }>;
+                    return (
+                      <Config
+                        value={currentConfig}
+                        onChange={(newConfig) => handleConfigChange(puzzle.type, newConfig)}
+                      />
+                    );
+                  })()}
                 </div>
               )}
             </div>

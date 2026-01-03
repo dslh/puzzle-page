@@ -3,6 +3,7 @@ import type { DragEvent } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle, PuzzleType } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
+import { useDragConfig } from '../contexts/DragConfigContext';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
 
@@ -21,12 +22,12 @@ interface DragState {
   width: number;
   height: number;
   puzzleId?: string; // If present, we're moving an existing puzzle
-  config?: unknown; // Optional config from sidebar
 }
 
 export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
+  const { dragConfig, setDragConfig } = useDragConfig();
 
   const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string): boolean => {
     // Check if puzzle would go out of bounds
@@ -59,21 +60,9 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         const puzzleType = parts[1];
         const width = parseInt(parts[2]);
         const height = parseInt(parts[3]);
-
-        // parts[4] is always puzzleId (may be empty string or undefined)
-        // parts[5] is always config (if present)
         const puzzleId = parts[4] || undefined;
-        let config: unknown = undefined;
 
-        if (parts[5]) {
-          try {
-            config = JSON.parse(decodeURIComponent(parts[5]));
-          } catch (e) {
-            console.error('Failed to parse config from drag data:', e);
-          }
-        }
-
-        setDragData({ type: puzzleType, width, height, puzzleId, config });
+        setDragData({ type: puzzleType, width, height, puzzleId });
       }
       return;
     }
@@ -115,6 +104,12 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       } else {
         // Adding a new puzzle from sidebar
         const definition = getPuzzleDefinition(dragData.type);
+
+        // Get config from context if available, otherwise use definition default
+        const config = dragConfig?.puzzleType === dragData.type
+          ? dragConfig.config
+          : definition?.defaultConfig;
+
         const newPuzzle: PlacedPuzzle = {
           id: `${dragData.type}-${Date.now()}-${Math.random()}`,
           type: dragData.type as PuzzleType,
@@ -123,7 +118,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
           seed: Date.now() + Math.floor(Math.random() * 1000),
           width: dragData.width,
           height: dragData.height,
-          config: dragData.config ?? definition?.defaultConfig,
+          config,
         };
 
         onAddPuzzle(newPuzzle);
@@ -132,6 +127,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
     setDragOver(null);
     setDragData(null);
+    setDragConfig(null);
   };
 
   const renderGridCells = () => {

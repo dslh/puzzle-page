@@ -41,6 +41,15 @@ export interface ResizableConfig {
   maxHeight?: number;
 }
 
+/**
+ * Standard props interface for puzzle config components.
+ * All configComponent implementations must follow this interface.
+ */
+export interface PuzzleConfigProps<TConfig> {
+  value: TConfig;
+  onChange: (config: TConfig) => void;
+}
+
 export interface PuzzleDefinition<TConfig = unknown> {
   type: PuzzleType;
   label: string;
@@ -49,8 +58,8 @@ export interface PuzzleDefinition<TConfig = unknown> {
   defaultWidth: number;
   defaultHeight: number;
   resizable?: ResizableConfig;
-  configComponent?: React.ComponentType<any>; // For future configuration UI
-  defaultConfig?: TConfig; // For future default configuration
+  configComponent?: React.ComponentType<PuzzleConfigProps<TConfig>>;
+  defaultConfig?: TConfig;
 }
 
 export const GRID_COLS = 10;

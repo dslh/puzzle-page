@@ -88,7 +88,14 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       return null;
     }
 
-    const Component = definition.component as React.ComponentType<any>;
+    // Cast needed: registry aggregates heterogeneous puzzle types as PuzzleDefinition<unknown>
+    // Type safety is preserved within individual puzzle definitions
+    const Component = definition.component as React.ComponentType<{
+      gridWidth: number;
+      gridHeight: number;
+      seed: number;
+      config: unknown;
+    }>;
 
     // Use puzzle's stored config, fallback to definition default
     const config = puzzle.config ?? definition.defaultConfig;
@@ -146,12 +153,16 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       {puzzleDef?.configComponent && onConfigChange && (
         <div className={styles.configPanel}>
           {(() => {
-            const ConfigComponent = puzzleDef.configComponent as React.ComponentType<any>;
+            // Cast needed: registry aggregates heterogeneous puzzle types
+            const ConfigComponent = puzzleDef.configComponent as React.ComponentType<{
+              value: unknown;
+              onChange: (config: unknown) => void;
+            }>;
             const currentConfig = puzzle.config ?? puzzleDef.defaultConfig;
             return (
               <ConfigComponent
                 value={currentConfig}
-                onChange={(newConfig: unknown) => {
+                onChange={(newConfig) => {
                   onConfigChange(puzzle.id, newConfig);
                 }}
               />
