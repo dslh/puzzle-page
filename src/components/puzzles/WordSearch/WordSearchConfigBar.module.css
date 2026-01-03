@@ -1,8 +1,9 @@
 .configContainer {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   background: white;
-  padding: 4px;
+  padding: 8px;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -11,6 +12,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.configGroup .buttonBar {
+  flex: 1;
 }
 
 .label {
@@ -83,7 +88,9 @@
   font-size: 13px;
   border: 2px solid #ddd;
   border-radius: 4px;
-  min-width: 120px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .textInput:focus {
