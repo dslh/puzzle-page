@@ -194,6 +194,14 @@ function generateValidSolution(size: number, random: SeededRandom | null): numbe
       [2, 3, 0, 1],
       [3, 2, 1, 0],
     ];
+  } else if (size === 5) {
+    solution = [
+      [0, 1, 2, 3, 4],
+      [1, 2, 3, 4, 0],
+      [2, 3, 4, 0, 1],
+      [3, 4, 0, 1, 2],
+      [4, 0, 1, 2, 3],
+    ];
   } else {
     // Fallback: generate using algorithm (though not needed for 3 or 4)
     solution = [];

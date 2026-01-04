@@ -1,3 +1,26 @@
+.configContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.configRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  min-width: 55px;
+}
+
 .buttonBar {
   display: flex;
   border: 2px solid #ddd;
@@ -30,4 +53,29 @@
 .button.selected {
   background: #2196f3;
   color: white;
+}
+
+.textInput {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.textInput::placeholder {
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #999;
 }

@@ -12,5 +12,6 @@ export const puzzleDefinition: PuzzleDefinition<SudokuConfig> = {
   defaultHeight: 3,
   defaultConfig: {
     size: 3,
+    symbolType: 'colors',
   },
 };
