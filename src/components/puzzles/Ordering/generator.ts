@@ -54,7 +54,8 @@ const EMOJI_POOL = [
 ];
 
 // Available sizes in mm (must be distinct and visually different)
-const EMOJI_SIZES = [4, 6, 8, 10, 12];
+// Supports up to 10 items (full grid width)
+const EMOJI_SIZES = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 /**
  * Generate a single ordering row in numbers mode
