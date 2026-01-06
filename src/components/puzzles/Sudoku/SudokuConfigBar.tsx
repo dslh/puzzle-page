@@ -26,7 +26,6 @@ export default function SudokuConfigBar({ value, onChange }: SudokuConfigBarProp
   return (
     <div className={styles.configContainer}>
       <div className={styles.configRow}>
-        <span className={styles.label}>Size:</span>
         <div className={styles.buttonBar}>
           <button
             type="button"
@@ -53,7 +52,6 @@ export default function SudokuConfigBar({ value, onChange }: SudokuConfigBarProp
       </div>
 
       <div className={styles.configRow}>
-        <span className={styles.label}>Symbols:</span>
         <div className={styles.buttonBar}>
           <button
             type="button"
@@ -88,7 +86,6 @@ export default function SudokuConfigBar({ value, onChange }: SudokuConfigBarProp
 
       {symbolType === 'custom' && (
         <div className={styles.configRow}>
-          <span className={styles.label}>Letters:</span>
           <input
             type="text"
             className={styles.textInput}
