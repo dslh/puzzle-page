@@ -10,6 +10,7 @@ export type PuzzleType = 'maze'
                        | 'wordsearch'
                        | 'lasermaze'
                        | 'oddoneout'
+                       | 'counting'
                        | 'ordering';
 
 export interface PlacedPuzzle {
