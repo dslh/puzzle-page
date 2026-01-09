@@ -5,6 +5,7 @@ import styles from './Maze.module.css';
 
 export interface MazeConfig {
   cellSizeRatio: 2 | 3 | 4;
+  branchiness: 'low' | 'medium' | 'high';
 }
 
 interface MazeTheme {
@@ -71,13 +72,14 @@ function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number)
 
 export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
   const ratio = config?.cellSizeRatio ?? 2;
+  const branchiness = config?.branchiness ?? 'medium';
 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
 
   const maze: MazeType = useMemo(() => {
-    return generateMaze(width, height, seed);
-  }, [width, height, seed]);
+    return generateMaze(width, height, seed, branchiness);
+  }, [width, height, seed, branchiness]);
 
   const theme = useMemo(() => {
     const themeIndex = Math.floor(seededRandom(seed + 12345) * MAZE_THEMES.length);

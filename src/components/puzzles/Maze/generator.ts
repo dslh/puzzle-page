@@ -18,6 +18,8 @@ export interface Maze {
   end: { x: number; y: number };
 }
 
+export type Branchiness = 'low' | 'medium' | 'high';
+
 /**
  * Simple seeded random number generator
  */
@@ -34,16 +36,35 @@ class SeededRandom {
   }
 }
 
+function getBranchProbability(branchiness: Branchiness): number {
+  switch (branchiness) {
+    case 'low':
+      return 0.0; // Pure DFS - long corridors
+    case 'medium':
+      return 0.3; // Mix of corridors and branches
+    case 'high':
+      return 0.6; // More branches, shorter corridors
+  }
+}
+
 /**
- * Generate a maze using recursive backtracking algorithm
+ * Generate a maze using the Growing Tree algorithm.
+ * The 'branchiness' parameter controls the branching factor.
+ * - 'low': Recursive backtracker (long corridors)
+ * - 'medium': Mix of backtracker and random walk
+ * - 'high': Prim's algorithm (many short branches)
+ *
  * Suitable for 4-5 year olds (small, simple mazes)
  */
 export function generateMaze(
   width: number = 6,
   height: number = 6,
-  seed?: number
+  seed?: number,
+  branchiness: Branchiness = 'medium'
 ): Maze {
   const random = seed ? new SeededRandom(seed) : null;
+  const branchProbability = getBranchProbability(branchiness);
+
   // Initialize grid with all walls
   const grid: Cell[][] = [];
   for (let y = 0; y < height; y++) {
@@ -58,20 +79,25 @@ export function generateMaze(
     }
   }
 
-  // Recursive backtracking to carve paths
+  // Use Growing Tree algorithm to carve paths
   const stack: Cell[] = [];
   const startCell = grid[0][0];
   startCell.visited = true;
   stack.push(startCell);
 
   while (stack.length > 0) {
-    const current = stack[stack.length - 1];
+    const randomValue = random ? random.next() : Math.random();
+    const index =
+      randomValue < branchProbability
+        ? Math.floor((random ? random.next() : Math.random()) * stack.length)
+        : stack.length - 1;
+    const current = stack[index];
     const neighbors = getUnvisitedNeighbors(current, grid, width, height);
 
     if (neighbors.length > 0) {
       // Choose random unvisited neighbor
-      const randomValue = random ? random.next() : Math.random();
-      const next = neighbors[Math.floor(randomValue * neighbors.length)];
+      const nextRandomValue = random ? random.next() : Math.random();
+      const next = neighbors[Math.floor(nextRandomValue * neighbors.length)];
 
       // Remove wall between current and next
       removeWall(current, next);
@@ -79,7 +105,8 @@ export function generateMaze(
       next.visited = true;
       stack.push(next);
     } else {
-      stack.pop();
+      // No unvisited neighbors, remove this cell from the stack
+      stack.splice(index, 1);
     }
   }
 
