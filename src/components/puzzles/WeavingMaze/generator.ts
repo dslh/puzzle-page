@@ -81,14 +81,14 @@ export function generateWeavingMaze(
     if (bridgeResult && neighbors.length > 0) {
       // Both available - use probability to decide
       if (rng.next() < bridgeProbability) {
-        useBridge(current, bridgeResult, bridges, stack);
+        applyBridge(current, bridgeResult, bridges, stack);
       } else {
-        useNeighbor(current, neighbors, stack, rng);
+        applyNeighbor(current, neighbors, stack, rng);
       }
     } else if (bridgeResult) {
-      useBridge(current, bridgeResult, bridges, stack);
+      applyBridge(current, bridgeResult, bridges, stack);
     } else if (neighbors.length > 0) {
-      useNeighbor(current, neighbors, stack, rng);
+      applyNeighbor(current, neighbors, stack, rng);
     } else {
       // No moves available - remove this cell from the stack
       stack.splice(index, 1);
@@ -143,7 +143,7 @@ function getBranchProbability(branchiness: Branchiness): number {
   }
 }
 
-function useBridge(
+function applyBridge(
   current: WeavingCell,
   bridgeResult: BridgeOpportunity,
   bridges: Bridge[],
@@ -160,7 +160,7 @@ function useBridge(
   stack.push(bridgeResult.target);
 }
 
-function useNeighbor(
+function applyNeighbor(
   current: WeavingCell,
   neighbors: WeavingCell[],
   stack: WeavingCell[],

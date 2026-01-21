@@ -43,7 +43,7 @@ export default function OddOneOut({ gridWidth, gridHeight, seed, config }: Puzzl
       offsets.push({ x: xJiggle, y: yJiggle });
     }
     return offsets;
-  }, [seed, size]);
+  }, [seed, size, jiggleAmount]);
 
   return (
     <div className={styles.container}>
