@@ -1,6 +1,11 @@
-import { EASY_PUZZLES, MEDIUM_PUZZLES, HARD_PUZZLES, type ChessPuzzle } from './puzzleData';
+import {
+  EASY_PUZZLES, MEDIUM_PUZZLES, HARD_PUZZLES,
+  CAPTURE_EASY_PUZZLES, CAPTURE_MEDIUM_PUZZLES, CAPTURE_HARD_PUZZLES,
+  type ChessPuzzle,
+} from './puzzleData';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
+export type PuzzleMode = 'mate' | 'capture' | 'both';
 
 /**
  * Simple seeded random number generator
@@ -18,22 +23,25 @@ class SeededRandom {
   }
 }
 
-function getPuzzlePool(difficulty: Difficulty): ChessPuzzle[] {
-  switch (difficulty) {
-    case 'easy':
-      return EASY_PUZZLES;
-    case 'medium':
-      return MEDIUM_PUZZLES;
-    case 'hard':
-      return HARD_PUZZLES;
+function getPuzzlePool(difficulty: Difficulty, mode: PuzzleMode): ChessPuzzle[] {
+  const matePools = { easy: EASY_PUZZLES, medium: MEDIUM_PUZZLES, hard: HARD_PUZZLES };
+  const capturePools = { easy: CAPTURE_EASY_PUZZLES, medium: CAPTURE_MEDIUM_PUZZLES, hard: CAPTURE_HARD_PUZZLES };
+
+  switch (mode) {
+    case 'mate':
+      return matePools[difficulty];
+    case 'capture':
+      return capturePools[difficulty];
+    case 'both':
+      return [...matePools[difficulty], ...capturePools[difficulty]];
   }
 }
 
 /**
- * Select a puzzle deterministically based on seed and difficulty
+ * Select a puzzle deterministically based on seed, difficulty, and mode
  */
-export function selectPuzzle(seed: number, difficulty: Difficulty): ChessPuzzle {
-  const pool = getPuzzlePool(difficulty);
+export function selectPuzzle(seed: number, difficulty: Difficulty, mode: PuzzleMode = 'mate'): ChessPuzzle {
+  const pool = getPuzzlePool(difficulty, mode);
   const rng = new SeededRandom(seed);
   const index = Math.floor(rng.next() * pool.length);
   return pool[index];

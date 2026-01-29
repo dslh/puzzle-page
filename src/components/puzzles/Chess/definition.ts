@@ -12,5 +12,6 @@ export const puzzleDefinition: PuzzleDefinition<ChessConfig> = {
   defaultHeight: 5,
   defaultConfig: {
     difficulty: 'easy',
+    mode: 'mate',
   },
 };

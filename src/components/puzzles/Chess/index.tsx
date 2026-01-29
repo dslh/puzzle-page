@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { PuzzleProps } from '../../../types/puzzle';
-import { selectPuzzle, type Difficulty } from './generator';
+import { selectPuzzle, type Difficulty, type PuzzleMode } from './generator';
 import { parseFEN, applyMove, type PieceType } from './fenParser';
 import styles from './Chess.module.css';
 
@@ -20,6 +20,7 @@ import pawnDark from './pieces/pawn-dark.svg';
 
 export interface ChessConfig {
   difficulty: Difficulty;
+  mode: PuzzleMode;
 }
 
 // Map piece characters to SVG imports
@@ -42,13 +43,14 @@ const PIECE_IMAGES: Record<PieceType, string> = {
 
 export default function Chess({ seed = 0, config }: PuzzleProps<ChessConfig>) {
   const difficulty = config?.difficulty ?? 'easy';
+  const mode = config?.mode ?? 'mate';
 
   const { board, activeColor } = useMemo(() => {
-    const puzzle = selectPuzzle(seed, difficulty);
+    const puzzle = selectPuzzle(seed, difficulty, mode);
     const initialPosition = parseFEN(puzzle.fen);
     // Apply the setup move to get the actual puzzle position
     return applyMove(initialPosition, puzzle.setupMove);
-  }, [seed, difficulty]);
+  }, [seed, difficulty, mode]);
 
   const toMoveKing = activeColor === 'w' ? kingLight : kingDark;
 
