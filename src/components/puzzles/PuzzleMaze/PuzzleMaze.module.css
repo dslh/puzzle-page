@@ -1,0 +1,72 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.legend {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 2mm;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5mm;
+}
+
+.legendEmoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.legendArrow {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.grid {
+  position: absolute;
+  left: 1mm;
+  top: 5mm;
+  display: grid;
+  border: 1.5px solid #333;
+  box-sizing: border-box;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.5px solid #999;
+  box-sizing: border-box;
+}
+
+.emoji {
+  line-height: 1;
+}
+
+.entryArrow,
+.exitArrow {
+  position: absolute;
+  font-size: 14px;
+  font-weight: bold;
+  transform: translateX(-50%);
+  color: #333;
+}
+.entryArrow {
+  left: 5mm;
+}
+.exitArrow {
+  right: 0;
+  bottom: 0;
+}

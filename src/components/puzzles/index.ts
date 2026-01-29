@@ -11,6 +11,7 @@ import { puzzleDefinition as oddOneOut } from './OddOneOut/definition';
 import { puzzleDefinition as counting } from './Counting/definition';
 import { puzzleDefinition as ordering } from './Ordering/definition';
 import { puzzleDefinition as chess } from './Chess/definition';
+import { puzzleDefinition as puzzleMaze } from './PuzzleMaze/definition';
 
 /**
  * Registry of all available puzzle types
@@ -30,6 +31,7 @@ export const PUZZLE_DEFINITIONS = [
   counting,
   ordering,
   chess,
+  puzzleMaze,
 ] as const;
 
 /**

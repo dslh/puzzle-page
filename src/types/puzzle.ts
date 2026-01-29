@@ -12,7 +12,8 @@ export type PuzzleType = 'maze'
                        | 'oddoneout'
                        | 'counting'
                        | 'ordering'
-                       | 'chess';
+                       | 'chess'
+                       | 'puzzlemaze';
 
 export interface PlacedPuzzle {
   id: string;
