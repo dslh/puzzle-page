@@ -10,6 +10,7 @@ import { puzzleDefinition as laserMaze } from './LaserMaze/definition';
 import { puzzleDefinition as oddOneOut } from './OddOneOut/definition';
 import { puzzleDefinition as counting } from './Counting/definition';
 import { puzzleDefinition as ordering } from './Ordering/definition';
+import { puzzleDefinition as chess } from './Chess/definition';
 
 /**
  * Registry of all available puzzle types
@@ -28,6 +29,7 @@ export const PUZZLE_DEFINITIONS = [
   oddOneOut,
   counting,
   ordering,
+  chess,
 ] as const;
 
 /**

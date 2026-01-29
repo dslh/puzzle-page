@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 2mm;
+  box-sizing: border-box;
+}
+
+.turnIcon {
+  width: 7mm;
+  height: 7mm;
+  object-fit: contain;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 92%;
+  aspect-ratio: 1;
+  border: 2px solid #333;
+  box-sizing: border-box;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.lightSquare {
+  background-color: #f0d9b5;
+}
+
+.darkSquare {
+  background-color: #b58863;
+}
+
+.piece {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+@media print {
+  .lightSquare {
+    background-color: #f0d9b5 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .darkSquare {
+    background-color: #b58863 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
