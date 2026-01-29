@@ -29,7 +29,7 @@ export default function PuzzleMaze({ gridWidth, gridHeight, seed, config }: Puzz
     [cols, rows, seed, emojiMode]
   );
 
-  const { grid, startX, endX, emojis } = puzzleData;
+  const { grid, emojis } = puzzleData;
 
   const totalHeight = gridHeight * CELL_SIZE_MM;
   const totalWidth = gridWidth * CELL_SIZE_MM;
