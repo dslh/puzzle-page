@@ -24,6 +24,10 @@ export const WORD_LIST: WordEntry[] = [
   { word: 'LION', emoji: '🦁' },
   { word: 'CRAB', emoji: '🦀' },
   { word: 'GOAT', emoji: '🐐' },
+  { word: 'SWAN', emoji: '🦢' },
+  { word: 'DEER', emoji: '🦌' },
+  { word: 'SEAL', emoji: '🦭' },
+  { word: 'WORM', emoji: '🪱' },
 
   // Food (3-4 letters)
   { word: 'CAKE', emoji: '🍰' },
@@ -36,6 +40,8 @@ export const WORD_LIST: WordEntry[] = [
   { word: 'PEAR', emoji: '🍐' },
   { word: 'SOUP', emoji: '🍲' },
   { word: 'TACO', emoji: '🌮' },
+  { word: 'MILK', emoji: '🥛' },
+  { word: 'RICE', emoji: '🍚' },
 
   // Nature (3-4 letters)
   { word: 'SUN', emoji: '☀️' },
@@ -48,6 +54,8 @@ export const WORD_LIST: WordEntry[] = [
   { word: 'ROCK', emoji: '🪨' },
   { word: 'WAVE', emoji: '🌊' },
   { word: 'ROSE', emoji: '🌹' },
+  { word: 'FIRE', emoji: '🔥' },
+  { word: 'SEED', emoji: '🌱' },
 
   // Objects (3-4 letters)
   { word: 'CAR', emoji: '🚗' },
@@ -66,4 +74,17 @@ export const WORD_LIST: WordEntry[] = [
   { word: 'KITE', emoji: '🪁' },
   { word: 'LAMP', emoji: '💡' },
   { word: 'DRUM', emoji: '🥁' },
+  { word: 'SHOE', emoji: '👟' },
+  { word: 'TENT', emoji: '⛺' },
+  { word: 'BIKE', emoji: '🚲' },
+  { word: 'RING', emoji: '💍' },
+  { word: 'LOCK', emoji: '🔒' },
+  { word: 'COIN', emoji: '🪙' },
+
+  // People & Body (3-4 letters)
+  { word: 'KING', emoji: '👑' },
+  { word: 'BABY', emoji: '👶' },
+  { word: 'HAND', emoji: '✋' },
+  { word: 'BONE', emoji: '🦴' },
+  { word: 'FOOT', emoji: '🦶' },
 ];

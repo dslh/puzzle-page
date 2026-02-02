@@ -209,13 +209,14 @@ export function generateWordSearch(
   // Filter words that can fit in this grid size
   const maxWordLength = gridSize;
 
-  // Parse custom words from text input and convert to WordEntry format (no emoji)
+  // Parse custom words from text input, matching emoji from word list when possible
+  const wordListMap = new Map(WORD_LIST.map(w => [w.word, w.emoji]));
   const validCustomWords: WordEntry[] = customWordsText
     .toUpperCase()
     .split(/[,\s]+/)
     .map(w => w.replace(/[^A-Z]/g, ''))
     .filter(w => w.length > 0 && w.length <= maxWordLength)
-    .map(word => ({ word, emoji: '' }));
+    .map(word => ({ word, emoji: wordListMap.get(word) ?? '' }));
 
   // Get available predefined words
   const availableWords = WORD_LIST.filter(w => w.word.length <= maxWordLength);
