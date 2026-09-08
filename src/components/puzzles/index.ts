@@ -12,6 +12,7 @@ import { puzzleDefinition as counting } from './Counting/definition';
 import { puzzleDefinition as ordering } from './Ordering/definition';
 import { puzzleDefinition as chess } from './Chess/definition';
 import { puzzleDefinition as puzzleMaze } from './PuzzleMaze/definition';
+import { puzzleDefinition as handwriting } from './Handwriting/definition';
 
 /**
  * Registry of all available puzzle types
@@ -32,6 +33,7 @@ export const PUZZLE_DEFINITIONS = [
   ordering,
   chess,
   puzzleMaze,
+  handwriting,
 ] as const;
 
 /**

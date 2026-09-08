@@ -13,7 +13,8 @@ export type PuzzleType = 'maze'
                        | 'counting'
                        | 'ordering'
                        | 'chess'
-                       | 'puzzlemaze';
+                       | 'puzzlemaze'
+                       | 'handwriting';
 
 export interface PlacedPuzzle {
   id: string;
