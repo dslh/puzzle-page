@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 15 puzzle types - see **Existing Puzzles** below.
+There are currently 16 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -393,7 +393,7 @@ default width×height in grid cells.
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
 | Pattern Sequence | `patternsequence` | 6×2 | height | - |
-| Matching | `matching` | 4×4 | height | - |
+| Matching | `matching` | 5×4 | both | pictures / words, max word length |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
@@ -403,6 +403,7 @@ default width×height in grid cells.
 | Chess Puzzle | `chess` | 5×5 | fixed | difficulty, mate / capture |
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
+| Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
 
 Two of these carry notes worth reading before editing them:
 
@@ -411,9 +412,29 @@ Two of these carry notes worth reading before editing them:
 - **Weaving Maze** - the generation algorithm is written up in
   `docs/weaving-maze-algorithm.md`.
 
-**Shared data:** `WordSearch/wordList.ts` holds ~120 emoji-paired 3-4 letter
-words and is imported by both Word Search and Handwriting. Add words there rather
-than starting a second list.
+**Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
+words, imported by Word Search, Handwriting and Matching. Add words there rather
+than starting a second list. Each entry carries three tags beyond the word and
+its emoji, and puzzles filter on them:
+
+- `rime` - a phonetic rime key. Two words rhyme **iff** their rime strings are
+  equal. It is deliberately not a spelling suffix: `CAT`/`HAT` are `"at"` while
+  `GOAT`/`BOAT` are `"oat"`, and `BEAR`/`PEAR` (`"air"`) are kept apart from
+  `STAR`/`CAR` (`"ar"`). Grouping by trailing letters instead produces
+  confidently wrong rhymes.
+- `decodable` - the child can sound it out from regular letter-sound
+  correspondences. False for `EIGHT`, `KEY`, `BEAR`.
+- `pictureClue` (optional, defaults true) - the emoji alone identifies the word.
+  False for the colour words, whose coloured squares are indistinguishable once
+  printed in mono, and the number words, whose numeral keycaps can be read
+  without decoding the word at all.
+
+**`WordEntry` vs `PuzzleWord`:** `WordEntry` is a curated list entry and is
+always fully tagged. `PuzzleWord` is what generators actually handle - a curated
+entry *or* a word a parent typed into a custom-words field, whose rime and
+decodability are genuinely unknowable. Filter with `w.decodable !== false`, never
+`=== true`: treating unknown as disallowed silently drops exactly the words a
+parent chose on purpose.
 
 ## Architecture Decisions
 

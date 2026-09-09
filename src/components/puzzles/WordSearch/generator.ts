@@ -1,4 +1,4 @@
-import { WORD_LIST, type WordEntry } from './wordList';
+import { WORD_LIST, type PuzzleWord } from './wordList';
 
 class SeededRandom {
   private seed: number;
@@ -149,7 +149,7 @@ function findIntersectionPlacements(
 
 function tryPlaceWord(
   grid: string[][],
-  wordEntry: WordEntry,
+  wordEntry: PuzzleWord,
   directions: Direction[],
   random: SeededRandom,
   gridSize: number
@@ -211,7 +211,7 @@ export function generateWordSearch(
 
   // Parse custom words from text input, matching emoji from word list when possible
   const wordListMap = new Map(WORD_LIST.map(w => [w.word, w.emoji]));
-  const validCustomWords: WordEntry[] = customWordsText
+  const validCustomWords: PuzzleWord[] = customWordsText
     .toUpperCase()
     .split(/[,\s]+/)
     .map(w => w.replace(/[^A-Z]/g, ''))
@@ -226,7 +226,7 @@ export function generateWordSearch(
 
   // Fill remaining slots with random predefined words if needed
   const remainingSlots = wordCount + 2 - validCustomWords.length; // +2 extra in case some fail
-  let predefinedWords: WordEntry[] = [];
+  let predefinedWords: PuzzleWord[] = [];
   if (remainingSlots > 0) {
     const shuffledWords = random.shuffle([...availableWords]);
     // Filter out any words that match custom words
@@ -239,7 +239,7 @@ export function generateWordSearch(
   }
 
   // Custom words first, then predefined (ensures custom words are prioritized)
-  const selectedWords: WordEntry[] = [...validCustomWords, ...predefinedWords];
+  const selectedWords: PuzzleWord[] = [...validCustomWords, ...predefinedWords];
 
   // Initialize empty grid
   const grid: string[][] = Array(gridSize)

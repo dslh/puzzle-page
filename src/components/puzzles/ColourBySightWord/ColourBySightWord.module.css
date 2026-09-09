@@ -1,0 +1,124 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  box-sizing: border-box;
+  padding: 4px;
+}
+
+/* The key: "the = red". Colours are named as words, never shown as swatches -
+   the sheet is printed in black and white and coloured in by the child, so a
+   swatch would be a blank box. */
+.key {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.keyRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyEntry {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  white-space: nowrap;
+  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
+  line-height: 1.4;
+}
+
+.keyWord {
+  font-weight: 700;
+  color: #222;
+}
+
+.keyEquals {
+  color: #999;
+  font-weight: 600;
+}
+
+/* Screen only: a restrained tint on the colour's *name*, which is still a word
+   the child has to read. Dropped for print. */
+.keyColour {
+  font-weight: 700;
+}
+
+.gridWrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid {
+  display: grid;
+  background: white;
+  border: 2px solid #333;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
+  font-weight: 600;
+  color: #333;
+  border-right: 1px solid #8a8a8a;
+  border-bottom: 1px solid #8a8a8a;
+}
+
+/* Last column / last row: the container's own border already closes the grid. */
+.noRight {
+  border-right: none;
+}
+
+.noBottom {
+  border-bottom: none;
+}
+
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .grid {
+    border: 2px solid #000;
+  }
+
+  /* Light enough that a coloured pencil covers them, dark enough to stay inside */
+  .cell {
+    border-right-color: #777;
+    border-bottom-color: #777;
+    color: #000;
+  }
+
+  .keyEntry {
+    border-color: #666;
+  }
+
+  .keyWord,
+  .keyEquals {
+    color: #000;
+  }
+
+  /* Mono printout: the tint would come out as unreadable grey, and the word
+     itself is the information. !important because the tint is an inline style. */
+  .keyColour {
+    color: #000 !important;
+  }
+}

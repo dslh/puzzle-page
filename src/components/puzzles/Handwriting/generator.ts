@@ -1,4 +1,4 @@
-import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
+import { WORD_LIST, type PuzzleWord } from '../WordSearch/wordList';
 
 class SeededRandom {
   private seed: number;
@@ -74,7 +74,7 @@ export function generateHandwriting(
 
   // Custom words come first so a spelling list from school always makes the cut
   const used = new Set<string>();
-  const customWords: WordEntry[] = customWordsText
+  const customWords: PuzzleWord[] = customWordsText
     .toUpperCase()
     .split(/[,\s]+/)
     .map(w => w.replace(/[^A-Z]/g, ''))
@@ -86,7 +86,7 @@ export function generateHandwriting(
     })
     .map(word => ({ word, emoji: wordListMap.get(word) ?? FALLBACK_EMOJI }));
 
-  const selected: WordEntry[] = customWords.slice(0, wordCount);
+  const selected: PuzzleWord[] = customWords.slice(0, wordCount);
 
   if (selected.length < wordCount) {
     const pool = WORD_LIST.filter(

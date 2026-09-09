@@ -66,7 +66,7 @@ export default function Handwriting({
   config,
 }: PuzzleProps<HandwritingConfig>) {
   const mode = config?.mode ?? 'trace';
-  const letterCase = config?.letterCase ?? 'lower';
+  const letterCase = config?.letterCase ?? 'upper';
   const customWordsText = config?.customWordsText ?? '';
 
   const availableWidth = gridWidth * GRID_CELL_PX;

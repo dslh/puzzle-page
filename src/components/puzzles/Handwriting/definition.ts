@@ -13,7 +13,7 @@ export const puzzleDefinition: PuzzleDefinition<HandwritingConfig> = {
   defaultHeight: 4,
   defaultConfig: {
     mode: 'trace',
-    letterCase: 'lower',
+    letterCase: 'upper',
     customWordsText: '',
   },
   resizable: {

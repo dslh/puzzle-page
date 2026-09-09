@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { generateMatchingPuzzle } from './generator';
+import { generateMatchingPuzzle, type MatchingMode } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Matching.module.css';
 
@@ -29,9 +29,22 @@ class SeededRandom {
   }
 }
 
-export default function Matching({ gridHeight = 4, seed }: PuzzleProps) {
+export interface MatchingConfig {
+  mode: MatchingMode;
+  /** Word mode only: longest word to draw from the list. */
+  maxWordLength: 3 | 4 | 5;
+}
+
+export default function Matching({
+  gridHeight = 4,
+  seed,
+  config,
+}: PuzzleProps<MatchingConfig>) {
+  const mode = config?.mode ?? 'silhouette';
+  const maxWordLength = config?.maxWordLength ?? 4;
+
   const puzzle = useMemo(() => {
-    const basePuzzle = generateMatchingPuzzle(seed, gridHeight);
+    const basePuzzle = generateMatchingPuzzle(seed, gridHeight, mode, maxWordLength);
 
     // Shuffle the right column for display
     const random = new SeededRandom(seed + 1); // Different seed for shuffling
@@ -45,20 +58,30 @@ export default function Matching({ gridHeight = 4, seed }: PuzzleProps) {
       shuffledRight,
       firstMatchIndex,
     };
-  }, [seed, gridHeight]);
+  }, [seed, gridHeight, mode, maxWordLength]);
+
+  const isWordMode = puzzle.mode === 'word';
 
   return (
     <div className={styles.container}>
       <div className={styles.matchingArea}>
-        <div className={styles.column}>
+        <div
+          className={`${styles.column} ${isWordMode ? styles.wordColumn : ''}`}
+        >
           {puzzle.pairs.map((pair, index) => (
             <div key={index} className={styles.item}>
-              <span className={styles.emoji}>{pair.left}</span>
+              <span className={isWordMode ? styles.word : styles.emoji}>
+                {pair.left}
+              </span>
             </div>
           ))}
         </div>
 
-        <div className={styles.connectingSpace}>
+        <div
+          className={`${styles.connectingSpace} ${
+            isWordMode ? styles.narrowConnector : ''
+          }`}
+        >
           <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
             <line
               x1="0"
@@ -72,10 +95,20 @@ export default function Matching({ gridHeight = 4, seed }: PuzzleProps) {
           </svg>
         </div>
 
-        <div className={styles.column}>
+        <div
+          className={`${styles.column} ${
+            isWordMode ? styles.wordRightColumn : ''
+          }`}
+        >
           {puzzle.shuffledRight.map((emoji, index) => (
             <div key={index} className={styles.item}>
-              <span className={`${styles.emoji} ${styles.silhouette}`}>{emoji}</span>
+              <span
+                className={`${styles.emoji} ${
+                  isWordMode ? '' : styles.silhouette
+                }`}
+              >
+                {emoji}
+              </span>
             </div>
           ))}
         </div>

@@ -14,7 +14,8 @@ export type PuzzleType = 'maze'
                        | 'ordering'
                        | 'chess'
                        | 'puzzlemaze'
-                       | 'handwriting';
+                       | 'handwriting'
+                       | 'coloursightword';
 
 export interface PlacedPuzzle {
   id: string;

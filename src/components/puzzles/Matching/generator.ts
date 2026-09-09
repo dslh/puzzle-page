@@ -1,11 +1,18 @@
+import { WORD_LIST } from '../WordSearch/wordList';
+
+export type MatchingMode = 'silhouette' | 'word';
+
 export interface MatchingPair {
+  /** Left column: an emoji in silhouette mode, the word itself in word mode. */
   left: string;
+  /** Right column: always an emoji. */
   right: string;
 }
 
 export interface MatchingPuzzle {
   pairs: MatchingPair[];
   category: string;
+  mode: MatchingMode;
 }
 
 class SeededRandom {
@@ -65,11 +72,35 @@ const MATCHING_CATEGORIES = [
   },
 ];
 
-export function generateMatchingPuzzle(seed: number, gridHeight: number = 4): MatchingPuzzle {
+export function generateMatchingPuzzle(
+  seed: number,
+  gridHeight: number = 4,
+  mode: MatchingMode = 'silhouette',
+  maxWordLength: number = 4
+): MatchingPuzzle {
   const random = new SeededRandom(seed);
 
   // One pair per row
   const numPairs = gridHeight;
+
+  if (mode === 'word') {
+    // Only words the child can actually sound out, short enough to decode
+    // without losing the thread. `decodable !== false` rather than `=== true`
+    // so an untagged word is allowed rather than silently dropped.
+    const pool = WORD_LIST.filter(
+      w =>
+        w.decodable !== false &&
+        w.pictureClue !== false &&
+        w.word.length <= maxWordLength
+    );
+
+    const picked = random.shuffle([...pool]).slice(0, numPairs);
+    return {
+      pairs: picked.map(entry => ({ left: entry.word, right: entry.emoji })),
+      category: 'Words',
+      mode,
+    };
+  }
 
   // Select a random category
   const categoryIndex = random.nextInt(MATCHING_CATEGORIES.length);
@@ -95,5 +126,6 @@ export function generateMatchingPuzzle(seed: number, gridHeight: number = 4): Ma
   return {
     pairs: selectedPairs,
     category: category.name,
+    mode,
   };
 }
