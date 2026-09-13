@@ -1,0 +1,67 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.problem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5mm;
+  border: 1px solid #e0e0e0;
+  background: white;
+  box-sizing: border-box;
+  padding: 1mm;
+  min-width: 0;
+}
+
+.number {
+  font-size: 6.5mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #222;
+}
+
+.operator {
+  font-size: 5.5mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #555;
+}
+
+.answerBox {
+  width: 7mm;
+  height: 7mm;
+  flex-shrink: 0;
+  border: 1.5px dashed #999;
+  border-radius: 2px;
+  background: white;
+}
+
+/* Print-specific styles */
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .answerBox {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

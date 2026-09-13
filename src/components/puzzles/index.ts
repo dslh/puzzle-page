@@ -14,6 +14,8 @@ import { puzzleDefinition as chess } from './Chess/definition';
 import { puzzleDefinition as puzzleMaze } from './PuzzleMaze/definition';
 import { puzzleDefinition as handwriting } from './Handwriting/definition';
 import { puzzleDefinition as colourBySightWord } from './ColourBySightWord/definition';
+import { puzzleDefinition as letterFormation } from './LetterFormation/definition';
+import { puzzleDefinition as sums } from './Sums/definition';
 
 /**
  * Registry of all available puzzle types
@@ -36,6 +38,8 @@ export const PUZZLE_DEFINITIONS = [
   puzzleMaze,
   handwriting,
   colourBySightWord,
+  letterFormation,
+  sums,
 ] as const;
 
 /**
