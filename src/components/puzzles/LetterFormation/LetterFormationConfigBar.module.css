@@ -1,0 +1,112 @@
+.configContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: white;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.configGroup .buttonBar {
+  flex: 1;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.buttonBar {
+  display: flex;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+}
+
+.button {
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-right: 1px solid #ddd;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button:last-child {
+  border-right: none;
+}
+
+.button:hover:not(.selected) {
+  background: #f5f5f5;
+}
+
+.selected {
+  background: #2196f3;
+  color: white;
+}
+
+.textInput {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+/* 26 letters plus a random option. A wrapping grid of small squares stays
+   scannable where a dropdown would hide the alphabet. */
+.letterGrid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.letterButton {
+  padding: 3px 0;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.letterButton:hover:not(.selected) {
+  background: #f0f0f0;
+}
+
+.letterButton.selected {
+  background: #2196f3;
+  color: white;
+  border-color: #2196f3;
+}
+
+.configGroup .letterGrid {
+  flex: 1;
+}
