@@ -24,6 +24,19 @@ const BADGE_PAD_TOP = 22;
 /** Keeps the first trace letter off the puzzle's left border. */
 const GLYPH_INSET_PX = 10;
 
+/**
+ * Practice-line sizing. The target is roughly one grid cell, which puts the
+ * cap height near 10mm - about right for a five-year-old writing capitals.
+ *
+ * Row count is derived first and the height divided out of it, rather than the
+ * other way round: picking a height and then dividing to see how many fit is
+ * at the mercy of floating point, and drops a row when the division lands a
+ * hair under a whole number.
+ */
+const ROW_TARGET_PX = 76;
+const ROW_MIN_PX = 56;
+const ROW_MAX_PX = 88;
+
 class SeededRandom {
   private seed: number;
 
@@ -141,8 +154,8 @@ export default function LetterFormation({
   const modelHeight = Math.min(availableHeight * 0.42, 112);
   const modelGlyphHeight = modelHeight * 0.8;
   const rowsHeight = availableHeight - modelHeight - 6;
-  const rowHeight = Math.min(84, Math.max(52, rowsHeight / Math.max(1, Math.round(rowsHeight / 76))));
-  const rowCount = Math.max(1, Math.floor(rowsHeight / rowHeight));
+  const rowCount = Math.max(1, Math.floor(rowsHeight / ROW_TARGET_PX));
+  const rowHeight = Math.min(ROW_MAX_PX, Math.max(ROW_MIN_PX, rowsHeight / rowCount));
 
   // Capitals only, so no descender zone: cap line, dashed midline, baseline.
   const capHeight = rowHeight * 0.64;

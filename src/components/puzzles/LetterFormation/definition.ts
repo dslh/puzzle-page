@@ -10,7 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<LetterFormationConfig> = {
   component: LetterFormation,
   configComponent: LetterFormationConfigBar,
   defaultWidth: 6,
-  defaultHeight: 4,
+  defaultHeight: 3,
   defaultConfig: {
     letter: '',
     guides: true,
@@ -19,9 +19,9 @@ export const puzzleDefinition: PuzzleDefinition<LetterFormationConfig> = {
   resizable: {
     width: true,
     height: true,
-    // Below this the model letter and a practice line stop both fitting
     minWidth: 3,
     maxWidth: GRID_COLS,
+    // The default and the minimum: model letter plus a single practice line
     minHeight: 3,
     maxHeight: GRID_ROWS,
   },
