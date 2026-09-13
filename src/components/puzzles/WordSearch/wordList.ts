@@ -288,7 +288,7 @@ export const WORD_LIST: WordEntry[] = [
   { word: 'SEVEN', emoji: '7️⃣', rime: 'evun', decodable: false, pictureClue: false },
   { word: 'EIGHT', emoji: '8️⃣', rime: 'ate', decodable: false, pictureClue: false },
   { word: 'NINE', emoji: '9️⃣', rime: 'ine', decodable: true, pictureClue: false },
-  { word: 'TEN', emoji: '🔟', rime: 'en', decodable: true },
+  { word: 'TEN', emoji: '🔟', rime: 'en', decodable: true, pictureClue: false },
 
   // Colours (3-5 letters)
   { word: 'RED', emoji: '🟥', rime: 'ed', decodable: true, pictureClue: false },

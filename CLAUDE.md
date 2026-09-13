@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 16 puzzle types - see **Existing Puzzles** below.
+There are currently 17 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -393,7 +393,7 @@ default width×height in grid cells.
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
 | Pattern Sequence | `patternsequence` | 6×2 | height | - |
-| Matching | `matching` | 5×4 | both | pictures / words, max word length |
+| Matching | `matching` | 5×4 | both | pictures / words, max word length, custom words |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
@@ -404,6 +404,7 @@ default width×height in grid cells.
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
+| Sums | `sums` | 4×3 | both | + / − / both |
 
 Two of these carry notes worth reading before editing them:
 
@@ -428,6 +429,13 @@ its emoji, and puzzles filter on them:
   False for the colour words, whose coloured squares are indistinguishable once
   printed in mono, and the number words, whose numeral keycaps can be read
   without decoding the word at all.
+
+Matching is the one exception to the "unknown means allowed" rule below: its
+right-hand column is a picture, so a custom word with no curated emoji cannot be
+drawn at all. `Matching/generator.ts` resolves the field against `WORD_LIST` and
+reports back the words it could not match, so the config bar can name them
+rather than dropping them silently. A word that *does* resolve then bypasses the
+length, decodability and picture-clue filters, as on every other puzzle.
 
 **`WordEntry` vs `PuzzleWord`:** `WordEntry` is a curated list entry and is
 always fully tagged. `PuzzleWord` is what generators actually handle - a curated

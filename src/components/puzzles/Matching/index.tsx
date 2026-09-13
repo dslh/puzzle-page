@@ -33,6 +33,11 @@ export interface MatchingConfig {
   mode: MatchingMode;
   /** Word mode only: longest word to draw from the list. */
   maxWordLength: 3 | 4 | 5;
+  /**
+   * Word mode only: words the parent typed, comma or space separated. Only
+   * entries in `WORD_LIST` are usable here - see `resolveCustomWords`.
+   */
+  customWordsText?: string;
 }
 
 export default function Matching({
@@ -42,9 +47,16 @@ export default function Matching({
 }: PuzzleProps<MatchingConfig>) {
   const mode = config?.mode ?? 'silhouette';
   const maxWordLength = config?.maxWordLength ?? 4;
+  const customWordsText = config?.customWordsText ?? '';
 
   const puzzle = useMemo(() => {
-    const basePuzzle = generateMatchingPuzzle(seed, gridHeight, mode, maxWordLength);
+    const basePuzzle = generateMatchingPuzzle(
+      seed,
+      gridHeight,
+      mode,
+      maxWordLength,
+      customWordsText
+    );
 
     // Shuffle the right column for display
     const random = new SeededRandom(seed + 1); // Different seed for shuffling
@@ -58,7 +70,7 @@ export default function Matching({
       shuffledRight,
       firstMatchIndex,
     };
-  }, [seed, gridHeight, mode, maxWordLength]);
+  }, [seed, gridHeight, mode, maxWordLength, customWordsText]);
 
   const isWordMode = puzzle.mode === 'word';
 

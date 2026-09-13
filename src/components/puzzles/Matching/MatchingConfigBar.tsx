@@ -1,3 +1,4 @@
+import { couldBeWord, resolveCustomWords } from './generator';
 import type { MatchingConfig } from './index';
 import styles from './MatchingConfigBar.module.css';
 
@@ -8,6 +9,25 @@ interface ConfigBarProps {
 
 export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
   const { mode, maxWordLength } = value;
+  const customWordsText = value.customWordsText ?? '';
+
+  // Every pair needs a picture, so a word we have no emoji for cannot be used.
+  // Name the rejects instead of dropping them silently - otherwise a typo just
+  // looks like the field being ignored.
+  const { unmatched } = resolveCustomWords(customWordsText);
+
+  // The word still under the cursor isn't a mistake yet if it could grow into a
+  // real one. Suppressing it keeps the warning from flashing on every keystroke
+  // (and the panel from resizing under the mouse) while someone types DOG.
+  const trailing = /[,\s]$/.test(customWordsText)
+    ? ''
+    : (customWordsText.toUpperCase().split(/[,\s]+/).pop() ?? '').replace(
+        /[^A-Z]/g,
+        ''
+      );
+  const rejected = unmatched.filter(
+    word => word !== trailing || !couldBeWord(trailing)
+  );
 
   return (
     <div className={styles.configContainer}>
@@ -50,6 +70,28 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {mode === 'word' && (
+        <div className={styles.configGroup}>
+          <span className={styles.label}>Custom:</span>
+          <input
+            type="text"
+            className={styles.textInput}
+            placeholder="CAT, DOG, FISH..."
+            title="Only words that have a picture can be used here"
+            value={customWordsText}
+            onChange={(e) =>
+              onChange({ ...value, customWordsText: e.target.value })
+            }
+          />
+        </div>
+      )}
+
+      {mode === 'word' && rejected.length > 0 && (
+        <div className={styles.warning}>
+          No picture for {rejected.join(', ')}
         </div>
       )}
     </div>
