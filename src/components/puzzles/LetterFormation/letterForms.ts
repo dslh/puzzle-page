@@ -272,12 +272,16 @@ export const LETTER_FORMS: LetterForm[] = [
     ],
   },
   {
+    // Two strokes, the short left diagonal joining the long right one at the
+    // middle. The long stroke bends at the join rather than running straight
+    // on: a straight stroke leans as far below the join as above it, which
+    // drags the tail sideways and splays the top asymmetrically - the letter
+    // ends up looking italic beside the upright V, W and X.
     char: 'Y',
     advance: 68,
     strokes: [
       { d: 'M8,0 L34,52', start: { x: 8, y: 0 }, dir: { x: 26, y: 52 }, hint: 'slant down to the middle' },
-      { d: 'M60,0 L34,52', start: { x: 60, y: 0 }, dir: { x: -26, y: 52 }, hint: 'slant down to meet it' },
-      { d: 'M34,52 L34,100', start: { x: 34, y: 52 }, dir: { x: 0, y: 1 }, hint: 'pull down straight' },
+      { d: 'M60,0 L34,52 L34,100', start: { x: 60, y: 0 }, dir: { x: -26, y: 52 }, hint: 'slant down to meet it, then straight down' },
     ],
   },
   {
