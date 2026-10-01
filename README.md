@@ -31,7 +31,7 @@ Live at https://puzzle-page.fly.dev
 | Sudoku | 3×3 / 4×4 / 5×5, with colours, numbers, letters or custom symbols |
 | Which Doesn't Belong? | - |
 | Odd One Out | grid size |
-| Pattern Sequence | shapes / colours, easy / medium / hard |
+| Pattern Sequence | shapes or colours; choose any of AB/ABC, AAB/ABB/AABB, ABCD/ABAC, growing and mirror patterns; filled shapes; gap position |
 | Matching | pictures or words, max word length, custom words |
 | Picture Scramble | image URL |
 | Word Search | directions, word count, limited letters, custom words |

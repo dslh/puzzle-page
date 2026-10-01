@@ -392,7 +392,7 @@ default width×height in grid cells.
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
-| Pattern Sequence | `patternsequence` | 8×3 | both (min width 4) | shapes / colours, easy / medium / hard |
+| Pattern Sequence | `patternsequence` | 8×3 | both (min width 5) | shapes / colours, pattern families (AB·ABC, AAB·ABB·AABB, ABCD·ABAC, growing, mirror), filled shapes, gap position |
 | Matching | `matching` | 5×4 | both | pictures / words, max word length, custom words |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |

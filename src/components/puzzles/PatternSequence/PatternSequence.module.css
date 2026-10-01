@@ -1,11 +1,12 @@
+/* Spacing in mm - keep in step with the layout constants in index.tsx */
 .container {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 3mm;
+  gap: 2mm;
   box-sizing: border-box;
-  padding: 2mm;
+  padding: 1.5mm;
 }
 
 .row {
@@ -17,21 +18,22 @@
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   box-sizing: border-box;
-  padding: 3mm;
+  padding: 1.5mm;
   flex: 1;
   min-height: 0;
 }
 
-.circlesContainer {
+.itemsContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4mm;
+  gap: 2.5mm;
   width: 100%;
 }
 
-.circle {
+.item {
   flex-shrink: 0;
+  overflow: visible;
 }
 
 /* Print-specific styles */
@@ -46,7 +48,7 @@
     page-break-inside: avoid;
   }
 
-  .circle {
+  .item {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
