@@ -12,6 +12,7 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
   defaultWidth: 4,
   defaultHeight: 4,
   defaultConfig: {
+    gridShape: 'square',
     cellSizeRatio: 2,
     branchiness: 'medium',
   },

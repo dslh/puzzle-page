@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { generateMaze, type Maze as MazeType } from './generator';
+import type { GridShape, Point } from './grids';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Maze.module.css';
 
 export interface MazeConfig {
+  gridShape: GridShape;
   cellSizeRatio: 2 | 3 | 4;
   branchiness: 'low' | 'medium' | 'high';
 }
@@ -50,7 +52,7 @@ function seededRandom(seed: number): number {
 }
 
 /**
- * Calculate maze grid dimensions from allocated grid cells
+ * Calculate maze dimensions, in square maze cells, from allocated grid cells
  * Formula: ratio:1 with margins
  * - Horizontal: 1 maze cell margin on each side (2 total)
  * - Vertical: 1.5 maze cells at top + 0.5 at bottom (2 total)
@@ -62,6 +64,9 @@ function seededRandom(seed: number): number {
  * Examples (ratio=3):
  * - 4x4 grid cells → 10x10 maze
  * - 5x5 grid cells → 13x13 maze
+ *
+ * Hex and triangle mazes are given the same area and fit as many of their own
+ * cells into it as they can.
  */
 function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number): { width: number; height: number } {
   return {
@@ -71,6 +76,7 @@ function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number)
 }
 
 export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
+  const gridShape = config?.gridShape ?? 'square';
   const ratio = config?.cellSizeRatio ?? 2;
   const branchiness = config?.branchiness ?? 'medium';
 
@@ -78,8 +84,8 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
 
   const maze: MazeType = useMemo(() => {
-    return generateMaze(width, height, seed, branchiness);
-  }, [width, height, seed, branchiness]);
+    return generateMaze(width, height, seed, branchiness, gridShape);
+  }, [width, height, seed, branchiness, gridShape]);
 
   const theme = useMemo(() => {
     const themeIndex = Math.floor(seededRandom(seed + 12345) * MAZE_THEMES.length);
@@ -99,6 +105,26 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const svgWidth = maze.width * cellSize + wallThickness;
   const svgHeight = maze.height * cellSize + wallThickness;
 
+  // Maze coordinates to SVG pixels
+  const toPx = (point: Point): Point => ({
+    x: point.x * cellSize + wallThickness / 2,
+    y: point.y * cellSize + wallThickness / 2,
+  });
+
+  const startCell = maze.cells[maze.start];
+  const endCell = maze.cells[maze.end];
+  const startCenter = toPx(startCell.center);
+  const endCenter = toPx(endCell.center);
+
+  // Shrink the markers when the cells are too small to hold them
+  const markerSize = Math.min(24, 2 * maze.inradius * cellSize);
+
+  const outline = (corners: Point[]) =>
+    corners
+      .map(toPx)
+      .map((p) => `${p.x},${p.y}`)
+      .join(' ');
+
   return (
     <div className={styles.mazeContainer}>
       <svg
@@ -109,106 +135,34 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Draw cell backgrounds */}
-        {maze.grid.map((row, y) =>
-          row.map((_cell, x) => {
-            const isStart = x === maze.start.x && y === maze.start.y;
-            const isEnd = x === maze.end.x && y === maze.end.y;
-
-            if (!isStart && !isEnd) return null;
-
-            return (
-              <rect
-                key={`bg-${x}-${y}`}
-                x={x * cellSize + wallThickness / 2}
-                y={y * cellSize + wallThickness / 2}
-                width={cellSize}
-                height={cellSize}
-                fill={isStart ? theme.startColor : theme.endColor}
-                opacity={0.5}
-              />
-            );
-          })
-        )}
+        <polygon points={outline(startCell.corners)} fill={theme.startColor} opacity={0.5} />
+        <polygon points={outline(endCell.corners)} fill={theme.endColor} opacity={0.5} />
 
         {/* Draw walls */}
-        {maze.grid.map((row, y) =>
-          row.map((cell, x) => {
-            const walls = [];
-            const offset = wallThickness / 2;
+        {maze.walls.map((wall, i) => {
+          const from = toPx(wall.from);
+          const to = toPx(wall.to);
 
-            if (cell.walls.top) {
-              walls.push(
-                <line
-                  key={`top-${x}-${y}`}
-                  x1={x * cellSize + offset}
-                  y1={y * cellSize + offset}
-                  x2={(x + 1) * cellSize + offset}
-                  y2={y * cellSize + offset}
-                  stroke="#000"
-                  strokeWidth={wallThickness}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              );
-            }
-
-            if (cell.walls.right) {
-              walls.push(
-                <line
-                  key={`right-${x}-${y}`}
-                  x1={(x + 1) * cellSize + offset}
-                  y1={y * cellSize + offset}
-                  x2={(x + 1) * cellSize + offset}
-                  y2={(y + 1) * cellSize + offset}
-                  stroke="#000"
-                  strokeWidth={wallThickness}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              );
-            }
-
-            if (cell.walls.bottom) {
-              walls.push(
-                <line
-                  key={`bottom-${x}-${y}`}
-                  x1={x * cellSize + offset}
-                  y1={(y + 1) * cellSize + offset}
-                  x2={(x + 1) * cellSize + offset}
-                  y2={(y + 1) * cellSize + offset}
-                  stroke="#000"
-                  strokeWidth={wallThickness}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              );
-            }
-
-            if (cell.walls.left) {
-              walls.push(
-                <line
-                  key={`left-${x}-${y}`}
-                  x1={x * cellSize + offset}
-                  y1={y * cellSize + offset}
-                  x2={x * cellSize + offset}
-                  y2={(y + 1) * cellSize + offset}
-                  stroke="#000"
-                  strokeWidth={wallThickness}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              );
-            }
-
-            return walls;
-          })
-        )}
+          return (
+            <line
+              key={`wall-${i}`}
+              x1={from.x}
+              y1={from.y}
+              x2={to.x}
+              y2={to.y}
+              stroke="#000"
+              strokeWidth={wallThickness}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          );
+        })}
 
         {/* Draw start marker */}
         <text
-          x={maze.start.x * cellSize + cellSize / 2 + wallThickness / 2}
-          y={maze.start.y * cellSize + cellSize / 2 + wallThickness / 2}
-          fontSize="24"
+          x={startCenter.x}
+          y={startCenter.y}
+          fontSize={markerSize}
           textAnchor="middle"
           dominantBaseline="central"
         >
@@ -217,9 +171,9 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
 
         {/* Draw end marker */}
         <text
-          x={maze.end.x * cellSize + cellSize / 2 + wallThickness / 2}
-          y={maze.end.y * cellSize + cellSize / 2 + wallThickness / 2}
-          fontSize="24"
+          x={endCenter.x}
+          y={endCenter.y}
+          fontSize={markerSize}
           textAnchor="middle"
           dominantBaseline="central"
         >

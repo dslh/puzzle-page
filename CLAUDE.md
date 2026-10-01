@@ -388,7 +388,7 @@ default width×height in grid cells.
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | cell size, branchiness |
+| Maze (4×4) | `maze` | 4×4 | both | square / hex / triangle grid, cell size, branchiness |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
@@ -406,8 +406,14 @@ default width×height in grid cells.
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
 | Sums | `sums` | 4×3 | both | + / − / both |
 
-Two of these carry notes worth reading before editing them:
+Three of these carry notes worth reading before editing them:
 
+- **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
+  describes each cell by its outline and the neighbour across each side, so a
+  new grid shape is one more builder function there plus a config button. Square
+  mazes consume the RNG in the same order as before the shapes were added
+  (neighbours listed top, right, bottom, left), so a seed still gives the same
+  maze - keep that order.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in

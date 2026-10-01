@@ -7,11 +7,38 @@ interface MazeConfigBarProps {
 }
 
 export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
+  const gridShape = value.gridShape;
   const ratio = value.cellSizeRatio;
   const branchiness = value.branchiness;
 
   return (
     <div className={styles.configContainer}>
+      <div className={styles.buttonBar}>
+        <button
+          type="button"
+          className={`${styles.button} ${gridShape === 'square' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, gridShape: 'square' })}
+          title="Square cells"
+        >
+          Square
+        </button>
+        <button
+          type="button"
+          className={`${styles.button} ${gridShape === 'hex' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, gridShape: 'hex' })}
+          title="Hexagonal cells"
+        >
+          Hex
+        </button>
+        <button
+          type="button"
+          className={`${styles.button} ${gridShape === 'triangle' ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, gridShape: 'triangle' })}
+          title="Triangular cells"
+        >
+          Triangle
+        </button>
+      </div>
       <div className={styles.buttonBar}>
         <button
           type="button"

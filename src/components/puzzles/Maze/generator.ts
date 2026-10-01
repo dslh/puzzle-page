@@ -1,21 +1,21 @@
-export interface Cell {
-  x: number;
-  y: number;
-  walls: {
-    top: boolean;
-    right: boolean;
-    bottom: boolean;
-    left: boolean;
-  };
-  visited: boolean;
+import { buildGrid, type GridCell, type GridShape, type Point } from './grids';
+
+export interface Wall {
+  from: Point;
+  to: Point;
 }
 
 export interface Maze {
-  grid: Cell[][];
+  cells: GridCell[];
+  /** Every wall still standing, including the outer edge of the maze. */
+  walls: Wall[];
   width: number;
   height: number;
-  start: { x: number; y: number };
-  end: { x: number; y: number };
+  /** Radius of the largest circle that fits inside a cell. */
+  inradius: number;
+  /** Indices into cells */
+  start: number;
+  end: number;
 }
 
 export type Branchiness = 'low' | 'medium' | 'high';
@@ -54,36 +54,31 @@ function getBranchProbability(branchiness: Branchiness): number {
  * - 'medium': Mix of backtracker and random walk
  * - 'high': Prim's algorithm (many short branches)
  *
+ * The algorithm only ever asks a cell for its neighbours, so it works the same
+ * on any grid shape. Width and height are in square cells - see buildGrid.
+ *
  * Suitable for 4-5 year olds (small, simple mazes)
  */
 export function generateMaze(
   width: number = 6,
   height: number = 6,
   seed?: number,
-  branchiness: Branchiness = 'medium'
+  branchiness: Branchiness = 'medium',
+  shape: GridShape = 'square'
 ): Maze {
   const random = seed ? new SeededRandom(seed) : null;
   const branchProbability = getBranchProbability(branchiness);
 
-  // Initialize grid with all walls
-  const grid: Cell[][] = [];
-  for (let y = 0; y < height; y++) {
-    grid[y] = [];
-    for (let x = 0; x < width; x++) {
-      grid[y][x] = {
-        x,
-        y,
-        walls: { top: true, right: true, bottom: true, left: true },
-        visited: false,
-      };
-    }
-  }
+  // Start with every wall standing
+  const grid = buildGrid(shape, width, height);
+  const { cells } = grid;
+  const visited = cells.map(() => false);
+  const passages = cells.map(() => new Set<number>());
 
   // Use Growing Tree algorithm to carve paths
-  const stack: Cell[] = [];
-  const startCell = grid[0][0];
-  startCell.visited = true;
-  stack.push(startCell);
+  const stack: number[] = [];
+  visited[0] = true;
+  stack.push(0);
 
   while (stack.length > 0) {
     const randomValue = random ? random.next() : Math.random();
@@ -92,7 +87,7 @@ export function generateMaze(
         ? Math.floor((random ? random.next() : Math.random()) * stack.length)
         : stack.length - 1;
     const current = stack[index];
-    const neighbors = getUnvisitedNeighbors(current, grid, width, height);
+    const neighbors = cells[current].neighbors.filter((n) => n !== -1 && !visited[n]);
 
     if (neighbors.length > 0) {
       // Choose random unvisited neighbor
@@ -100,9 +95,10 @@ export function generateMaze(
       const next = neighbors[Math.floor(nextRandomValue * neighbors.length)];
 
       // Remove wall between current and next
-      removeWall(current, next);
+      passages[current].add(next);
+      passages[next].add(current);
 
-      next.visited = true;
+      visited[next] = true;
       stack.push(next);
     } else {
       // No unvisited neighbors, remove this cell from the stack
@@ -110,67 +106,29 @@ export function generateMaze(
     }
   }
 
-  // Set start and end points
-  const start = { x: 0, y: 0 };
-  const end = { x: width - 1, y: height - 1 };
+  // Collect the walls that were never carved through. A wall between two cells
+  // is a side of both, so take it from the lower-numbered cell only.
+  const walls: Wall[] = [];
+  cells.forEach((cell, i) => {
+    cell.neighbors.forEach((neighbor, side) => {
+      const isEdge = neighbor === -1;
+      const isWall = neighbor > i && !passages[i].has(neighbor);
+      if (isEdge || isWall) {
+        walls.push({
+          from: cell.corners[side],
+          to: cell.corners[(side + 1) % cell.corners.length],
+        });
+      }
+    });
+  });
 
   return {
-    grid,
-    width,
-    height,
-    start,
-    end,
+    cells,
+    walls,
+    width: grid.width,
+    height: grid.height,
+    inradius: grid.inradius,
+    start: 0,
+    end: cells.length - 1,
   };
-}
-
-function getUnvisitedNeighbors(
-  cell: Cell,
-  grid: Cell[][],
-  width: number,
-  height: number
-): Cell[] {
-  const neighbors: Cell[] = [];
-  const { x, y } = cell;
-
-  // Top
-  if (y > 0 && !grid[y - 1][x].visited) {
-    neighbors.push(grid[y - 1][x]);
-  }
-  // Right
-  if (x < width - 1 && !grid[y][x + 1].visited) {
-    neighbors.push(grid[y][x + 1]);
-  }
-  // Bottom
-  if (y < height - 1 && !grid[y + 1][x].visited) {
-    neighbors.push(grid[y + 1][x]);
-  }
-  // Left
-  if (x > 0 && !grid[y][x - 1].visited) {
-    neighbors.push(grid[y][x - 1]);
-  }
-
-  return neighbors;
-}
-
-function removeWall(current: Cell, next: Cell): void {
-  const dx = current.x - next.x;
-  const dy = current.y - next.y;
-
-  if (dx === 1) {
-    // Next is to the left
-    current.walls.left = false;
-    next.walls.right = false;
-  } else if (dx === -1) {
-    // Next is to the right
-    current.walls.right = false;
-    next.walls.left = false;
-  } else if (dy === 1) {
-    // Next is above
-    current.walls.top = false;
-    next.walls.bottom = false;
-  } else if (dy === -1) {
-    // Next is below
-    current.walls.bottom = false;
-    next.walls.top = false;
-  }
 }
