@@ -226,7 +226,7 @@ class Outline {
 }
 
 /** Distance from a point to the nearest side of a polygon */
-function clearance(p: Point, corners: Point[]): number {
+export function clearance(p: Point, corners: Point[]): number {
   return Math.min(...corners.map((c, i) => distanceToSegment(p, c, corners[(i + 1) % corners.length])));
 }
 

@@ -9,6 +9,10 @@ const GRID_SHAPES: { group: string; shapes: [GridShape, string][] }[] = [
       ['square', 'Squares'],
       ['hex', 'Hexagons'],
       ['triangle', 'Triangles'],
+      ['rhombille', 'Rhombuses'],
+      ['snubsquare', 'Squares + triangles'],
+      ['cairo', 'Pentagons'],
+      ['voronoi', 'Crazy paving'],
     ],
   },
   {

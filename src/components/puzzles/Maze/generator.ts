@@ -70,7 +70,7 @@ export function generateMaze(
   const branchProbability = getBranchProbability(branchiness);
 
   // Start with every wall standing
-  const grid = buildGrid(shape, width, height);
+  const grid = buildGrid(shape, width, height, () => (random ? random.next() : Math.random()));
   const { cells } = grid;
   const visited = cells.map(() => false);
   const passages = cells.map(() => new Set<number>());

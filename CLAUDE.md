@@ -388,7 +388,7 @@ default width×height in grid cells.
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness |
+| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
@@ -413,12 +413,17 @@ Three of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
-  new tiling is one more builder function there plus a dropdown entry. The ring
-  shapes (circle, star, heart, ...) all come from `concentric.ts`, which takes
-  any outline that is star-shaped about the origin; a new ring shape is just an
-  outline. Square mazes consume the RNG in the same order as before the shapes
-  were added (neighbours listed top, right, bottom, left), so a seed still gives
-  the same maze - keep that order.
+  new tiling is one more builder function there plus a dropdown entry. Tilings
+  that don't fall into rows and columns (rhombille, snub square, Cairo) skip the
+  neighbour bookkeeping: they list the polygons of one repeat, and
+  `polygons.ts` fits the pattern to the area and pairs up cells that share a
+  side. Voronoi (`voronoi.ts`) feeds the same helper, and is the only grid that
+  draws on the RNG - it takes its points from the maze's own sequence before
+  carving starts. The ring shapes (circle, star, heart, ...) all come from
+  `concentric.ts`, which takes any outline that is star-shaped about the origin;
+  a new ring shape is just an outline. Square mazes consume the RNG in the same
+  order as before the shapes were added (neighbours listed top, right, bottom,
+  left), so a seed still gives the same maze - keep that order.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
