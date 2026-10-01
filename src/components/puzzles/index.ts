@@ -17,6 +17,7 @@ import { puzzleDefinition as colourBySightWord } from './ColourBySightWord/defin
 import { puzzleDefinition as letterFormation } from './LetterFormation/definition';
 import { puzzleDefinition as sums } from './Sums/definition';
 import { puzzleDefinition as takeAway } from './TakeAway/definition';
+import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 
 /**
  * Registry of all available puzzle types
@@ -42,6 +43,7 @@ export const PUZZLE_DEFINITIONS = [
   letterFormation,
   sums,
   takeAway,
+  moreOrLess,
 ] as const;
 
 /**

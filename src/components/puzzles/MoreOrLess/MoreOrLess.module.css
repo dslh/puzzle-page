@@ -1,0 +1,87 @@
+/*
+ * Paddings, gaps, the key height and the answer box all feed the side-box size
+ * - see the mm constants in generator.ts. Change them together.
+ */
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  box-sizing: border-box;
+  padding: 2mm;
+}
+
+.key {
+  height: 10mm;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10mm;
+  font-size: 8mm;
+  font-weight: 700;
+  line-height: 1;
+  color: #333;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 2mm 3mm;
+  flex: 1;
+  min-height: 0;
+  gap: 4mm;
+}
+
+/* Fixed-size box: both sides get the same room whatever their count */
+.side {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.emoji {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 6.5mm;
+  line-height: 1;
+}
+
+.answerBox {
+  width: 10mm;
+  height: 10mm;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed #999;
+  border-radius: 2px;
+  background: white;
+}
+
+/* The worked example's answer, pencilled in */
+.filledIn {
+  font-size: 7mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #777;
+}
+
+/* Print-specific styles */
+@media print {
+  .container,
+  .row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .answerBox {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
