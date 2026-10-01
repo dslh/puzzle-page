@@ -24,14 +24,14 @@ Live at https://puzzle-page.fly.dev
 
 | Puzzle | Options |
 |---|---|
-| Maze | square / hex / triangle grid, cell size, branchiness |
+| Maze | grid shape (square, hex or triangle tiling; circle, hexagon, octagon, star or heart rings), cell size, branchiness |
 | Weaving Maze (paths cross over and under each other) | cell size, crossing density, branchiness |
 | Puzzle Maze | emoji mode |
 | Laser Maze | - |
 | Sudoku | 3×3 / 4×4 / 5×5, with colours, numbers, letters or custom symbols |
 | Which Doesn't Belong? | - |
 | Odd One Out | grid size |
-| Pattern Sequence | - |
+| Pattern Sequence | shapes / colours, easy / medium / hard |
 | Matching | pictures or words, max word length, custom words |
 | Picture Scramble | image URL |
 | Word Search | directions, word count, limited letters, custom words |

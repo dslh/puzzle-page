@@ -388,11 +388,11 @@ default width×height in grid cells.
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | square / hex / triangle grid, cell size, branchiness |
+| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
-| Pattern Sequence | `patternsequence` | 6×2 | height | - |
+| Pattern Sequence | `patternsequence` | 8×3 | both (min width 4) | shapes / colours, easy / medium / hard |
 | Matching | `matching` | 5×4 | both | pictures / words, max word length, custom words |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
@@ -413,10 +413,12 @@ Three of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
-  new grid shape is one more builder function there plus a config button. Square
-  mazes consume the RNG in the same order as before the shapes were added
-  (neighbours listed top, right, bottom, left), so a seed still gives the same
-  maze - keep that order.
+  new tiling is one more builder function there plus a dropdown entry. The ring
+  shapes (circle, star, heart, ...) all come from `concentric.ts`, which takes
+  any outline that is star-shaped about the origin; a new ring shape is just an
+  outline. Square mazes consume the RNG in the same order as before the shapes
+  were added (neighbours listed top, right, bottom, left), so a seed still gives
+  the same maze - keep that order.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in

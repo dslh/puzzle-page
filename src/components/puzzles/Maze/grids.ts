@@ -1,4 +1,7 @@
-export type GridShape = 'square' | 'hex' | 'triangle';
+import { OUTLINES, buildConcentricGrid } from './concentric';
+
+/** Tilings of the whole area, and ring shapes (see concentric.ts) */
+export type GridShape = 'square' | 'hex' | 'triangle' | keyof typeof OUTLINES;
 
 export interface Point {
   x: number;
@@ -13,17 +16,23 @@ export interface GridCell {
   center: Point;
   /** Outline, clockwise. Side i runs from corners[i] to corners[i + 1]. */
   corners: Point[];
-  /** neighbors[i] is the cell across side i, or -1 at the edge of the grid. */
+  /**
+   * neighbors[i] is the cell across side i, or -1 at the edge of the grid.
+   * The same neighbour may appear more than once when the shared boundary
+   * bends - it is one wall as far as the maze is concerned.
+   */
   neighbors: number[];
 }
 
 export interface Grid {
-  /** Row by row: the first cell is top-left, the last is bottom-right. */
   cells: GridCell[];
   width: number;
   height: number;
-  /** Radius of the largest circle that fits inside a cell. */
+  /** Radius of the largest circle that fits inside a cell (the start and end cells, at least). */
   inradius: number;
+  /** Indices into cells */
+  start: number;
+  end: number;
 }
 
 /**
@@ -63,7 +72,7 @@ function buildSquareGrid(width: number, height: number): Grid {
     }
   }
 
-  return { cells, width, height, inradius: 0.5 };
+  return { cells, width, height, inradius: 0.5, start: 0, end: cells.length - 1 };
 }
 
 /**
@@ -117,6 +126,8 @@ function buildHexGrid(width: number, height: number): Grid {
     width: w * (cols + 0.5),
     height: 2 * radius + (rows - 1) * rowPitch,
     inradius: w / 2,
+    start: 0,
+    end: cells.length - 1,
   };
 }
 
@@ -171,13 +182,16 @@ function buildTriangleGrid(width: number, height: number): Grid {
     width: ((cols + 1) * side) / 2,
     height: rows * rowHeight,
     inradius: rowHeight / 3,
+    start: 0,
+    end: cells.length - 1,
   };
 }
 
 /**
  * Build a grid that fits inside width x height, measured in square cells. A
- * square grid fills that area exactly; the others fit as many of their own
- * cells as they can and report the size they actually cover.
+ * square grid fills that area exactly; the other tilings fit as many of their
+ * own cells as they can, and the ring shapes scale to fit. All report the size
+ * they actually cover.
  */
 export function buildGrid(shape: GridShape, width: number, height: number): Grid {
   switch (shape) {
@@ -187,5 +201,7 @@ export function buildGrid(shape: GridShape, width: number, height: number): Grid
       return buildHexGrid(width, height);
     case 'triangle':
       return buildTriangleGrid(width, height);
+    default:
+      return buildConcentricGrid(OUTLINES[shape], width, height);
   }
 }

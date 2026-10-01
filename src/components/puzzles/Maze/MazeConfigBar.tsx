@@ -1,5 +1,27 @@
 import type { MazeConfig } from './index';
+import type { GridShape } from './grids';
 import styles from './MazeConfigBar.module.css';
+
+const GRID_SHAPES: { group: string; shapes: [GridShape, string][] }[] = [
+  {
+    group: 'Tiled',
+    shapes: [
+      ['square', 'Squares'],
+      ['hex', 'Hexagons'],
+      ['triangle', 'Triangles'],
+    ],
+  },
+  {
+    group: 'Rings',
+    shapes: [
+      ['circle', 'Circle'],
+      ['hexring', 'Hexagon'],
+      ['octring', 'Octagon'],
+      ['star', 'Star'],
+      ['heart', 'Heart'],
+    ],
+  },
+];
 
 interface MazeConfigBarProps {
   value: MazeConfig;
@@ -13,32 +35,22 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
 
   return (
     <div className={styles.configContainer}>
-      <div className={styles.buttonBar}>
-        <button
-          type="button"
-          className={`${styles.button} ${gridShape === 'square' ? styles.selected : ''}`}
-          onClick={() => onChange({ ...value, gridShape: 'square' })}
-          title="Square cells"
-        >
-          Square
-        </button>
-        <button
-          type="button"
-          className={`${styles.button} ${gridShape === 'hex' ? styles.selected : ''}`}
-          onClick={() => onChange({ ...value, gridShape: 'hex' })}
-          title="Hexagonal cells"
-        >
-          Hex
-        </button>
-        <button
-          type="button"
-          className={`${styles.button} ${gridShape === 'triangle' ? styles.selected : ''}`}
-          onClick={() => onChange({ ...value, gridShape: 'triangle' })}
-          title="Triangular cells"
-        >
-          Triangle
-        </button>
-      </div>
+      <select
+        className={styles.select}
+        value={gridShape}
+        onChange={(e) => onChange({ ...value, gridShape: e.target.value as GridShape })}
+        title="Grid shape"
+      >
+        {GRID_SHAPES.map(({ group, shapes }) => (
+          <optgroup key={group} label={group}>
+            {shapes.map(([shape, label]) => (
+              <option key={shape} value={shape}>
+                {label}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
       <div className={styles.buttonBar}>
         <button
           type="button"

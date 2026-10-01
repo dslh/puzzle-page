@@ -4,6 +4,17 @@
   gap: 4px;
 }
 
+.select {
+  padding: 6px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
 .buttonBar {
   display: flex;
   border: 2px solid #ddd;

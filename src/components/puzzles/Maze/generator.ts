@@ -77,8 +77,8 @@ export function generateMaze(
 
   // Use Growing Tree algorithm to carve paths
   const stack: number[] = [];
-  visited[0] = true;
-  stack.push(0);
+  visited[grid.start] = true;
+  stack.push(grid.start);
 
   while (stack.length > 0) {
     const randomValue = random ? random.next() : Math.random();
@@ -87,7 +87,7 @@ export function generateMaze(
         ? Math.floor((random ? random.next() : Math.random()) * stack.length)
         : stack.length - 1;
     const current = stack[index];
-    const neighbors = cells[current].neighbors.filter((n) => n !== -1 && !visited[n]);
+    const neighbors = [...new Set(cells[current].neighbors.filter((n) => n !== -1 && !visited[n]))];
 
     if (neighbors.length > 0) {
       // Choose random unvisited neighbor
@@ -128,7 +128,7 @@ export function generateMaze(
     width: grid.width,
     height: grid.height,
     inradius: grid.inradius,
-    start: 0,
-    end: cells.length - 1,
+    start: grid.start,
+    end: grid.end,
   };
 }
