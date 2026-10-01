@@ -4,7 +4,8 @@ import type { Grid, GridCell, Point } from './grids';
  * Concentric mazes: rings of cells around a centre cell, each ring a scaled
  * copy of one outline (a circle, a star, ...). Rays from the centre divide a
  * ring into sectors, and a sector splits in two as the rings get bigger, so
- * the cells stay roughly the same width all the way out.
+ * the cells stay roughly the same width all the way out. The maze runs from
+ * the top-left of the rim to the bottom-right, like the tiled ones.
  *
  * Any outline works as long as it is star-shaped about the origin: every ray
  * from the centre must cross it exactly once. A circle is drawn as a polygon
@@ -44,8 +45,8 @@ export const OUTLINES = {
   octring: regularPolygon(8, Math.PI / 8, 8),
   // Points reach 1 / 0.6 further than notches, so the notches go narrow
   star: starOutline(5, STAR_INNER_RADIUS, 0.6),
-  // The cleft is 0.44 of the way out; this is a 3-ring heart on a 4x4 Large
-  heart: heartOutline(0.5),
+  // The cleft is 0.6 of the way out; this is a 3-ring heart on a 4x4 Large
+  heart: heartOutline(0.65),
 } satisfies Record<string, OutlineSpec>;
 
 function regularPolygon(sides: number, rotation: number, symmetry: number): OutlineSpec {
@@ -69,24 +70,59 @@ function starOutline(points: number, innerRadius: number, ringWidth: number): Ou
 }
 
 /**
- * The classic parametric heart, centred a little below the middle. Every ray
- * from a point on the axis below the cleft crosses the outline once; this
- * point is the one that keeps the rings widest at the cleft.
+ * A heart built from two round lobes joined to the point by curves that leave
+ * each lobe along its tangent: convex all the way round except at the cleft,
+ * and with a shallow cleft so the rings don't pinch there. The lobes are unit
+ * circles centred at (±lobeOffset, 0), the point is at (0, -depth), and the
+ * lower curves leave the lobes `exit` below horizontal and meet at the point
+ * `halfAngle` either side of vertical.
+ *
+ * Centred at (0, centreY): every ray from there crosses the outline once, and
+ * it is the point on the axis that keeps the rings widest at the cleft.
  */
 function heartOutline(ringWidth: number): OutlineSpec {
-  const samples = 90;
-  const centreY = -3.5;
-  const vertices: Point[] = [];
-  for (let i = 0; i < samples; i++) {
-    const t = (TAU * i) / samples;
-    const x = 16 * Math.sin(t) ** 3;
-    const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-    // Flip y: the formula has the point at the bottom, screen y runs downwards
-    vertices.push({ x, y: -(y - centreY) });
+  const lobeOffset = 0.8;
+  const depth = 2.4;
+  const exit = (30 * Math.PI) / 180;
+  const halfAngle = (45 * Math.PI) / 180;
+  const centreY = -0.62;
+  const lobeSamples = 42;
+  const curveSamples = 18;
+
+  // Right half, in maths coordinates (y up): from the cleft over the lobe
+  const right: Point[] = [];
+  const cleftAngle = Math.acos(-lobeOffset);
+  for (let i = 0; i <= lobeSamples; i++) {
+    const a = cleftAngle - ((cleftAngle + exit) * i) / lobeSamples;
+    right.push({ x: lobeOffset + Math.cos(a), y: Math.sin(a) });
   }
-  const radius = Math.max(...vertices.map((v) => Math.hypot(v.x, v.y)));
+  // Then down to the point along a quadratic Bezier, whose control point is
+  // where the lobe's tangent meets the line leaving the point
+  const p0 = right[right.length - 1];
+  const d0 = { x: -Math.sin(exit), y: -Math.cos(exit) };
+  const p2 = { x: 0, y: -depth };
+  const d2 = { x: Math.sin(halfAngle), y: Math.cos(halfAngle) };
+  const det = -d0.x * d2.y + d0.y * d2.x;
+  const s = (-(p2.x - p0.x) * d2.y + (p2.y - p0.y) * d2.x) / det;
+  const p1 = { x: p0.x + s * d0.x, y: p0.y + s * d0.y };
+  for (let i = 1; i <= curveSamples; i++) {
+    const t = i / curveSamples;
+    const u = 1 - t;
+    right.push({
+      x: u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x,
+      y: u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y,
+    });
+  }
+
+  // Mirror for the left half, leaving out the shared cleft and point
+  const vertices = [...right];
+  for (let i = right.length - 2; i >= 1; i--) vertices.push({ x: -right[i].x, y: right[i].y });
+
+  // Move the origin to the centre, flip to screen coordinates, scale to radius 1
+  const shifted = vertices.map((v) => ({ x: v.x, y: -(v.y - centreY) }));
+  const radius = Math.max(...shifted.map((v) => Math.hypot(v.x, v.y)));
   return {
-    vertices: vertices.map((v) => ({ x: v.x / radius, y: v.y / radius })),
+    vertices: shifted.map((v) => ({ x: v.x / radius, y: v.y / radius })),
     symmetry: 2,
     ringWidth,
   };
@@ -218,7 +254,8 @@ export function buildConcentricGrid(spec: OutlineSpec, width: number, height: nu
 
   // Sectors of the first ring; as many as make the cells about FIRST_RING_WIDTH
   // wide, rounded to the outline's symmetry. Angles are measured from half a
-  // sector before straight down, so the bottom is in the middle of a cell.
+  // sector before straight down, so the top and bottom (a star's point, a
+  // heart's cleft) sit in the middle of a cell rather than on a wall.
   const ideal = (unit.perimeter() * 2 * step) / FIRST_RING_WIDTH;
   const sectors = Math.max(3, Math.ceil(ideal / spec.symmetry) * spec.symmetry);
   const outline = new Outline(spec.vertices, Math.PI / 2 - Math.PI / sectors);
@@ -323,19 +360,25 @@ export function buildConcentricGrid(spec: OutlineSpec, width: number, height: nu
     });
   });
 
-  // Finish in the outermost ring, as near straight down from the centre as the
-  // outline allows: a cell in a sharp point (the bottom of a heart) has no room
-  // for a marker. Such cells have well under half the room of the roomiest;
-  // the cells either side of the point have about half or more.
+  // Start and finish on the rim, as near top-left and bottom-right as the
+  // outline allows: a cell in a sharp point (the bottom of a heart) has no
+  // room for a marker. Such cells have well under half the room of the
+  // roomiest; the cells either side of a point have about half or more.
   const outerRing = rings[rings.length - 1];
-  const bottom = Math.PI / sectors;
   const room = outerRing.map((s) => clearance(cells[s.cell].center, cells[s.cell].corners));
   const roomiest = Math.max(...room);
-  const end = outerRing
-    .filter((_, i) => room[i] >= 0.45 * roomiest)
-    .map((s) => ({ cell: s.cell, offset: Math.abs((s.from + s.to) / 2 - bottom) }))
-    .reduce((a, b) => (b.offset < a.offset ? b : a)).cell;
-  const endInradius = clearance(cells[end].center, cells[end].corners);
+  const rimCell = (direction: number): number => {
+    const target = outline.angleOf({ x: Math.cos(direction), y: Math.sin(direction) });
+    return outerRing
+      .filter((_, i) => room[i] >= 0.45 * roomiest)
+      .map((s) => {
+        const away = Math.abs((s.from + s.to) / 2 - target);
+        return { cell: s.cell, away: Math.min(away, TAU - away) };
+      })
+      .reduce((a, b) => (b.away < a.away ? b : a)).cell;
+  };
+  const start = rimCell((-3 * Math.PI) / 4);
+  const end = rimCell(Math.PI / 4);
 
   // Shift everything so the bounding box starts at the origin
   const shift = (p: Point): Point => ({ x: p.x - bounds.x * scale, y: p.y - bounds.y * scale });
@@ -348,8 +391,8 @@ export function buildConcentricGrid(spec: OutlineSpec, width: number, height: nu
     cells,
     width: bounds.w * scale,
     height: bounds.h * scale,
-    inradius: Math.min(step * unit.inradius(), endInradius),
-    start: 0,
+    inradius: Math.min(clearance(cells[start].center, cells[start].corners), clearance(cells[end].center, cells[end].corners)),
+    start,
     end,
   };
 }
