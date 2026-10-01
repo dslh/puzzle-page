@@ -406,7 +406,7 @@ default width×height in grid cells.
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
 | Letter Formation | `letterformation` | 6×3 | both (min height 3) | letter, stroke guides, trace letters per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
-| Take Away | `takeaway` | 7×4 | both (min width 4) | blank answer / taken / mixed, worked example |
+| Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 
 Three of these carry notes worth reading before editing them:
 

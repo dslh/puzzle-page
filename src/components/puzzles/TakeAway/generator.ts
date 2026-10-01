@@ -1,4 +1,5 @@
 import { ANIMAL_EMOJI, VEHICLE_EMOJI } from '../Counting/generator';
+import { CELL_SIZE_MM } from '../../../types/puzzle';
 
 // Take Away puzzle data structures
 
@@ -17,11 +18,21 @@ export interface TakeAwayProblem {
   blank: 'answer' | 'taken';
 }
 
-/** Emoji a row can afford per grid cell of puzzle width. */
-const EMOJI_PER_CELL = 2;
+/** From this many emoji up, rows are split into fives for counting in chunks. */
+export const GROUP_FROM = 10;
+export const GROUP_SIZE = 5;
 
-/** Grid cells reserved on the right of each row for `7 − 4 = ▢`. */
-const EQUATION_CELLS = 2.5;
+/*
+ * Row layout in mm, measured from TakeAway.module.css in the browser. Change
+ * them together: the starting-number limit is whatever fits.
+ */
+const EMOJI_SLOT_MM = 7;
+const GROUP_GAP_MM = 2.5;
+/** `9 − 5 = ▢` */
+const EQUATION_MM = 26.6;
+const DIGIT_MM = 3.6;
+/** Container and row padding, row border, and the gap before the equation. */
+const ROW_OVERHEAD_MM = 13.6;
 
 /** How many starting numbers a row can be drawn from, ending at the maximum. */
 const START_RANGE = 6;
@@ -35,13 +46,26 @@ const TAKE_ZERO_CHANCE = 1 / 20;
 
 const EMOJI = [...ANIMAL_EMOJI, ...VEHICLE_EMOJI];
 
+function rowWidthMm(start: number): number {
+  const groupGaps = start >= GROUP_FROM ? Math.floor((start - 1) / GROUP_SIZE) : 0;
+  // A two-digit start can also put two digits in the middle number
+  const extraDigits = start >= 10 ? 2 : 0;
+  return ROW_OVERHEAD_MM
+    + start * EMOJI_SLOT_MM
+    + groupGaps * GROUP_GAP_MM
+    + EQUATION_MM
+    + extraDigits * DIGIT_MM;
+}
+
 /**
- * Largest starting number for a puzzle this wide: whatever fits beside the
- * equation. 9 at the default width of 7, rising by two per extra cell, so
+ * Largest starting number for a puzzle this wide: as many emoji as fit beside
+ * the equation. 9 at the default width of 6, up to 19 at full width, so
  * widening the puzzle is how it gets harder.
  */
 export function maxStartForWidth(gridWidth: number): number {
-  return Math.max(2, Math.floor(EMOJI_PER_CELL * (gridWidth - EQUATION_CELLS)));
+  let start = 2;
+  while (rowWidthMm(start + 1) <= gridWidth * CELL_SIZE_MM) start++;
+  return start;
 }
 
 // Seeded random number generator for reproducible puzzles

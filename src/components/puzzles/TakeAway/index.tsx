@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { generateTakeAway, type BlankMode } from './generator';
+import { generateTakeAway, GROUP_FROM, GROUP_SIZE, type BlankMode } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './TakeAway.module.css';
 
@@ -8,15 +8,8 @@ export interface TakeAwayConfig {
   workedExample: boolean;
 }
 
-/**
- * From this many emoji up, rows are split into fives so they can be counted in
- * chunks rather than one long line. Below it the extra gaps are just noise.
- */
-const GROUP_FROM = 10;
-const GROUP_SIZE = 5;
-
 export default function TakeAway({
-  gridWidth = 7,
+  gridWidth = 6,
   gridHeight = 4,
   seed,
   config,

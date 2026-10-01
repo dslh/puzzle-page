@@ -29,13 +29,16 @@
   min-width: 0;
 }
 
-/* Fixed-width slots so the same count lines up from row to row */
+/*
+ * Fixed-width slots so the same count lines up from row to row. Row sizes here
+ * feed the starting-number limit - see the mm constants in generator.ts.
+ */
 .emoji {
   position: relative;
-  width: 7.5mm;
+  width: 7mm;
   flex-shrink: 0;
   text-align: center;
-  font-size: 6.5mm;
+  font-size: 6mm;
   line-height: 1;
 }
 

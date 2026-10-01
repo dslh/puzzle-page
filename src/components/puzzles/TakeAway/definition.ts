@@ -9,8 +9,8 @@ export const puzzleDefinition: PuzzleDefinition<TakeAwayConfig> = {
   icon: '➖',
   component: TakeAway,
   configComponent: TakeAwayConfigBar,
-  // Width sets the difficulty: 7 cells gives starting numbers up to 9
-  defaultWidth: 7,
+  // Width sets the difficulty: 6 cells gives starting numbers up to 9
+  defaultWidth: 6,
   defaultHeight: 4,
   defaultConfig: {
     blankMode: 'answer',
