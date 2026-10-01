@@ -26,12 +26,19 @@ class SeededRandom {
   }
 }
 
-// Child-friendly emoji pool
+// Child-friendly emoji, grouped so other puzzles can borrow the parts they want
+// (Take Away uses the animals and vehicles).
+export const FRUIT_EMOJI = ['🍎', '🍊', '🍋', '🍇', '🍓', '🍌', '🍉'];
+export const VEHICLE_EMOJI = ['🚗', '🚌', '🚀', '✈️', '🚂', '🚲', '🚜', '🚒', '🚁', '⛵'];
+export const ANIMAL_EMOJI = [
+  '🐶', '🐱', '🐰', '🐻', '🐸', '🦋', '🐷', '🐮', '🐵', '🦁', '🐘', '🐢', '🐟', '🦆',
+];
+
 const EMOJI_POOL = [
-  '🍎', '🍊', '🍋', '🍇', '🍓', '🍌', '🍉',
+  ...FRUIT_EMOJI,
   '🌟', '⭐', '🌙', '☀️',
-  '🚗', '🚌', '🚀', '✈️', '🚂',
-  '🐶', '🐱', '🐰', '🐻', '🐸', '🦋',
+  ...VEHICLE_EMOJI,
+  ...ANIMAL_EMOJI,
   '🌸', '🌺', '🌻', '🌷',
   '🎈', '🎀', '🎁',
   '⚽', '🏀', '🎾',

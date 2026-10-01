@@ -38,6 +38,7 @@ Live at https://puzzle-page.fly.dev
 | Counting | - |
 | Ordering | numbers or emoji |
 | Sums | addition, subtraction or both |
+| Take Away (cross out pictures to subtract) | blank the answer or the number taken, worked example |
 | Chess Puzzle | difficulty, mate or capture |
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |

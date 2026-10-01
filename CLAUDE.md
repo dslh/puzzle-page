@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 17 puzzle types - see **Existing Puzzles** below.
+There are currently 19 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -404,7 +404,9 @@ default width×height in grid cells.
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
+| Letter Formation | `letterformation` | 6×3 | both (min height 3) | letter, stroke guides, trace letters per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
+| Take Away | `takeaway` | 7×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 
 Three of these carry notes worth reading before editing them:
 

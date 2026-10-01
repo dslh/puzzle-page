@@ -16,6 +16,7 @@ import { puzzleDefinition as handwriting } from './Handwriting/definition';
 import { puzzleDefinition as colourBySightWord } from './ColourBySightWord/definition';
 import { puzzleDefinition as letterFormation } from './LetterFormation/definition';
 import { puzzleDefinition as sums } from './Sums/definition';
+import { puzzleDefinition as takeAway } from './TakeAway/definition';
 
 /**
  * Registry of all available puzzle types
@@ -40,6 +41,7 @@ export const PUZZLE_DEFINITIONS = [
   colourBySightWord,
   letterFormation,
   sums,
+  takeAway,
 ] as const;
 
 /**

@@ -1,0 +1,128 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+  box-sizing: border-box;
+  padding: 2mm;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 2mm 3mm;
+  flex: 1;
+  min-height: 0;
+  gap: 3mm;
+}
+
+.emojis {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Fixed-width slots so the same count lines up from row to row */
+.emoji {
+  position: relative;
+  width: 7.5mm;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 6.5mm;
+  line-height: 1;
+}
+
+/* Gap between groups of five in long rows */
+.groupStart {
+  margin-left: 2.5mm;
+}
+
+/* Worked example: a hand-drawn-ish X over each taken emoji */
+.crossed::before,
+.crossed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0.7mm;
+  margin-top: -0.35mm;
+  background: #333;
+  border-radius: 0.35mm;
+}
+
+.crossed::before {
+  transform: rotate(45deg);
+}
+
+.crossed::after {
+  transform: rotate(-45deg);
+}
+
+.equation {
+  display: flex;
+  align-items: center;
+  gap: 1.5mm;
+  flex-shrink: 0;
+}
+
+.number {
+  font-size: 6.5mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #222;
+}
+
+.operator {
+  font-size: 5.5mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #555;
+}
+
+.answerBox {
+  width: 7mm;
+  height: 7mm;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed #999;
+  border-radius: 2px;
+  background: white;
+}
+
+/* The worked example's answer, pencilled in */
+.filledIn {
+  font-size: 6mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #777;
+}
+
+/* Print-specific styles */
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .crossed::before,
+  .crossed::after,
+  .answerBox {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
