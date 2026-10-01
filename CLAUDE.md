@@ -407,7 +407,7 @@ default width×height in grid cells.
 | Letter Formation | `letterformation` | 6×3 | both (min height 3) | letter, stroke guides, trace letters per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
-| More or Less | `moreorless` | 6×7 | both (min 5×3) | layout (scatter / rows / clumps / mixed), worked example |
+| More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 
 Three of these carry notes worth reading before editing them:
 

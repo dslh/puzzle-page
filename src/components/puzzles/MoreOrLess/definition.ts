@@ -9,12 +9,11 @@ export const puzzleDefinition: PuzzleDefinition<MoreOrLessConfig> = {
   icon: '⚖️',
   component: MoreOrLess,
   configComponent: MoreOrLessConfigBar,
-  // Width sets the difficulty: 6 cells gives up to 9 a side. Height is one row
-  // for the key plus two per problem.
-  defaultWidth: 6,
-  defaultHeight: 7,
+  // Width sets the difficulty: 8 cells gives up to 8 a side. Height is one row
+  // for the key plus one per problem.
+  defaultWidth: 8,
+  defaultHeight: 5,
   defaultConfig: {
-    layout: 'mixed',
     workedExample: true,
   },
   resizable: {
@@ -22,7 +21,7 @@ export const puzzleDefinition: PuzzleDefinition<MoreOrLessConfig> = {
     height: true,
     minWidth: 5,
     maxWidth: GRID_COLS,
-    minHeight: 3,
+    minHeight: 2,
     maxHeight: GRID_ROWS,
   },
 };

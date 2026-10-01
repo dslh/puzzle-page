@@ -39,7 +39,7 @@ Live at https://puzzle-page.fly.dev
 | Ordering | numbers or emoji |
 | Sums | addition, subtraction or both |
 | Take Away (cross out pictures to subtract) | blank the answer or the number taken, worked example |
-| More or Less (compare two groups with > = <) | layout of the pictures, worked example |
+| More or Less (compare two groups with > = <) | worked example |
 | Chess Puzzle | difficulty, mate or capture |
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |

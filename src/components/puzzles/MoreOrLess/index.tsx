@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import { generateMoreOrLess, type LayoutMode, type Side } from './generator';
+import { generateMoreOrLess, type Side } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './MoreOrLess.module.css';
 
 export interface MoreOrLessConfig {
-  layout: LayoutMode;
   workedExample: boolean;
 }
 
@@ -26,12 +25,11 @@ export default function MoreOrLess({
   seed,
   config,
 }: PuzzleProps<MoreOrLessConfig>) {
-  const layout = config?.layout ?? 'mixed';
   const workedExample = config?.workedExample ?? true;
 
   const puzzle = useMemo(
-    () => generateMoreOrLess(gridWidth, gridHeight, seed, layout, workedExample),
-    [gridWidth, gridHeight, seed, layout, workedExample]
+    () => generateMoreOrLess(gridWidth, gridHeight, seed, workedExample),
+    [gridWidth, gridHeight, seed, workedExample]
   );
 
   return (

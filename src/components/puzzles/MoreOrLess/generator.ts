@@ -8,10 +8,10 @@ export type Relation = '>' | '<' | '=';
 /**
  * How one side's emoji are arranged. All of them spread across the whole side,
  * so a bigger group can't be spotted by how much room it takes up - it has to
- * be counted. `mixed` picks per side, so the two halves of a row rarely match.
+ * be counted. Each row gives its two sides different layouts, so the halves
+ * never look alike.
  */
 export type Layout = 'scatter' | 'rows' | 'clusters';
-export type LayoutMode = Layout | 'mixed';
 
 /** An emoji's centre, in mm from the top-left of its side. */
 export interface Position {
@@ -52,19 +52,14 @@ const ROW_BORDER_MM = 0.3;
 /** The answer box plus the gap either side of it. */
 const MIDDLE_MM = 10 + 2 * 4;
 
-/** Each problem takes two grid rows; the key takes one more. */
-const ROWS_PER_PROBLEM = 2;
-
 /** Emoji glyph size, and how close two centres may sit without touching. */
-export const EMOJI_MM = 6.5;
-const MIN_SPACING_MM = 7.5;
-/** Lattice slot for scatter's fallback and for working out the count limit. */
-const SLOT_MM = 8.5;
+export const EMOJI_MM = 6;
+const MIN_SPACING_MM = 7;
 /**
- * Share of the lattice the biggest group may fill. Any denser and every layout
+ * Share of the packed lattice (see `latticeSlots`) the biggest group may fill. Any denser and every layout
  * turns into a neat grid, which is easy to compare without counting.
  */
-const MAX_FILL = 0.6;
+const MAX_FILL = 0.5;
 
 const EQUAL_CHANCE = 1 / 4;
 /**
@@ -119,8 +114,9 @@ class SeededRandom {
   }
 }
 
+/** One problem per grid row, under the key's row. */
 export function problemCountForHeight(gridHeight: number): number {
-  return Math.max(1, Math.floor((gridHeight - 1) / ROWS_PER_PROBLEM));
+  return Math.max(1, gridHeight - 1);
 }
 
 function sideWidthMm(gridWidth: number): number {
@@ -134,14 +130,14 @@ function sideHeightMm(gridHeight: number, problemCount: number): number {
 }
 
 /**
- * Most emoji one side can hold at this width. Worked out at the nominal two
- * grid rows per problem, so a taller puzzle gets roomier rows rather than
- * bigger numbers: 9 at the default width of 6, up to 16 at full width.
+ * Most emoji one side can hold at this width: enough room is left that the
+ * random layouts don't end up as a packed grid. Worked out at the shortest a
+ * row gets, so the limit depends only on width: 4 at width 5, 8 at the default
+ * width of 8, 11 at full width.
  */
 export function maxCountForWidth(gridWidth: number): number {
-  const nominalHeight = ROWS_PER_PROBLEM * CELL_SIZE_MM - STACK_GAP_MM - 2 * ROW_PAD_Y_MM - 2 * ROW_BORDER_MM;
-  const slots = Math.floor(sideWidthMm(gridWidth) / SLOT_MM) * Math.floor(nominalHeight / SLOT_MM);
-  return Math.max(3, Math.floor(slots * MAX_FILL));
+  const shortestRow = CELL_SIZE_MM - STACK_GAP_MM - 2 * ROW_PAD_Y_MM - 2 * ROW_BORDER_MM;
+  return Math.max(3, Math.floor(latticeSlots(sideWidthMm(gridWidth), shortestRow).length * MAX_FILL));
 }
 
 // --- Pairs ---
@@ -209,19 +205,29 @@ function pickEmoji(rng: SeededRandom, problemCount: number): Array<[string, stri
 const fits = (p: Position, placed: Position[]) =>
   placed.every(q => Math.hypot(p.x - q.x, p.y - q.y) >= MIN_SPACING_MM);
 
-/** Even grid of slots with each emoji nudged within its slot. Always fits. */
+/**
+ * Every spot in the tightest packing that fits: lines of emoji at minimum
+ * spacing, alternate lines shifted half a step so they can sit closer
+ * together. A one-row box takes two such lines, zig-zagged.
+ */
+function latticeSlots(width: number, height: number): Position[] {
+  const margin = EMOJI_MM / 2;
+  const lineGap = MIN_SPACING_MM * Math.sqrt(3) / 2;
+  const lines = Math.floor((height - EMOJI_MM) / lineGap) + 1;
+  const dy = lines > 1 ? (height - EMOJI_MM) / (lines - 1) : 0;
+  const slots: Position[] = [];
+  for (let line = 0; line < lines; line++) {
+    const y = lines > 1 ? margin + line * dy : height / 2;
+    for (let x = margin + (line % 2) * MIN_SPACING_MM / 2; x <= width - margin; x += MIN_SPACING_MM) {
+      slots.push({ x, y });
+    }
+  }
+  return slots;
+}
+
+/** A random pick of lattice spots. Always fits, so it's the last resort. */
 function latticeLayout(rng: SeededRandom, count: number, width: number, height: number): Position[] {
-  const cols = Math.max(1, Math.floor(width / SLOT_MM));
-  const rows = Math.max(1, Math.floor(height / SLOT_MM));
-  const cellW = width / cols;
-  const cellH = height / rows;
-  const slackX = Math.max(0, (cellW - MIN_SPACING_MM) / 2);
-  const slackY = Math.max(0, (cellH - MIN_SPACING_MM) / 2);
-  const slots = rng.shuffle(Array.from({ length: cols * rows }, (_, i) => i)).slice(0, count);
-  return slots.map(slot => ({
-    x: (slot % cols + 0.5) * cellW + rng.nextFloat(-slackX, slackX),
-    y: (Math.floor(slot / cols) + 0.5) * cellH + rng.nextFloat(-slackY, slackY),
-  }));
+  return rng.shuffle(latticeSlots(width, height)).slice(0, count);
 }
 
 /**
@@ -266,26 +272,22 @@ function scatterLayout(rng: SeededRandom, count: number, width: number, height: 
 
 /**
  * Two lines with random gaps, so a line that looks full might hold fewer than
- * one that looks sparse. Each line spans the side's width.
+ * one that looks sparse. In a one-row box the lines sit close enough that they
+ * zig-zag around each other.
  */
 function rowsLayout(rng: SeededRandom, count: number, width: number, height: number): Position[] {
-  const slotW = MIN_SPACING_MM;
-  const perLine = Math.floor(width / slotW);
-  if (count > 2 * perLine || height < 2 * MIN_SPACING_MM) return scatterLayout(rng, count, width, height);
-
-  const minTop = Math.max(count > 1 ? 1 : 0, count - perLine);
-  const maxTop = Math.min(perLine, count - (count > 1 ? 1 : 0));
-  const top = rng.nextIntRange(minTop, maxTop);
-  const lineY = [height * 0.28, height * 0.72];
-  const wobbleY = Math.min(1.5, (lineY[1] - lineY[0] - MIN_SPACING_MM) / 2);
-  const slack = (width / perLine - slotW) / 2;
-
-  return [top, count - top].flatMap((n, line) =>
-    rng.shuffle(Array.from({ length: perLine }, (_, i) => i)).slice(0, n).map(slot => ({
-      x: (slot + 0.5) * (width / perLine) + rng.nextFloat(-slack, slack),
-      y: lineY[line] + rng.nextFloat(-wobbleY, wobbleY),
-    }))
-  );
+  const margin = EMOJI_MM / 2;
+  const lineY = [Math.max(margin, height * 0.28), Math.min(height - margin, height * 0.72)];
+  const top = count > 1 ? rng.nextIntRange(1, count - 1) : count;
+  return throwDarts(
+    count,
+    i => ({
+      x: rng.nextFloat(margin, width - margin),
+      y: lineY[i < top ? 0 : 1] + rng.nextFloat(-1, 1),
+    }),
+    width,
+    height
+  ) ?? scatterLayout(rng, count, width, height);
 }
 
 /**
@@ -326,8 +328,7 @@ function clustersLayout(rng: SeededRandom, count: number, width: number, height:
 
 const LAYOUTS: Layout[] = ['scatter', 'rows', 'clusters'];
 
-function placeSide(rng: SeededRandom, emoji: string, count: number, mode: LayoutMode, width: number, height: number): Side {
-  const layout = mode === 'mixed' ? LAYOUTS[rng.nextInt(LAYOUTS.length)] : mode;
+function placeSide(rng: SeededRandom, emoji: string, count: number, layout: Layout, width: number, height: number): Side {
   const positions =
     layout === 'rows' ? rowsLayout(rng, count, width, height)
     : layout === 'clusters' ? clustersLayout(rng, count, width, height)
@@ -336,7 +337,7 @@ function placeSide(rng: SeededRandom, emoji: string, count: number, mode: Layout
 }
 
 /**
- * One problem per two grid rows, no two pairs alike. One random row has a
+ * One problem per grid row, no two pairs alike. One random row has a
  * side at the most the width allows, so a wider puzzle reliably asks for more.
  * With `workedExample`, the first row is kept unequal since it's there to show
  * which way the symbol points.
@@ -345,7 +346,6 @@ export function generateMoreOrLess(
   gridWidth: number,
   gridHeight: number,
   seed: number,
-  layoutMode: LayoutMode,
   workedExample: boolean
 ): MoreOrLessPuzzle {
   const rng = new SeededRandom(seed);
@@ -376,11 +376,14 @@ export function generateMoreOrLess(
     pairs[row] = pair;
   }
 
-  const problems = pairs.map((pair, i) => ({
-    left: placeSide(rng, emoji[i][0], pair.left, layoutMode, sideWidth, sideHeight),
-    right: placeSide(rng, emoji[i][1], pair.right, layoutMode, sideWidth, sideHeight),
-    relation: relationOf(pair),
-  }));
+  const problems = pairs.map((pair, i) => {
+    const [leftLayout, rightLayout] = rng.shuffle(LAYOUTS);
+    return {
+      left: placeSide(rng, emoji[i][0], pair.left, leftLayout, sideWidth, sideHeight),
+      right: placeSide(rng, emoji[i][1], pair.right, rightLayout, sideWidth, sideHeight),
+      relation: relationOf(pair),
+    };
+  });
 
   return { problems, sideWidth, sideHeight };
 }
