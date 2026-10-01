@@ -15,6 +15,7 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     gridShape: 'square',
     cellSizeRatio: 2,
     branchiness: 'medium',
+    theme: 'random',
   },
   resizable: {
     width: true,

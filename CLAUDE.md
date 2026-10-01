@@ -388,7 +388,7 @@ default width×height in grid cells.
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness |
+| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, start/finish pair |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |

@@ -1,5 +1,6 @@
 import type { MazeConfig } from './index';
 import type { GridShape } from './grids';
+import { MAZE_THEMES, themeId } from './themes';
 import styles from './MazeConfigBar.module.css';
 
 const GRID_SHAPES: { group: string; shapes: [GridShape, string][] }[] = [
@@ -36,6 +37,7 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
   const gridShape = value.gridShape;
   const ratio = value.cellSizeRatio;
   const branchiness = value.branchiness;
+  const theme = value.theme;
 
   return (
     <div className={styles.configContainer}>
@@ -107,6 +109,19 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
           Branchy
         </button>
       </div>
+      <select
+        className={styles.select}
+        value={theme}
+        onChange={(e) => onChange({ ...value, theme: e.target.value })}
+        title="Start and finish"
+      >
+        <option value="random">Random pair</option>
+        {MAZE_THEMES.map((t) => (
+          <option key={themeId(t)} value={themeId(t)}>
+            {t.start} → {t.end}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

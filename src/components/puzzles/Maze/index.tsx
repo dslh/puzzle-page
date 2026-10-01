@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { generateMaze, type Maze as MazeType } from './generator';
 import type { GridShape, Point } from './grids';
+import { MAZE_THEMES, themeId } from './themes';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Maze.module.css';
 
@@ -8,42 +9,9 @@ export interface MazeConfig {
   gridShape: GridShape;
   cellSizeRatio: 2 | 3 | 4;
   branchiness: 'low' | 'medium' | 'high';
+  /** Who starts and where they are going: a themeId, or 'random' to let the seed pick. */
+  theme: string;
 }
-
-interface MazeTheme {
-  start: string;
-  end: string;
-  startColor: string;
-  endColor: string;
-}
-
-const MAZE_THEMES: MazeTheme[] = [
-  { start: '🐭', end: '🧀', startColor: '#90EE90', endColor: '#FFB6C1' },
-  { start: '🐕', end: '🦴', startColor: '#DEB887', endColor: '#F5F5DC' },
-  { start: '🐝', end: '🌸', startColor: '#FFD700', endColor: '#FFB6C1' },
-  { start: '🐱', end: '🐭', startColor: '#FFA07A', endColor: '#D3D3D3' },
-  { start: '🚀', end: '🌙', startColor: '#87CEEB', endColor: '#F0E68C' },
-  { start: '👶', end: '👩', startColor: '#FFE4E1', endColor: '#FFB6C1' },
-  { start: '🐰', end: '🥕', startColor: '#F5F5DC', endColor: '#FFA500' },
-  { start: '🐻', end: '🍯', startColor: '#DEB887', endColor: '#FFD700' },
-  { start: '🐿️', end: '🌰', startColor: '#CD853F', endColor: '#8B4513' },
-  { start: '🐞', end: '🍃', startColor: '#FF6347', endColor: '#90EE90' },
-  { start: '🦋', end: '🌺', startColor: '#DA70D6', endColor: '#FF69B4' },
-  { start: '🐨', end: '🌿', startColor: '#C0C0C0', endColor: '#90EE90' },
-  { start: '🦊', end: '🏠', startColor: '#FF8C00', endColor: '#D2691E' },
-  { start: '🐧', end: '🐟', startColor: '#B0E0E6', endColor: '#87CEEB' },
-  { start: '🐌', end: '🥬', startColor: '#F4A460', endColor: '#90EE90' },
-  { start: '🦔', end: '🍎', startColor: '#DEB887', endColor: '#FF6347' },
-  { start: '🧚', end: '⭐', startColor: '#FFB6C1', endColor: '#FFD700' },
-  { start: '🐉', end: '💎', startColor: '#90EE90', endColor: '#87CEEB' },
-  { start: '🤖', end: '🔋', startColor: '#C0C0C0', endColor: '#90EE90' },
-  { start: '👻', end: '🏚️', startColor: '#F0F0F0', endColor: '#8B4513' },
-  { start: '🧙', end: '🔮', startColor: '#9370DB', endColor: '#DDA0DD' },
-  { start: '🚗', end: '🏁', startColor: '#FF6347', endColor: '#000000' },
-  { start: '⚽', end: '🥅', startColor: '#FFFFFF', endColor: '#90EE90' },
-  { start: '🔑', end: '🔓', startColor: '#FFD700', endColor: '#C0C0C0' },
-  { start: '🐜', end: '🧁', startColor: '#8B4513', endColor: '#FFB6C1' },
-];
 
 // Simple seeded random number generator
 function seededRandom(seed: number): number {
@@ -79,6 +47,7 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const gridShape = config?.gridShape ?? 'square';
   const ratio = config?.cellSizeRatio ?? 2;
   const branchiness = config?.branchiness ?? 'medium';
+  const themeChoice = config?.theme ?? 'random';
 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
@@ -88,9 +57,11 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   }, [width, height, seed, branchiness, gridShape]);
 
   const theme = useMemo(() => {
+    const chosen = MAZE_THEMES.find((t) => themeId(t) === themeChoice);
+    if (chosen) return chosen;
     const themeIndex = Math.floor(seededRandom(seed + 12345) * MAZE_THEMES.length);
     return MAZE_THEMES[themeIndex];
-  }, [seed]);
+  }, [seed, themeChoice]);
 
   // Calculate cell size dynamically based on available grid space
   // Grid cells are approximately 72px (19mm at 96 DPI)
