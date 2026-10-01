@@ -38,11 +38,16 @@ const ROW_OVERHEAD_MM = 13.6;
 const START_RANGE = 6;
 
 /**
- * Taking away nothing is worth meeting, but it's a trick question if it turns up
- * often. Zero *answers* need no special handling - they come up naturally
- * whenever the whole row is taken.
+ * Rows involving zero - taking nothing away, or taking everything - are worth
+ * meeting but turn into trick questions if they come up often. Every other row
+ * is "ordinary": something taken, something left.
  */
+type RowKind = 'ordinary' | 'takeZero' | 'zeroAnswer';
 const TAKE_ZERO_CHANCE = 1 / 20;
+const ZERO_ANSWER_CHANCE = 1 / 15;
+
+/** Tries at drawing a row not already on the page before picking from what's left. */
+const MAX_DRAWS = 20;
 
 const EMOJI = [...ANIMAL_EMOJI, ...VEHICLE_EMOJI];
 
@@ -99,10 +104,67 @@ class SeededRandom {
   }
 }
 
+interface Sum {
+  start: number;
+  take: number;
+}
+
+const sumKey = ({ start, take }: Sum) => `${start}-${take}`;
+
+function kindOf({ start, take }: Sum): RowKind {
+  if (take === 0) return 'takeZero';
+  if (take === start) return 'zeroAnswer';
+  return 'ordinary';
+}
+
+function pickKind(rng: SeededRandom): RowKind {
+  const r = rng.next();
+  if (r < TAKE_ZERO_CHANCE) return 'takeZero';
+  if (r < TAKE_ZERO_CHANCE + ZERO_ANSWER_CHANCE) return 'zeroAnswer';
+  return 'ordinary';
+}
+
+function drawSum(
+  rng: SeededRandom,
+  kind: RowKind,
+  minStart: number,
+  maxStart: number,
+  fixedStart?: number
+): Sum {
+  // An ordinary row needs at least 2: one to take and one to leave
+  const start = fixedStart ?? rng.nextIntRange(kind === 'ordinary' ? Math.max(2, minStart) : minStart, maxStart);
+  if (kind === 'takeZero') return { start, take: 0 };
+  if (kind === 'zeroAnswer') return { start, take: start };
+  return { start, take: rng.nextIntRange(1, start - 1) };
+}
+
 /**
- * Generate one problem per row. Each row gets a different emoji until the pool
- * runs out. With `workedExample`, the first row is kept ordinary - something
- * taken, something left - since it's there to show how the others work.
+ * A sum not yet on the page, ordinary ones first. Only reached when random
+ * draws keep hitting repeats - a narrow, tall puzzle can use up every ordinary
+ * sum, and then the rest have to involve zero.
+ */
+function pickUnused(
+  rng: SeededRandom,
+  used: Set<string>,
+  minStart: number,
+  maxStart: number,
+  fixedStart?: number
+): Sum | undefined {
+  const unused: Sum[] = [];
+  for (let start = fixedStart ?? minStart; start <= (fixedStart ?? maxStart); start++) {
+    for (let take = 0; take <= start; take++) {
+      if (!used.has(sumKey({ start, take }))) unused.push({ start, take });
+    }
+  }
+  const shuffled = rng.shuffle(unused);
+  return shuffled.find(sum => kindOf(sum) === 'ordinary') ?? shuffled[0];
+}
+
+/**
+ * Generate one problem per row, no two alike. One random row always starts at
+ * the most the width allows, so a wider puzzle reliably asks for more. With
+ * `workedExample`, the first row is kept ordinary since it's there to show how
+ * the others work. Each row gets a different emoji until the pool runs out.
  */
 export function generateTakeAway(
   rowCount: number,
@@ -116,17 +178,35 @@ export function generateTakeAway(
   const minStart = Math.max(1, maxStart - START_RANGE + 1);
   const emoji = rng.shuffle(EMOJI);
 
-  return Array.from({ length: rowCount }, (_, i) => {
-    const isExample = workedExample && i === 0;
+  // The full-size row is drawn first so it can't find its sums already taken
+  const fullRow = rng.nextInt(rowCount);
+  const rowOrder = [fullRow, ...Array.from({ length: rowCount }, (_, i) => i).filter(i => i !== fullRow)];
 
-    const start = rng.nextIntRange(isExample ? Math.max(2, minStart) : minStart, maxStart);
-    const take = isExample
-      ? rng.nextIntRange(1, start - 1)
-      : rng.next() < TAKE_ZERO_CHANCE ? 0 : rng.nextIntRange(1, start);
-    const blank = blankMode === 'mixed'
-      ? (rng.next() < 0.5 ? 'answer' : 'taken')
-      : blankMode;
+  const used = new Set<string>();
+  const sums: Sum[] = [];
+  for (const row of rowOrder) {
+    const isExample = workedExample && row === 0;
+    const kind = isExample || row === fullRow ? 'ordinary' : pickKind(rng);
+    const fixedStart = row === fullRow ? maxStart : undefined;
 
-    return { emoji: emoji[i % emoji.length], start, take, answer: start - take, blank };
-  });
+    let sum: Sum | undefined;
+    for (let i = 0; i < MAX_DRAWS && !sum; i++) {
+      const drawn = drawSum(rng, kind, minStart, maxStart, fixedStart);
+      if (!used.has(sumKey(drawn))) sum = drawn;
+    }
+    // Repeating beats failing if every sum is used, though 14 rows never get there
+    sum ??= pickUnused(rng, used, minStart, maxStart, fixedStart)
+      ?? drawSum(rng, kind, minStart, maxStart, fixedStart);
+
+    used.add(sumKey(sum));
+    sums[row] = sum;
+  }
+
+  return sums.map(({ start, take }, i) => ({
+    emoji: emoji[i % emoji.length],
+    start,
+    take,
+    answer: start - take,
+    blank: blankMode === 'mixed' ? (rng.next() < 0.5 ? 'answer' : 'taken') : blankMode,
+  }));
 }
