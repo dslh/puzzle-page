@@ -388,7 +388,7 @@ default width×height in grid cells.
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, start/finish pair |
+| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, straight / curvy walls, start/finish pair |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
@@ -423,7 +423,9 @@ Three of these carry notes worth reading before editing them:
   `concentric.ts`, which takes any outline that is star-shaped about the origin;
   a new ring shape is just an outline. Square mazes consume the RNG in the same
   order as before the shapes were added (neighbours listed top, right, bottom,
-  left), so a seed still gives the same maze - keep that order.
+  left), so a seed still gives the same maze - keep that order. Curvy walls are
+  a drawing option only (`curves.ts`): the same walls, joined into runs and
+  drawn as corner-cutting curves, on any grid shape.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in

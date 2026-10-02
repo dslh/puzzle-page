@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { curvePath, wallRuns } from './curves';
 import { generateMaze, type Maze as MazeType } from './generator';
 import type { GridShape, Point } from './grids';
 import { MAZE_THEMES, themeId } from './themes';
@@ -11,6 +12,8 @@ export interface MazeConfig {
   branchiness: 'low' | 'medium' | 'high';
   /** Who starts and where they are going: a themeId, or 'random' to let the seed pick. */
   theme: string;
+  /** Draw the walls as flowing curves rather than straight lines. */
+  curvyWalls: boolean;
 }
 
 // Simple seeded random number generator
@@ -48,6 +51,7 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const ratio = config?.cellSizeRatio ?? 2;
   const branchiness = config?.branchiness ?? 'medium';
   const themeChoice = config?.theme ?? 'random';
+  const curvyWalls = config?.curvyWalls ?? false;
 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
@@ -55,6 +59,8 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const maze: MazeType = useMemo(() => {
     return generateMaze(width, height, seed, branchiness, gridShape);
   }, [width, height, seed, branchiness, gridShape]);
+
+  const runs = useMemo(() => (curvyWalls ? wallRuns(maze.walls) : []), [maze, curvyWalls]);
 
   const theme = useMemo(() => {
     const chosen = MAZE_THEMES.find((t) => themeId(t) === themeChoice);
@@ -105,29 +111,46 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Draw cell backgrounds */}
-        <polygon points={outline(startCell.corners)} fill={theme.startColor} opacity={0.5} />
-        <polygon points={outline(endCell.corners)} fill={theme.endColor} opacity={0.5} />
+        {/* Draw cell backgrounds. Not with curvy walls: the tint is the cell's
+            straight-sided shape and would show past the rounded corners. */}
+        {!curvyWalls && (
+          <>
+            <polygon points={outline(startCell.corners)} fill={theme.startColor} opacity={0.5} />
+            <polygon points={outline(endCell.corners)} fill={theme.endColor} opacity={0.5} />
+          </>
+        )}
 
         {/* Draw walls */}
-        {maze.walls.map((wall, i) => {
-          const from = toPx(wall.from);
-          const to = toPx(wall.to);
+        {curvyWalls
+          ? runs.map((run, i) => (
+              <path
+                key={`run-${i}`}
+                d={curvePath({ ...run, points: run.points.map(toPx) })}
+                fill="none"
+                stroke="#000"
+                strokeWidth={wallThickness}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))
+          : maze.walls.map((wall, i) => {
+              const from = toPx(wall.from);
+              const to = toPx(wall.to);
 
-          return (
-            <line
-              key={`wall-${i}`}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-              stroke="#000"
-              strokeWidth={wallThickness}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          );
-        })}
+              return (
+                <line
+                  key={`wall-${i}`}
+                  x1={from.x}
+                  y1={from.y}
+                  x2={to.x}
+                  y2={to.y}
+                  stroke="#000"
+                  strokeWidth={wallThickness}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              );
+            })}
 
         {/* Draw start marker */}
         <text

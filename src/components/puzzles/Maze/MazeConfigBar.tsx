@@ -38,6 +38,7 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
   const ratio = value.cellSizeRatio;
   const branchiness = value.branchiness;
   const theme = value.theme;
+  const curvyWalls = value.curvyWalls;
 
   return (
     <div className={styles.configContainer}>
@@ -107,6 +108,24 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
           title="Many branches, shorter corridors"
         >
           Branchy
+        </button>
+      </div>
+      <div className={styles.buttonBar}>
+        <button
+          type="button"
+          className={`${styles.button} ${!curvyWalls ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, curvyWalls: false })}
+          title="Straight walls"
+        >
+          Straight
+        </button>
+        <button
+          type="button"
+          className={`${styles.button} ${curvyWalls ? styles.selected : ''}`}
+          onClick={() => onChange({ ...value, curvyWalls: true })}
+          title="Walls drawn as flowing curves"
+        >
+          Curvy
         </button>
       </div>
       <select

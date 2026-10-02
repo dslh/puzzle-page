@@ -16,6 +16,7 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     cellSizeRatio: 2,
     branchiness: 'medium',
     theme: 'random',
+    curvyWalls: false,
   },
   resizable: {
     width: true,
