@@ -76,7 +76,6 @@
 }
 
 .word {
-  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -88,7 +87,6 @@
    Century Gothic for its single-storey a and g, the forms children are
    taught to write. */
 .letter {
-  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
   font-size: 36px;
   font-weight: 700;
   line-height: 1;

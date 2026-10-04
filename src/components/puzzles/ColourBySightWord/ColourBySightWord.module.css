@@ -34,7 +34,6 @@
   border-radius: 4px;
   background: white;
   white-space: nowrap;
-  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
   line-height: 1.4;
 }
 
@@ -74,7 +73,6 @@
   justify-content: center;
   overflow: hidden;
   white-space: nowrap;
-  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
   font-weight: 600;
   color: #333;
   border-right: 1px solid #8a8a8a;
