@@ -50,6 +50,14 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
           >
             Words
           </button>
+          <button
+            type="button"
+            className={`${styles.button} ${mode === 'letter' ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, mode: 'letter' })}
+            title="Match each upper case letter to its lower case partner"
+          >
+            Letters
+          </button>
         </div>
       </div>
 
@@ -84,6 +92,22 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
             value={customWordsText}
             onChange={(e) =>
               onChange({ ...value, customWordsText: e.target.value })
+            }
+          />
+        </div>
+      )}
+
+      {mode === 'letter' && (
+        <div className={styles.configGroup}>
+          <span className={styles.label}>Letters:</span>
+          <input
+            type="text"
+            className={styles.textInput}
+            placeholder="Random, or e.g. s a t p"
+            title="Only these letters are used. Leave empty for a random selection"
+            value={value.customLettersText ?? ''}
+            onChange={(e) =>
+              onChange({ ...value, customLettersText: e.target.value })
             }
           />
         </div>

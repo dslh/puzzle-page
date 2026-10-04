@@ -38,6 +38,11 @@ export interface MatchingConfig {
    * entries in `WORD_LIST` are usable here - see `resolveCustomWords`.
    */
   customWordsText?: string;
+  /**
+   * Letter mode only: the letters to match, in any case and with any
+   * separators. Empty means a random selection.
+   */
+  customLettersText?: string;
 }
 
 export default function Matching({
@@ -48,6 +53,7 @@ export default function Matching({
   const mode = config?.mode ?? 'silhouette';
   const maxWordLength = config?.maxWordLength ?? 4;
   const customWordsText = config?.customWordsText ?? '';
+  const customLettersText = config?.customLettersText ?? '';
 
   const puzzle = useMemo(() => {
     const basePuzzle = generateMatchingPuzzle(
@@ -55,7 +61,8 @@ export default function Matching({
       gridHeight,
       mode,
       maxWordLength,
-      customWordsText
+      customWordsText,
+      customLettersText
     );
 
     // Shuffle the right column for display
@@ -70,9 +77,14 @@ export default function Matching({
       shuffledRight,
       firstMatchIndex,
     };
-  }, [seed, gridHeight, mode, maxWordLength, customWordsText]);
+  }, [seed, gridHeight, mode, maxWordLength, customWordsText, customLettersText]);
 
   const isWordMode = puzzle.mode === 'word';
+  const isLetterMode = puzzle.mode === 'letter';
+  const leftClass = isWordMode ? styles.word : isLetterMode ? styles.letter : styles.emoji;
+  const rightClass = isLetterMode
+    ? styles.letter
+    : `${styles.emoji} ${isWordMode ? '' : styles.silhouette}`;
 
   return (
     <div className={styles.container}>
@@ -82,7 +94,7 @@ export default function Matching({
         >
           {puzzle.pairs.map((pair, index) => (
             <div key={index} className={styles.item}>
-              <span className={isWordMode ? styles.word : styles.emoji}>
+              <span className={leftClass}>
                 {pair.left}
               </span>
             </div>
@@ -114,11 +126,7 @@ export default function Matching({
         >
           {puzzle.shuffledRight.map((emoji, index) => (
             <div key={index} className={styles.item}>
-              <span
-                className={`${styles.emoji} ${
-                  isWordMode ? '' : styles.silhouette
-                }`}
-              >
+              <span className={rightClass}>
                 {emoji}
               </span>
             </div>

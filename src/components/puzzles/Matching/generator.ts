@@ -1,11 +1,14 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
 
-export type MatchingMode = 'silhouette' | 'word';
+export type MatchingMode = 'silhouette' | 'word' | 'letter';
 
 export interface MatchingPair {
-  /** Left column: an emoji in silhouette mode, the word itself in word mode. */
+  /**
+   * Left column: an emoji in silhouette mode, the word itself in word mode,
+   * an upper case letter in letter mode.
+   */
   left: string;
-  /** Right column: always an emoji. */
+  /** Right column: an emoji, or the lower case letter in letter mode. */
   right: string;
 }
 
@@ -122,12 +125,25 @@ export function couldBeWord(fragment: string): boolean {
   return false;
 }
 
+/**
+ * Letters drawn on when the parent hasn't chosen any. Left out are the letters
+ * whose two cases are the same shape at a different size (C, K, O, P, S, U, V,
+ * W, X, Z) - matching those is a size comparison, not letter knowledge.
+ */
+const RANDOM_LETTERS = 'ABDEFGHIJLMNQRTY'.split('');
+
+/** Upper case, de-duplicated letters from whatever the parent typed. */
+export function parseLetters(customLettersText: string): string[] {
+  return [...new Set(customLettersText.toUpperCase().replace(/[^A-Z]/g, ''))];
+}
+
 export function generateMatchingPuzzle(
   seed: number,
   gridHeight: number = 4,
   mode: MatchingMode = 'silhouette',
   maxWordLength: number = 4,
-  customWordsText: string = ''
+  customWordsText: string = '',
+  customLettersText: string = ''
 ): MatchingPuzzle {
   const random = new SeededRandom(seed);
 
@@ -160,6 +176,20 @@ export function generateMatchingPuzzle(
     return {
       pairs: picked.map(entry => ({ left: entry.word, right: entry.emoji })),
       category: 'Words',
+      mode,
+    };
+  }
+
+  if (mode === 'letter') {
+    // Chosen letters are used as given and nothing else is added - a parent
+    // practising s, a, t, p wants exactly those, even if that leaves rows
+    // spare. Shuffled so a list longer than the puzzle still varies on reroll.
+    const custom = parseLetters(customLettersText);
+    const pool = custom.length > 0 ? custom : RANDOM_LETTERS;
+    const picked = random.shuffle(pool).slice(0, numPairs);
+    return {
+      pairs: picked.map(letter => ({ left: letter, right: letter.toLowerCase() })),
+      category: 'Letters',
       mode,
     };
   }

@@ -15,6 +15,7 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
     mode: 'silhouette',
     maxWordLength: 4,
     customWordsText: '',
+    customLettersText: '',
   },
   resizable: {
     width: true,

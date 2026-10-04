@@ -84,6 +84,17 @@
   color: #222;
 }
 
+/* Letter mode: a single glyph fits the emoji-sized columns, so no widening.
+   Century Gothic for its single-storey a and g, the forms children are
+   taught to write. */
+.letter {
+  font-family: 'Century Gothic', 'Futura', 'Trebuchet MS', Arial, sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  color: #222;
+}
+
 @media print {
   .container {
     break-inside: avoid;
@@ -106,7 +117,8 @@
     stroke: #666;
   }
 
-  .word {
+  .word,
+  .letter {
     color: #000;
   }
 }
