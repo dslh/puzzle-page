@@ -9,18 +9,6 @@
   background-color: #fff;
 }
 
-.pathsUnder line {
-  stroke-linecap: round;
-}
-
-.pathsOver line {
-  stroke-linecap: round;
-}
-
-.pathBorders line {
-  stroke-linecap: butt;
-}
-
 @media print {
   .mazeContainer {
     margin: 1cm 0;
