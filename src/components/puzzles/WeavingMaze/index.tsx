@@ -217,6 +217,9 @@ export default function WeavingMaze({
 
         const startPull = bridgedHere ? tunnelReach : 0;
         const endPull = bridgedThere ? tunnelReach : 0;
+        // A passage squeezed between two bridges in adjacent cells may have
+        // almost nothing left to draw; a sliver just looks like a stray mark.
+        if (cellSize - startPull - endPull < outline * 2) continue;
         corridors.push({
           x1: here.x + dx * startPull,
           y1: here.y + dy * startPull,
@@ -285,19 +288,19 @@ export default function WeavingMaze({
       >
         <defs>
           <linearGradient id={`${gradientId}-top`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#000" stopOpacity="0.22" />
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
             <stop offset="1" stopColor="#000" stopOpacity="0" />
           </linearGradient>
           <linearGradient id={`${gradientId}-bottom`} x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0" stopColor="#000" stopOpacity="0.22" />
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
             <stop offset="1" stopColor="#000" stopOpacity="0" />
           </linearGradient>
           <linearGradient id={`${gradientId}-left`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#000" stopOpacity="0.22" />
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
             <stop offset="1" stopColor="#000" stopOpacity="0" />
           </linearGradient>
           <linearGradient id={`${gradientId}-right`} x1="1" y1="0" x2="0" y2="0">
-            <stop offset="0" stopColor="#000" stopOpacity="0.22" />
+            <stop offset="0" stopColor="#000" stopOpacity="0.16" />
             <stop offset="1" stopColor="#000" stopOpacity="0" />
           </linearGradient>
         </defs>
