@@ -404,7 +404,7 @@ default width×height in grid cells.
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
-| Letter Formation | `letterformation` | 6×3 | both (min height 3) | letter, stroke guides, trace letters per line |
+| Letter Formation | `letterformation` | 6×3 | both (min height 3) | letters / numbers, character, stroke guides, trace count per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |

@@ -1,6 +1,6 @@
 /**
- * Stroke-by-stroke construction of the 26 capital letters, for a letter
- * formation exercise: each stroke carries where the pen lands, which way it
+ * Stroke-by-stroke construction of the 26 capital letters and the ten digits,
+ * for a letter formation exercise: each stroke carries where the pen lands, which way it
  * travels, and the order to do them in.
  *
  * Coordinates: x runs 0..advance, y runs 0 (cap line) to 100 (baseline), so a
@@ -295,8 +295,124 @@ export const LETTER_FORMS: LetterForm[] = [
   },
 ];
 
+/**
+ * The ten digits, on the same 0..advance by 0..100 box and conventions as the
+ * capitals. Formations follow Zaner-Bloser's digit descriptions, the same spec
+ * the capitals were checked against.
+ *
+ * The two digits with real regional variants are drawn plainly: 1 has no flag
+ * (it is a single downstroke, like I) and 4 is open-topped ("down, across,
+ * lift, down") rather than the closed printed form, which children cannot
+ * easily make with a vertical-first stroke.
+ */
+export const NUMBER_FORMS: LetterForm[] = [
+  {
+    char: '0',
+    advance: 62,
+    strokes: [
+      { d: 'M31,3 A26,48 0 0 0 31,99 A26,48 0 0 0 31,3', start: { x: 31, y: 3 }, dir: { x: -1, y: 0.1 }, hint: 'back, around and close it up' },
+    ],
+  },
+  {
+    char: '1',
+    advance: 30,
+    strokes: [
+      { d: 'M15,0 L15,100', start: { x: 15, y: 0 }, dir: { x: 0, y: 1 }, hint: 'pull down straight' },
+    ],
+  },
+  {
+    char: '2',
+    advance: 64,
+    strokes: [
+      {
+        d: 'M9,24 C12,-4 54,-6 54,24 C54,44 30,64 9,100 L57,100',
+        start: { x: 9, y: 24 },
+        dir: { x: 0.3, y: -1 },
+        hint: 'over the top, slant down, slide right',
+      },
+    ],
+  },
+  {
+    char: '3',
+    advance: 66,
+    strokes: [
+      {
+        d: 'M10,14 C22,-4 54,-2 54,24 C54,42 40,48 28,48 C44,48 58,58 58,74 C58,100 20,104 8,86',
+        start: { x: 10, y: 14 },
+        dir: { x: 1, y: -1.2 },
+        hint: 'around to the middle, then around again',
+      },
+    ],
+  },
+  {
+    char: '4',
+    advance: 68,
+    strokes: [
+      { d: 'M10,0 L10,62 L62,62', start: { x: 10, y: 0 }, dir: { x: 0, y: 1 }, hint: 'pull down, then slide right' },
+      { d: 'M46,0 L46,100', start: { x: 46, y: 0 }, dir: { x: 0, y: 1 }, hint: 'pull down straight through' },
+    ],
+  },
+  {
+    char: '5',
+    advance: 64,
+    strokes: [
+      {
+        d: 'M14,0 L12,44 C26,34 56,36 56,68 C56,100 18,104 8,86',
+        start: { x: 14, y: 0 },
+        dir: { x: 0, y: 1 },
+        hint: 'pull down, then around the tummy',
+        labelOffset: { x: -15, y: 1 },
+      },
+      { d: 'M14,0 L54,0', start: { x: 14, y: 0 }, dir: { x: 1, y: 0 }, hint: 'slide right for the hat', labelOffset: { x: 2, y: -13 } },
+    ],
+  },
+  {
+    char: '6',
+    advance: 66,
+    strokes: [
+      {
+        d: 'M50,4 C30,10 10,40 10,68 C10,90 22,100 34,100 C48,100 58,88 58,72 C58,56 46,46 34,46 C22,46 12,54 10,66',
+        start: { x: 50, y: 4 },
+        dir: { x: -1, y: 0.4 },
+        hint: 'curve down, then around the loop',
+      },
+    ],
+  },
+  {
+    char: '7',
+    advance: 64,
+    strokes: [
+      { d: 'M8,0 L58,0 L24,100', start: { x: 8, y: 0 }, dir: { x: 1, y: 0 }, hint: 'slide right, then slant down' },
+    ],
+  },
+  {
+    char: '8',
+    advance: 66,
+    strokes: [
+      {
+        d: 'M50,16 C46,-2 12,0 13,24 C14,44 54,50 54,74 C54,98 12,100 12,76 C12,54 50,40 50,16',
+        start: { x: 50, y: 16 },
+        dir: { x: -1, y: -1 },
+        hint: 'make an S, then slant back up',
+      },
+    ],
+  },
+  {
+    char: '9',
+    advance: 64,
+    strokes: [
+      {
+        d: 'M54,22 C54,10 44,2 32,2 C20,2 10,13 10,27 C10,41 20,52 32,52 C44,52 54,42 54,27 L54,100',
+        start: { x: 54, y: 22 },
+        dir: { x: 0, y: -1 },
+        hint: 'back around the circle, then pull down',
+      },
+    ],
+  },
+];
+
 export const LETTER_FORMS_BY_CHAR: Record<string, LetterForm> = Object.fromEntries(
-  LETTER_FORMS.map(form => [form.char, form])
+  [...LETTER_FORMS, ...NUMBER_FORMS].map(form => [form.char, form])
 );
 
 export function getLetterForm(char: string): LetterForm | undefined {

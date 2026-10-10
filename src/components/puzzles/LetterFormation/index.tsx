@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
-import { LETTER_FORMS, getLetterForm, type LetterForm } from './letterForms';
+import { LETTER_FORMS, NUMBER_FORMS, getLetterForm, type LetterForm } from './letterForms';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './LetterFormation.module.css';
 
 /** Empty letter means "let the seed pick", so rerolling gives a new one. */
 export interface LetterFormationConfig {
+  /** A capital or a digit. */
   letter: string;
+  /** Which set the config bar offers, and the random pick draws from. */
+  set: 'letters' | 'numbers';
   /** Numbered start badges and direction arrows on the model letter. */
   guides: boolean;
   /** Grey letters to write over at the start of each practice line. */
@@ -134,6 +137,7 @@ export default function LetterFormation({
   config,
 }: PuzzleProps<LetterFormationConfig>) {
   const requested = (config?.letter ?? '').toUpperCase();
+  const set = config?.set ?? 'letters';
   const showGuides = config?.guides ?? true;
   const traceCount = config?.traceCount ?? 3;
 
@@ -142,8 +146,9 @@ export default function LetterFormation({
   const form = useMemo(() => {
     const chosen = getLetterForm(requested);
     if (chosen) return chosen;
-    return LETTER_FORMS[new SeededRandom(seed).nextInt(LETTER_FORMS.length)];
-  }, [requested, seed]);
+    const pool = set === 'numbers' ? NUMBER_FORMS : LETTER_FORMS;
+    return pool[new SeededRandom(seed).nextInt(pool.length)];
+  }, [requested, set, seed]);
 
   const availableWidth = gridWidth * GRID_CELL_PX;
   const availableHeight = gridHeight * GRID_CELL_PX;
@@ -157,7 +162,7 @@ export default function LetterFormation({
   const rowCount = Math.max(1, Math.floor(rowsHeight / ROW_TARGET_PX));
   const rowHeight = Math.min(ROW_MAX_PX, Math.max(ROW_MIN_PX, rowsHeight / rowCount));
 
-  // Capitals only, so no descender zone: cap line, dashed midline, baseline.
+  // Capitals and digits only, so no descender zone: cap line, dashed midline, baseline.
   const capHeight = rowHeight * 0.64;
   const glyphWidth = form.advance * (capHeight / 100);
   const gap = capHeight * 0.45;

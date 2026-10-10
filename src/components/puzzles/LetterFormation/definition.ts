@@ -13,6 +13,7 @@ export const puzzleDefinition: PuzzleDefinition<LetterFormationConfig> = {
   defaultHeight: 3,
   defaultConfig: {
     letter: '',
+    set: 'letters',
     guides: true,
     traceCount: 3,
   },

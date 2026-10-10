@@ -74,7 +74,7 @@
   border-color: #2196f3;
 }
 
-/* 26 letters plus a random option. A wrapping grid of small squares stays
+/* 26 letters (or 10 digits) plus a random option. A wrapping grid of small squares stays
    scannable where a dropdown would hide the alphabet. */
 .letterGrid {
   display: grid;
