@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 21 puzzle types - see **Existing Puzzles** below.
+There are currently 22 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -409,6 +409,7 @@ default width×height in grid cells.
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
+| Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 →` / `2 right`, robot / treasure theme, route length, spare boxes |
 
 Five of these carry notes worth reading before editing them:
 
@@ -441,6 +442,14 @@ Five of these carry notes worth reading before editing them:
   C/G, or long vowels) and its emoji can't plausibly be named with another
   letter. The second filter is a hand-kept `AMBIGUOUS_PICTURES` set in its
   generator; check new `wordList.ts` entries against it.
+- **Directions** - one puzzle covering both the treasure map and robot paths
+  ideas (GitHub #18, #19); the theme only swaps emoji. Routes are runs that
+  each turn a corner and never cross themselves. Write mode's boxes come from
+  a BFS over the map, not from the generated route, so any shortest answer
+  fits, and its length setting is the *answer's* run count - maps whose
+  obstacles allow a shorter way are rejected. Fix mode only plants a mistake
+  that has exactly one single-token fix. All of it is laid out against the mm
+  constants at the top of `generator.ts`, mirrored in the CSS.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather

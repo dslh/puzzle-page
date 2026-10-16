@@ -41,6 +41,7 @@ Live at https://puzzle-page.fly.dev
 | Take Away (cross out pictures to subtract) | blank the answer or the number taken, worked example |
 | More or Less (compare two groups with > = <) | worked example |
 | Initial Sounds (picture → first letter) | circle / write, case, limit to letters |
+| Directions (robot or treasure map routes) | follow / write / fix the route, arrows or counted steps or words, theme, length, spare boxes |
 | Chess Puzzle | difficulty, mate or capture |
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |
