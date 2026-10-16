@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 20 puzzle types - see **Existing Puzzles** below.
+There are currently 21 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -408,8 +408,9 @@ default width×height in grid cells.
 | Sums | `sums` | 4×3 | both | + / − / both |
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
+| Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
 
-Three of these carry notes worth reading before editing them:
+Four of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -430,6 +431,11 @@ Three of these carry notes worth reading before editing them:
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
   `docs/weaving-maze-algorithm.md`.
+- **Initial Sounds** - the picture is the child's only clue, so a word is
+  used only if its first letter makes its usual sound (no digraph starts, soft
+  C/G, or long vowels) and its emoji can't plausibly be named with another
+  letter. The second filter is a hand-kept `AMBIGUOUS_PICTURES` set in its
+  generator; check new `wordList.ts` entries against it.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather

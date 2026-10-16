@@ -40,6 +40,7 @@ Live at https://puzzle-page.fly.dev
 | Sums | addition, subtraction or both |
 | Take Away (cross out pictures to subtract) | blank the answer or the number taken, worked example |
 | More or Less (compare two groups with > = <) | worked example |
+| Initial Sounds (picture → first letter) | circle / write, case, limit to letters |
 | Chess Puzzle | difficulty, mate or capture |
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |

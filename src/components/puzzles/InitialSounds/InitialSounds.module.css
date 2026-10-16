@@ -1,0 +1,75 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 0;
+  background: white;
+  box-sizing: border-box;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin: 1mm;
+}
+
+.picture {
+  line-height: 1;
+}
+
+.choices {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  line-height: 1;
+}
+
+/* Room around each letter for a ring drawn in pencil */
+.choice {
+  padding: 0 0.3em;
+}
+
+.writeBox {
+  border: 2px solid #555;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4mm;
+  box-sizing: border-box;
+  color: #888;
+  font-size: 4mm;
+}
+
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .tile {
+    border-color: #ccc;
+  }
+
+  .writeBox {
+    border-color: #000;
+  }
+
+  /* An empty-filter message is a hint for the parent, not part of the page */
+  .empty {
+    visibility: hidden;
+  }
+}

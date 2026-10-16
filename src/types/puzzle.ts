@@ -19,7 +19,8 @@ export type PuzzleType = 'maze'
                        | 'letterformation'
                        | 'sums'
                        | 'takeaway'
-                       | 'moreorless';
+                       | 'moreorless'
+                       | 'initialsounds';
 
 export interface PlacedPuzzle {
   id: string;

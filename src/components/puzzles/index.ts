@@ -18,6 +18,7 @@ import { puzzleDefinition as letterFormation } from './LetterFormation/definitio
 import { puzzleDefinition as sums } from './Sums/definition';
 import { puzzleDefinition as takeAway } from './TakeAway/definition';
 import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
+import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 
 /**
  * Registry of all available puzzle types
@@ -44,6 +45,7 @@ export const PUZZLE_DEFINITIONS = [
   sums,
   takeAway,
   moreOrLess,
+  initialSounds,
 ] as const;
 
 /**
