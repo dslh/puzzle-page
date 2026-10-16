@@ -82,3 +82,29 @@
   border-radius: 3px;
   padding: 3px 6px;
 }
+
+/* Four modes don't fit across the sidebar, so lay them out two by two. The
+   1px gap over a grey background draws the dividers between cells. */
+.gridBar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #ddd;
+}
+
+.gridBar .button {
+  border-right: none;
+}
+
+/* Label above the bar rather than beside it, leaving the bar the full width
+   of the sidebar for three buttons. */
+.stackedGroup {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.stackedGroup .button {
+  flex: 1;
+  padding: 4px 6px;
+}

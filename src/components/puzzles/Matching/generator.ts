@@ -1,15 +1,21 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
 
-export type MatchingMode = 'silhouette' | 'word' | 'letter';
+export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme';
+
+/** Rhyme mode only: what each side shows. */
+export type RhymeDisplay = 'pictures' | 'words' | 'both';
 
 export interface MatchingPair {
   /**
    * Left column: an emoji in silhouette mode, the word itself in word mode,
-   * an upper case letter in letter mode.
+   * an upper case letter in letter mode, an emoji in rhyme mode.
    */
   left: string;
   /** Right column: an emoji, or the lower case letter in letter mode. */
   right: string;
+  /** Rhyme mode only: the words the two emoji stand for. */
+  leftWord?: string;
+  rightWord?: string;
 }
 
 export interface MatchingPuzzle {
@@ -137,18 +143,56 @@ export function parseLetters(customLettersText: string): string[] {
   return [...new Set(customLettersText.toUpperCase().replace(/[^A-Z]/g, ''))];
 }
 
+/**
+ * Words that rhyme, grouped by `rime` - never by trailing letters, which would
+ * pair GOAT with CAT. Only groups with at least two usable words survive.
+ *
+ * Which words are usable depends on what the child has to go on. With
+ * pictures on show, the emoji must name the word by itself; with words alone,
+ * the child must be able to sound it out, and the emoji doesn't matter.
+ */
+function rhymeGroups(display: RhymeDisplay): WordEntry[][] {
+  const groups = new Map<string, WordEntry[]>();
+  for (const entry of WORD_LIST) {
+    const usable =
+      display === 'words'
+        ? entry.decodable !== false
+        : entry.pictureClue !== false;
+    if (!usable) continue;
+    const group = groups.get(entry.rime);
+    if (group) group.push(entry);
+    else groups.set(entry.rime, [entry]);
+  }
+  return [...groups.values()].filter(group => group.length >= 2);
+}
+
 export function generateMatchingPuzzle(
   seed: number,
   gridHeight: number = 4,
   mode: MatchingMode = 'silhouette',
   maxWordLength: number = 4,
   customWordsText: string = '',
-  customLettersText: string = ''
+  customLettersText: string = '',
+  rhymeDisplay: RhymeDisplay = 'pictures'
 ): MatchingPuzzle {
   const random = new SeededRandom(seed);
 
   // One pair per row
   const numPairs = gridHeight;
+
+  if (mode === 'rhyme') {
+    // One rime group per pair, so no left-hand word rhymes with more than
+    // one right-hand word and every line has exactly one right answer.
+    const groups = random.shuffle(rhymeGroups(rhymeDisplay)).slice(0, numPairs);
+    return {
+      pairs: groups.map(group => {
+        const [a, b] = random.shuffle(group);
+        return { left: a.emoji, right: b.emoji, leftWord: a.word, rightWord: b.word };
+      }),
+      category: 'Rhymes',
+      mode,
+    };
+  }
 
   if (mode === 'word') {
     // A custom word goes in exactly as typed - no length cap, no decodability

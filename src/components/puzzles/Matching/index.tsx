@@ -1,5 +1,9 @@
 import { useMemo } from 'react';
-import { generateMatchingPuzzle, type MatchingMode } from './generator';
+import {
+  generateMatchingPuzzle,
+  type MatchingMode,
+  type RhymeDisplay,
+} from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Matching.module.css';
 
@@ -43,6 +47,8 @@ export interface MatchingConfig {
    * separators. Empty means a random selection.
    */
   customLettersText?: string;
+  /** Rhyme mode only: show pictures, words, or a picture captioned by its word. */
+  rhymeDisplay?: RhymeDisplay;
 }
 
 export default function Matching({
@@ -54,6 +60,7 @@ export default function Matching({
   const maxWordLength = config?.maxWordLength ?? 4;
   const customWordsText = config?.customWordsText ?? '';
   const customLettersText = config?.customLettersText ?? '';
+  const rhymeDisplay = config?.rhymeDisplay ?? 'pictures';
 
   const puzzle = useMemo(() => {
     const basePuzzle = generateMatchingPuzzle(
@@ -62,48 +69,70 @@ export default function Matching({
       mode,
       maxWordLength,
       customWordsText,
-      customLettersText
+      customLettersText,
+      rhymeDisplay
     );
 
     // Shuffle the right column for display
     const random = new SeededRandom(seed + 1); // Different seed for shuffling
-    const shuffledRight = random.shuffle(basePuzzle.pairs.map(p => p.right));
+    const shuffledRight = random.shuffle(
+      basePuzzle.pairs.map(p => ({ symbol: p.right, word: p.rightWord }))
+    );
 
     // Find where the first pair's match ended up in the shuffled right column
-    const firstMatchIndex = shuffledRight.findIndex(emoji => emoji === basePuzzle.pairs[0].right);
+    const firstMatchIndex = shuffledRight.findIndex(
+      item => item.symbol === basePuzzle.pairs[0].right
+    );
 
     return {
       ...basePuzzle,
       shuffledRight,
       firstMatchIndex,
     };
-  }, [seed, gridHeight, mode, maxWordLength, customWordsText, customLettersText]);
+  }, [seed, gridHeight, mode, maxWordLength, customWordsText, customLettersText, rhymeDisplay]);
 
   const isWordMode = puzzle.mode === 'word';
   const isLetterMode = puzzle.mode === 'letter';
+  const isRhymeMode = puzzle.mode === 'rhyme';
+  // Rhyme words need room on both sides, not just the left as in word mode.
+  const isRhymeWide = isRhymeMode && rhymeDisplay !== 'pictures';
   const leftClass = isWordMode ? styles.word : isLetterMode ? styles.letter : styles.emoji;
   const rightClass = isLetterMode
     ? styles.letter
-    : `${styles.emoji} ${isWordMode ? '' : styles.silhouette}`;
+    : `${styles.emoji} ${isWordMode || isRhymeMode ? '' : styles.silhouette}`;
+
+  const renderCell = (symbol: string, className: string, word?: string) => {
+    if (!isRhymeMode) return <span className={className}>{symbol}</span>;
+    if (rhymeDisplay === 'words') return <span className={styles.word}>{word}</span>;
+    if (rhymeDisplay === 'both') {
+      return (
+        <span className={styles.captioned}>
+          <span className={styles.emoji}>{symbol}</span>
+          <span className={styles.caption}>{word}</span>
+        </span>
+      );
+    }
+    return <span className={styles.emoji}>{symbol}</span>;
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.matchingArea}>
         <div
-          className={`${styles.column} ${isWordMode ? styles.wordColumn : ''}`}
+          className={`${styles.column} ${
+            isWordMode ? styles.wordColumn : isRhymeWide ? styles.rhymeColumn : ''
+          }`}
         >
           {puzzle.pairs.map((pair, index) => (
             <div key={index} className={styles.item}>
-              <span className={leftClass}>
-                {pair.left}
-              </span>
+              {renderCell(pair.left, leftClass, pair.leftWord)}
             </div>
           ))}
         </div>
 
         <div
           className={`${styles.connectingSpace} ${
-            isWordMode ? styles.narrowConnector : ''
+            isWordMode ? styles.narrowConnector : isRhymeWide ? styles.rhymeConnector : ''
           }`}
         >
           <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -121,14 +150,12 @@ export default function Matching({
 
         <div
           className={`${styles.column} ${
-            isWordMode ? styles.wordRightColumn : ''
+            isWordMode ? styles.wordRightColumn : isRhymeWide ? styles.rhymeColumn : ''
           }`}
         >
-          {puzzle.shuffledRight.map((emoji, index) => (
+          {puzzle.shuffledRight.map((item, index) => (
             <div key={index} className={styles.item}>
-              <span className={rightClass}>
-                {emoji}
-              </span>
+              {renderCell(item.symbol, rightClass, item.word)}
             </div>
           ))}
         </div>

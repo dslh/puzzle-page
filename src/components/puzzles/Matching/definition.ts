@@ -16,6 +16,7 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
     maxWordLength: 4,
     customWordsText: '',
     customLettersText: '',
+    rhymeDisplay: 'pictures',
   },
   resizable: {
     width: true,

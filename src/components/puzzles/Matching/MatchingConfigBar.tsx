@@ -33,7 +33,7 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
     <div className={styles.configContainer}>
       <div className={styles.configGroup}>
         <span className={styles.label}>Match:</span>
-        <div className={styles.buttonBar}>
+        <div className={`${styles.buttonBar} ${styles.gridBar}`}>
           <button
             type="button"
             className={`${styles.button} ${mode === 'silhouette' ? styles.selected : ''}`}
@@ -58,8 +58,43 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
           >
             Letters
           </button>
+          <button
+            type="button"
+            className={`${styles.button} ${mode === 'rhyme' ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, mode: 'rhyme' })}
+            title="Match each picture to the one it rhymes with"
+          >
+            Rhymes
+          </button>
         </div>
       </div>
+
+      {mode === 'rhyme' && (
+        <div className={`${styles.configGroup} ${styles.stackedGroup}`}>
+          <span className={styles.label}>Show:</span>
+          <div className={styles.buttonBar}>
+            {(
+              [
+                ['pictures', 'Pictures', 'Pictures only - say the words aloud'],
+                ['words', 'Words', 'Words only - read them, then listen for the rhyme'],
+                ['both', 'Both', 'Each picture with its word underneath'],
+              ] as const
+            ).map(([display, label, title]) => (
+              <button
+                key={display}
+                type="button"
+                className={`${styles.button} ${
+                  (value.rhymeDisplay ?? 'pictures') === display ? styles.selected : ''
+                }`}
+                onClick={() => onChange({ ...value, rhymeDisplay: display })}
+                title={title}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Only meaningful in word mode, so don't clutter the bar otherwise */}
       {mode === 'word' && (

@@ -83,6 +83,37 @@
   color: #222;
 }
 
+/* Rhyme mode with words: both columns carry a word, so both widen. */
+.rhymeColumn {
+  flex: 0 0 32%;
+}
+
+.rhymeConnector {
+  flex: 0 0 36%;
+}
+
+/* At the minimum width a 5-letter word only just clears the box edges. */
+.rhymeColumn .item {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* Rhyme mode, both: the picture with its word underneath. */
+.captioned {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.caption {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: #222;
+}
+
 /* Letter mode: a single glyph fits the emoji-sized columns, so no widening.
    Century Gothic for its single-storey a and g, the forms children are
    taught to write. */
@@ -116,7 +147,8 @@
   }
 
   .word,
-  .letter {
+  .letter,
+  .caption {
     color: #000;
   }
 }
