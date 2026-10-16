@@ -94,12 +94,13 @@ export default function Matching({
   const isWordMode = puzzle.mode === 'word';
   const isLetterMode = puzzle.mode === 'letter';
   const isRhymeMode = puzzle.mode === 'rhyme';
+  const isHomesMode = puzzle.mode === 'homes';
   // Rhyme words need room on both sides, not just the left as in word mode.
   const isRhymeWide = isRhymeMode && rhymeDisplay !== 'pictures';
   const leftClass = isWordMode ? styles.word : isLetterMode ? styles.letter : styles.emoji;
   const rightClass = isLetterMode
     ? styles.letter
-    : `${styles.emoji} ${isWordMode || isRhymeMode ? '' : styles.silhouette}`;
+    : `${styles.emoji} ${isWordMode || isRhymeMode || isHomesMode ? '' : styles.silhouette}`;
 
   const renderCell = (symbol: string, className: string, word?: string) => {
     if (!isRhymeMode) return <span className={className}>{symbol}</span>;

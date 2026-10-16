@@ -1,6 +1,7 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
+import { HOMES, HOME_ANIMALS, type HomeAnimal, type HomeId } from './habitats';
 
-export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme';
+export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme' | 'homes';
 
 /** Rhyme mode only: what each side shows. */
 export type RhymeDisplay = 'pictures' | 'words' | 'both';
@@ -8,10 +9,14 @@ export type RhymeDisplay = 'pictures' | 'words' | 'both';
 export interface MatchingPair {
   /**
    * Left column: an emoji in silhouette mode, the word itself in word mode,
-   * an upper case letter in letter mode, an emoji in rhyme mode.
+   * an upper case letter in letter mode, an emoji in rhyme mode, an animal
+   * in homes mode.
    */
   left: string;
-  /** Right column: an emoji, or the lower case letter in letter mode. */
+  /**
+   * Right column: an emoji, the lower case letter in letter mode, or where the
+   * animal lives in homes mode.
+   */
   right: string;
   /** Rhyme mode only: the words the two emoji stand for. */
   leftWord?: string;
@@ -166,6 +171,34 @@ function rhymeGroups(display: RhymeDisplay): WordEntry[][] {
   return [...groups.values()].filter(group => group.length >= 2);
 }
 
+/**
+ * One animal per home, chosen so that no animal on the page also fits another
+ * home on the page - see `alsoFits` in `habitats.ts`. Greedy over a shuffled
+ * list of homes, so with ten homes and rows to spare a puzzle may come up a
+ * pair or two short of the row count rather than show an arguable line.
+ */
+function pickHomePairs(random: SeededRandom, numPairs: number): MatchingPair[] {
+  const picked: { home: HomeId; animal: HomeAnimal }[] = [];
+  const fits = (animal: HomeAnimal, home: HomeId) =>
+    animal.home === home || (animal.alsoFits ?? []).includes(home);
+
+  for (const home of random.shuffle(HOMES)) {
+    if (picked.length >= numPairs) break;
+    // A home some animal already on the page could also go to.
+    if (picked.some(p => fits(p.animal, home.id))) continue;
+
+    const animal = random
+      .shuffle(HOME_ANIMALS.filter(a => a.home === home.id))
+      .find(a => !picked.some(p => fits(a, p.home)));
+    if (animal) picked.push({ home: home.id, animal });
+  }
+
+  return picked.map(({ home, animal }) => ({
+    left: animal.emoji,
+    right: HOMES.find(h => h.id === home)!.emoji,
+  }));
+}
+
 export function generateMatchingPuzzle(
   seed: number,
   gridHeight: number = 4,
@@ -192,6 +225,10 @@ export function generateMatchingPuzzle(
       category: 'Rhymes',
       mode,
     };
+  }
+
+  if (mode === 'homes') {
+    return { pairs: pickHomePairs(random, numPairs), category: 'Homes', mode };
   }
 
   if (mode === 'word') {

@@ -66,6 +66,14 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
           >
             Rhymes
           </button>
+          <button
+            type="button"
+            className={`${styles.button} ${mode === 'homes' ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, mode: 'homes' })}
+            title="Match each animal to where it lives"
+          >
+            Homes
+          </button>
         </div>
       </div>
 

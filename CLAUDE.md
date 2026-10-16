@@ -393,7 +393,7 @@ default width×height in grid cells.
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
 | Pattern Sequence | `patternsequence` | 8×3 | both (min width 5) | shapes / colours, pattern families (AB·ABC, AAB·ABB·AABB, ABCD·ABAC, growing, mirror), filled shapes, gap position |
-| Matching | `matching` | 5×4 | both | pictures / words / letters (upper to lower case) / rhymes (shown as pictures, words or both), max word length, custom words, custom letters |
+| Matching | `matching` | 5×4 | both | pictures / words / letters (upper to lower case) / rhymes (shown as pictures, words or both) / homes (animal to where it lives), max word length, custom words, custom letters |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
@@ -410,7 +410,7 @@ default width×height in grid cells.
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
 
-Four of these carry notes worth reading before editing them:
+Five of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -431,6 +431,11 @@ Four of these carry notes worth reading before editing them:
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
   `docs/weaving-maze-algorithm.md`.
+- **Matching (homes)** - `habitats.ts` tags each animal with its home plus
+  every other home a child could fairly pick (`alsoFits`), and the generator
+  never shows an animal beside a second home it fits. That keeps every line
+  gradeable, at the cost of capping puzzles at about 8 pairs. Homes without an
+  emoji (cave, hive, pond, ...) are simply left out.
 - **Initial Sounds** - the picture is the child's only clue, so a word is
   used only if its first letter makes its usual sound (no digraph starts, soft
   C/G, or long vowels) and its emoji can't plausibly be named with another
