@@ -49,6 +49,8 @@ export interface MatchingConfig {
   customLettersText?: string;
   /** Rhyme mode only: show pictures, words, or a picture captioned by its word. */
   rhymeDisplay?: RhymeDisplay;
+  /** Draw the first pair's line as a dashed guide. Defaults to true. */
+  workedExample?: boolean;
 }
 
 export default function Matching({
@@ -61,6 +63,7 @@ export default function Matching({
   const customWordsText = config?.customWordsText ?? '';
   const customLettersText = config?.customLettersText ?? '';
   const rhymeDisplay = config?.rhymeDisplay ?? 'pictures';
+  const workedExample = config?.workedExample ?? true;
 
   const puzzle = useMemo(() => {
     const basePuzzle = generateMatchingPuzzle(
@@ -136,17 +139,19 @@ export default function Matching({
             isWordMode ? styles.narrowConnector : isRhymeWide ? styles.rhymeConnector : ''
           }`}
         >
-          <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line
-              x1="0"
-              y1={((0.5 + 0) / puzzle.pairs.length) * 100}
-              x2="100"
-              y2={((0.5 + puzzle.firstMatchIndex) / puzzle.pairs.length) * 100}
-              stroke="#999"
-              strokeWidth="2"
-              strokeDasharray="5,5"
-            />
-          </svg>
+          {workedExample && (
+            <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
+              <line
+                x1="0"
+                y1={((0.5 + 0) / puzzle.pairs.length) * 100}
+                x2="100"
+                y2={((0.5 + puzzle.firstMatchIndex) / puzzle.pairs.length) * 100}
+                stroke="#999"
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+            </svg>
+          )}
         </div>
 
         <div

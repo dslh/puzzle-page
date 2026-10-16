@@ -17,6 +17,7 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
     customWordsText: '',
     customLettersText: '',
     rhymeDisplay: 'pictures',
+    workedExample: true,
   },
   resizable: {
     width: true,

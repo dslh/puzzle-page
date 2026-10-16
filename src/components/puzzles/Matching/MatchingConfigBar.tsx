@@ -10,6 +10,7 @@ interface ConfigBarProps {
 export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
   const { mode, maxWordLength } = value;
   const customWordsText = value.customWordsText ?? '';
+  const workedExample = value.workedExample ?? true;
 
   // Every pair needs a picture, so a word we have no emoji for cannot be used.
   // Name the rejects instead of dropping them silently - otherwise a typo just
@@ -155,6 +156,27 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
           />
         </div>
       )}
+
+      <div className={styles.configGroup}>
+        <span className={styles.label}>Example:</span>
+        <div className={styles.buttonBar}>
+          <button
+            type="button"
+            className={`${styles.button} ${workedExample ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, workedExample: true })}
+            title="Draw the first line as a dashed guide"
+          >
+            First pair
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${!workedExample ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, workedExample: false })}
+          >
+            None
+          </button>
+        </div>
+      </div>
 
       {mode === 'word' && rejected.length > 0 && (
         <div className={styles.warning}>
