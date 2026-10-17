@@ -452,10 +452,11 @@ Six of these carry notes worth reading before editing them:
   that has exactly one single-token fix. All of it is laid out against the mm
   constants at the top of `generator.ts`, mirrored in the CSS.
 - **Secret Code** - pictures in a key stand for letters; the child decodes
-  each word under it. Height adds words, but more words need more key
-  letters, so the generator searches for the most words that fit together
-  with their key, using the mm `LAYOUT` constants the component also draws
-  with. The default "code" key uses a hand-picked `CIPHER_PICTURES` set
+  each word under it. Words are packed several to a row where the width
+  allows, and chosen to reuse each other's letters (`orderBySharedLetters`)
+  so key pictures come back. More words need more key letters, so the
+  generator searches for the most words that fit together with their key,
+  using the mm `LAYOUT` constants the component also draws with. The default "code" key uses a hand-picked `CIPHER_PICTURES` set
   (distinct in mono, never paired with a letter its name starts with). The
   "sounds" key reuses Initial Sounds' `isEligible`/`firstSoundLetter`, plus
   a few key-only extras for I, U and Y; Q and X have no picture, so words

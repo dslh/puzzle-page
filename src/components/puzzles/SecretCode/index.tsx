@@ -63,17 +63,28 @@ export default function SecretCode({
       </div>
 
       <div className={styles.words}>
-        {puzzle.words.map((word, i) => (
-          <div key={i} className={styles.word} style={{ height: `${LAYOUT.wordRowHeight}mm` }}>
-            {word.split('').map((letter, j) => (
-              <div key={j} className={styles.slot} style={{ width: `${LAYOUT.slotWidth}mm` }}>
-                <span style={{ fontSize: `${LAYOUT.wordEmoji}mm`, lineHeight: 1 }}>
-                  {emojiFor.get(letter)}
-                </span>
-                <div
-                  className={styles.writeBox}
-                  style={{ width: `${LAYOUT.writeBox}mm`, height: `${LAYOUT.writeBox}mm` }}
-                />
+        {puzzle.rows.map((row, i) => (
+          <div
+            key={i}
+            className={styles.row}
+            style={{
+              height: `${LAYOUT.wordRowHeight}mm`,
+              gap: `${LAYOUT.wordGapSlots * LAYOUT.slotWidth}mm`,
+            }}
+          >
+            {row.map((word, j) => (
+              <div key={j} className={styles.word}>
+                {word.split('').map((letter, k) => (
+                  <div key={k} className={styles.slot} style={{ width: `${LAYOUT.slotWidth}mm` }}>
+                    <span style={{ fontSize: `${LAYOUT.wordEmoji}mm`, lineHeight: 1 }}>
+                      {emojiFor.get(letter)}
+                    </span>
+                    <div
+                      className={styles.writeBox}
+                      style={{ width: `${LAYOUT.writeBox}mm`, height: `${LAYOUT.writeBox}mm` }}
+                    />
+                  </div>
+                ))}
               </div>
             ))}
           </div>

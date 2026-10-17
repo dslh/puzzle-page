@@ -7,17 +7,19 @@ import { firstSoundLetter, isEligible } from '../InitialSounds/generator';
  */
 export const LAYOUT = {
   padding: 2,
-  keyCellWidth: 11,
-  keyCellHeight: 16,
-  keyEmoji: 7,
-  keyLetter: 5,
-  /** Space between the key and the first word. */
-  keyGap: 4,
-  slotWidth: 12,
-  wordRowHeight: 23,
-  wordEmoji: 9,
+  keyCellWidth: 9,
+  keyCellHeight: 12,
+  keyEmoji: 6,
+  keyLetter: 4.5,
+  /** Space between the key and the first row of words. */
+  keyGap: 3,
+  slotWidth: 10,
+  wordRowHeight: 18,
+  wordEmoji: 7,
   /** The box a child writes the decoded letter in. */
-  writeBox: 10,
+  writeBox: 9,
+  /** Empty slots between two words sharing a row. */
+  wordGapSlots: 1,
 };
 
 /**
@@ -93,6 +95,8 @@ export interface SecretCodePuzzle {
   /** Alphabetical, decoys included. */
   key: KeyEntry[];
   words: string[];
+  /** The words again, packed into rows - several to a row when they fit. */
+  rows: string[][];
   keyRows: number;
   keyPerRow: number;
   slotsPerRow: number;
@@ -204,6 +208,56 @@ function buildKey(
   });
 }
 
+/**
+ * Packs words into rows, each into the first row with room for it. Order is
+ * mostly kept, but a short word can slip back to fill a gap.
+ */
+function packRows(words: string[], slotsPerRow: number): string[][] {
+  const rows: string[][] = [];
+  const widths: number[] = [];
+  for (const word of words) {
+    const i = widths.findIndex((w) => w + LAYOUT.wordGapSlots + word.length <= slotsPerRow);
+    if (i >= 0) {
+      rows[i].push(word);
+      widths[i] += LAYOUT.wordGapSlots + word.length;
+    } else {
+      rows.push([word]);
+      widths.push(word.length);
+    }
+  }
+  return rows;
+}
+
+// How many shuffled candidates each pick chooses between. Bigger finds more
+// shared letters, but tends towards the same few short, overlapping words.
+const SHARING_SAMPLE = 30;
+
+/**
+ * Orders words so each one reuses as many of the earlier words' letters as it
+ * can. A key whose every letter is used just once is a dull key: the child
+ * only gets the satisfaction of "I know that one!" when pictures come back.
+ * `fixed` words (the parent's) always come first, in their own order.
+ */
+function orderBySharedLetters(fixed: string[], pool: string[], count: number): string[] {
+  const letters = new Set(fixed.join(''));
+  const result = [...fixed];
+  const remaining = [...pool];
+  while (result.length < count && remaining.length > 0) {
+    // Share of the word's letters the key doesn't have yet; lowest wins, and
+    // the shuffle breaks ties.
+    const newShare = (word: string) =>
+      [...new Set(word)].filter((l) => !letters.has(l)).length / word.length;
+    let best = 0;
+    for (let i = 1; i < Math.min(SHARING_SAMPLE, remaining.length); i++) {
+      if (newShare(remaining[i]) < newShare(remaining[best])) best = i;
+    }
+    const [word] = remaining.splice(best, 1);
+    result.push(word);
+    for (const l of word) letters.add(l);
+  }
+  return result;
+}
+
 export function generateSecretCode(
   seed: number,
   innerWidthMm: number,
@@ -234,27 +288,34 @@ export function generateSecretCode(
       (w) => w.decodable !== false && fits(w.word) && !custom.includes(w.word)
     ).map((w) => w.word)
   );
-  const candidates = [...custom.filter(fits), ...pool];
+
+  // An upper bound: every row full of three letter words.
+  const maxRows = Math.floor(
+    (innerHeightMm - LAYOUT.keyCellHeight - LAYOUT.keyGap) / LAYOUT.wordRowHeight
+  );
+  const maxWords = maxRows * Math.max(1, Math.floor((slotsPerRow + LAYOUT.wordGapSlots) / (3 + LAYOUT.wordGapSlots)));
+  const candidates = orderBySharedLetters(custom.filter(fits), pool, maxWords);
 
   // More words need more key letters, and a taller key leaves less room for
   // words, so find the most that fit together.
-  const maxWords = Math.floor(
-    (innerHeightMm - LAYOUT.keyCellHeight - LAYOUT.keyGap) / LAYOUT.wordRowHeight
-  );
   let words: string[] = [];
+  let rows: string[][] = [];
   let letters: string[] = [];
   let keyCount = 0;
-  search: for (let n = Math.min(maxWords, candidates.length); n >= 1; n--) {
+  search: for (let n = candidates.length; n >= 1; n--) {
     const chosen = candidates.slice(0, n);
+    const packed = packRows(chosen, slotsPerRow);
     const used = [...new Set(chosen.join(''))];
     const sizes = decoys
       ? [MIN_DECOYS, 0].map((min) => keySize(used.length, min, keyPerRow, alphabet.length))
       : [used.length];
     for (const count of sizes) {
-      const rows = Math.ceil(count / keyPerRow);
-      const height = rows * LAYOUT.keyCellHeight + LAYOUT.keyGap + n * LAYOUT.wordRowHeight;
+      const keyRows = Math.ceil(count / keyPerRow);
+      const height =
+        keyRows * LAYOUT.keyCellHeight + LAYOUT.keyGap + packed.length * LAYOUT.wordRowHeight;
       if (height <= innerHeightMm) {
         words = chosen;
+        rows = packed;
         letters = used;
         keyCount = count;
         break search;
@@ -268,6 +329,7 @@ export function generateSecretCode(
   return {
     key: buildKey(rng, keyLetters, mode, words),
     words,
+    rows,
     keyRows: Math.ceil(keyLetters.length / keyPerRow),
     keyPerRow,
     slotsPerRow,
