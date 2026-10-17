@@ -123,7 +123,7 @@ const AMBIGUOUS_PICTURES = new Set([
   'CLAP', // hands
 ]);
 
-function firstSoundLetter(word: string): string | null {
+export function firstSoundLetter(word: string): string | null {
   const first = word[0];
   if ('AEIOU'.includes(first)) return SHORT_VOWEL_WORDS.has(word) ? first : null;
   if (DIGRAPH_STARTS.some((d) => word.startsWith(d))) return null;
@@ -133,7 +133,7 @@ function firstSoundLetter(word: string): string | null {
   return first;
 }
 
-function isEligible(w: WordEntry): boolean {
+export function isEligible(w: WordEntry): boolean {
   return (
     w.pictureClue !== false &&
     !AMBIGUOUS_PICTURES.has(w.word) &&

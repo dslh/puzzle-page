@@ -20,6 +20,7 @@ import { puzzleDefinition as takeAway } from './TakeAway/definition';
 import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
+import { puzzleDefinition as secretCode } from './SecretCode/definition';
 
 /**
  * Registry of all available puzzle types
@@ -48,6 +49,7 @@ export const PUZZLE_DEFINITIONS = [
   moreOrLess,
   initialSounds,
   directions,
+  secretCode,
 ] as const;
 
 /**

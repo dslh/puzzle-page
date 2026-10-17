@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 22 puzzle types - see **Existing Puzzles** below.
+There are currently 23 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -410,8 +410,9 @@ default width×height in grid cells.
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 →` / `2 right`, robot / treasure theme, route length, spare boxes |
+| Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 
-Five of these carry notes worth reading before editing them:
+Six of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -450,6 +451,15 @@ Five of these carry notes worth reading before editing them:
   obstacles allow a shorter way are rejected. Fix mode only plants a mistake
   that has exactly one single-token fix. All of it is laid out against the mm
   constants at the top of `generator.ts`, mirrored in the CSS.
+- **Secret Code** - pictures in a key stand for letters; the child decodes
+  each word under it. Height adds words, but more words need more key
+  letters, so the generator searches for the most words that fit together
+  with their key, using the mm `LAYOUT` constants the component also draws
+  with. The default "code" key uses a hand-picked `CIPHER_PICTURES` set
+  (distinct in mono, never paired with a letter its name starts with). The
+  "sounds" key reuses Initial Sounds' `isEligible`/`firstSoundLetter`, plus
+  a few key-only extras for I, U and Y; Q and X have no picture, so words
+  with them are skipped in that mode and named in the config bar.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather
