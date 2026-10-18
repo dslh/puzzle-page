@@ -89,15 +89,16 @@ App (state holder)
 └── DragConfigProvider
     ├── Sidebar (age switch; collapsible categories; one entry per definition + preset)
     │   └── Config UI (when puzzle.configComponent exists)
-    └── GridLayout (drag/drop target + collision detection)
-        ├── Grid cells (19mm × 19mm visual grid)
-        ├── PuzzleWrapper (for each PlacedPuzzle)
-        │   ├── Drag handle
-        │   ├── Reroll/delete buttons
-        │   ├── Config UI (hover, when puzzle.configComponent exists)
-        │   ├── Resize handles (when puzzle.resizable)
-        │   └── Dynamic puzzle component
-        └── Drag preview (while dragging)
+    └── desk (green mat: toolbar with count / Clear page / Print)
+        └── GridLayout (drag/drop target + collision detection)
+            ├── Grid cells (19mm × 19mm visual grid)
+            ├── PuzzleWrapper (for each PlacedPuzzle)
+            │   ├── Drag handle
+            │   ├── Reroll/delete buttons
+            │   ├── Config UI (hover, when puzzle.configComponent exists)
+            │   ├── Resize handles (when puzzle.resizable)
+            │   └── Dynamic puzzle component
+            └── Drag preview (while dragging)
 ```
 
 ## Adding a New Puzzle
@@ -326,15 +327,18 @@ All components use scoped CSS Modules:
 - Usage: `className={styles.myClass}`
 - No global styles except `index.css`
 
-Match existing button-bar pattern for config components:
+Match existing button-bar pattern for config components. Colours come from the
+custom properties on `:root` in `index.css` (cutting-mat green desk, graphite
+ink, HB-pencil yellow for the selected option) - use them rather than hex
+values:
 
 ```css
 .buttonBar {
   display: flex;
-  border: 2px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
-  background: white;
+  background: var(--paper);
 }
 
 .button {
@@ -343,17 +347,22 @@ Match existing button-bar pattern for config components:
   font-size: 14px;
   font-weight: 600;
   border: none;
-  border-right: 1px solid #ddd;
-  background: white;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .button.selected {
-  background: #2196f3;
-  color: white;
+  background: var(--pencil);
+  color: var(--ink);
 }
 ```
+
+The app's own controls use Atkinson Hyperlegible Next (`--ui-font`); the
+puzzles keep Playpen Sans (`--hand-font`, set on `body`). The global `button`
+rules are wrapped in `:where()` so a module's `.button` always wins.
 
 ## Technology Stack
 

@@ -74,7 +74,7 @@ function App() {
   };
 
   const handleClear = () => {
-    if (window.confirm('Clear all puzzles from the grid?')) {
+    if (window.confirm('Remove every puzzle from the page?')) {
       setPuzzles([]);
     }
   };
@@ -82,18 +82,26 @@ function App() {
   return (
     <DragConfigProvider>
       <div className={styles.app}>
-        <div className={styles.controls}>
-          <button onClick={handlePrint}>Print Page</button>
-          <button onClick={handleClear} disabled={puzzles.length === 0}>
-            Clear Grid
-          </button>
-          <span className={styles.puzzleCount}>
-            {puzzles.length} puzzle{puzzles.length !== 1 ? 's' : ''} on page
-          </span>
-        </div>
-
-        <div className={styles.workspace}>
-          <Sidebar />
+        <Sidebar />
+        <main className={styles.desk}>
+          <div className={styles.toolbar}>
+            <span className={styles.puzzleCount}>
+              {puzzles.length === 0
+                ? 'Drag a puzzle onto the page'
+                : `${puzzles.length} puzzle${puzzles.length !== 1 ? 's' : ''} on the page`}
+            </span>
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={handleClear}
+              disabled={puzzles.length === 0}
+            >
+              Clear page
+            </button>
+            <button type="button" className={styles.printButton} onClick={handlePrint}>
+              Print
+            </button>
+          </div>
           <GridLayout
             puzzles={puzzles}
             onAddPuzzle={handleAddPuzzle}
@@ -103,7 +111,7 @@ function App() {
             onResizePuzzle={handleResizePuzzle}
             onConfigChange={handleConfigChange}
           />
-        </div>
+        </main>
       </div>
     </DragConfigProvider>
   );

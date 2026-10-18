@@ -103,9 +103,11 @@ export default function Sidebar() {
         onDragStart={(e) => handleDragStart(e, entry)}
         onDragEnd={handleDragEnd}
       >
-        <div className={styles.icon}>{entry.icon}</div>
-        <div className={styles.label}>{entry.label}</div>
-        <div className={styles.hint}>Drag to grid</div>
+        <div className={styles.entryHead}>
+          <span className={styles.icon}>{entry.icon}</span>
+          <span className={styles.label}>{entry.label}</span>
+          <span className={styles.grip} aria-hidden="true" title="Drag onto the page" />
+        </div>
         {ConfigComponent && currentConfig !== undefined && (
           <div className={styles.configSection}>
             {(() => {
@@ -129,9 +131,9 @@ export default function Sidebar() {
 
   return (
     <aside className={styles.sidebar}>
-      <h2 className={styles.title}>Puzzles</h2>
-      <div className={styles.ageSwitch}>
-        <span className={styles.ageLabel}>Age</span>
+      <h1 className={styles.title}>Puzzle page</h1>
+      <div className={styles.ageSwitch} role="group" aria-labelledby="age-label">
+        <span id="age-label" className={styles.ageLabel}>Child’s age</span>
         <div className={styles.ageButtons}>
           {[{ id: 'all', label: 'All' } as const, ...AGE_BANDS].map(option => (
             <button
@@ -146,6 +148,10 @@ export default function Sidebar() {
           ))}
         </div>
       </div>
+      <p className={styles.instructions}>
+        Drag a puzzle onto the page. The squares turn green where it fits and
+        red where it would overlap.
+      </p>
       {PUZZLE_CATEGORIES.map(category => {
         const entries = SIDEBAR_ENTRIES.filter(entry =>
           entry.category === category.id && isEntryForAge(entry, age)
@@ -153,7 +159,7 @@ export default function Sidebar() {
         if (entries.length === 0) return null;
         const isOpen = openCategories.has(category.id);
         return (
-          <section key={category.id} className={styles.category}>
+          <section key={category.id} className={styles.category} data-category={category.id}>
             <h3 className={styles.categoryTitle}>
               <button
                 type="button"
@@ -161,9 +167,10 @@ export default function Sidebar() {
                 aria-expanded={isOpen}
                 onClick={() => toggleCategory(category.id)}
               >
-                <span className={`${styles.chevron} ${isOpen ? styles.open : ''}`}>▸</span>
+                <span className={styles.tab} aria-hidden="true" />
                 <span className={styles.categoryLabel}>{category.label}</span>
                 <span className={styles.count}>{entries.length}</span>
+                <span className={`${styles.chevron} ${isOpen ? styles.open : ''}`} aria-hidden="true">›</span>
               </button>
             </h3>
             {isOpen && (
@@ -174,11 +181,6 @@ export default function Sidebar() {
           </section>
         );
       })}
-      <div className={styles.instructions}>
-        <p>Drag puzzles onto the grid to create your custom puzzle page.</p>
-        <p>Green highlight = valid placement</p>
-        <p>Red highlight = invalid (overlap or out of bounds)</p>
-      </div>
     </aside>
   );
 }

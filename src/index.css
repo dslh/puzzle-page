@@ -25,40 +25,92 @@
   unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
 }
 
+/* Atkinson Hyperlegible Next, self-hosted, for the app's own controls. The
+   puzzles keep Playpen Sans, which body still sets so they inherit it. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* The editor's palette: an A4 sheet on a green cutting mat, with HB-pencil
+   yellow for whatever is chosen. None of it reaches the printed page. */
+:root {
+  --mat: #3d6a5b;
+  --mat-deep: #335a4d;
+  --mat-line: rgba(255, 255, 255, 0.09);
+  --mat-line-major: rgba(255, 255, 255, 0.2);
+  --paper: #ffffff;
+  --panel: #f2f5f4;
+  --ink: #1e2a2d;
+  --ink-soft: #5b686b;
+  --line: #d2dad8;
+  --hover: #e6edeb;
+  --pencil: #f6cb3a;
+  --pencil-edge: #c99a0c;
+  --danger: #c43d32;
+  --radius: 6px;
+  --ui-font: 'Atkinson Hyperlegible Next', 'Noto Color Emoji', system-ui, sans-serif;
+  --hand-font: 'Playpen Sans', 'Noto Color Emoji', sans-serif;
+}
+
 * {
   box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+  }
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Playpen Sans', 'Noto Color Emoji', sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
+  font-family: var(--hand-font);
+  background-color: var(--mat);
+  color: var(--ink);
 }
 
 button, input, select, textarea {
   font-family: inherit;
 }
 
-button {
+:where(button) {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  border: 2px solid #333;
-  background-color: #fff;
-  color: #333;
+  border: 2px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: all 0.2s;
 }
 
-button:hover {
-  background-color: #333;
-  color: #fff;
+:where(button):hover {
+  background-color: var(--ink);
+  color: var(--paper);
 }
 
-button:active {
+:where(button):active {
   transform: scale(0.98);
 }
 

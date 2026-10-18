@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: white;
+  background: var(--paper);
   padding: 8px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -16,10 +16,10 @@
 
 .buttonBar {
   display: flex;
-  border: 2px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
-  background: white;
+  background: var(--paper);
 }
 
 .button {
@@ -28,9 +28,9 @@
   font-size: 14px;
   font-weight: 600;
   border: none;
-  border-right: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -40,12 +40,12 @@
 }
 
 .button:hover:not(.selected) {
-  background: #f5f5f5;
+  background: var(--hover);
 }
 
 .button.selected {
-  background: #2196f3;
-  color: white;
+  background: var(--pencil);
+  color: var(--ink);
 }
 
 .textInput {
@@ -53,22 +53,22 @@
   padding: 6px 10px;
   font-size: 14px;
   font-weight: 600;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  color: #333;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 2px;
 }
 
 .textInput:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: var(--ink);
 }
 
 .textInput::placeholder {
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
-  color: #999;
+  color: var(--ink-soft);
 }

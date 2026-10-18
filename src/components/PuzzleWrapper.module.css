@@ -23,9 +23,9 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #9e9e9e;
-  color: white;
-  border: 2px solid white;
+  background: var(--ink-soft);
+  color: var(--paper);
+  border: 2px solid var(--paper);
   font-size: 12px;
   line-height: 1;
   cursor: grab;
@@ -41,7 +41,7 @@
 }
 
 .dragHandle:hover {
-  background: #757575;
+  background: var(--ink);
   transform: scale(1.1);
 }
 
@@ -71,8 +71,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  color: white;
-  border: 2px solid white;
+  color: var(--paper);
+  border: 2px solid var(--paper);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
@@ -86,21 +86,23 @@
 }
 
 .rerollButton {
-  background: #2196f3;
+  background: var(--ink);
 }
 
 .rerollButton:hover {
-  background: #1976d2;
+  background: var(--ink);
+  color: var(--pencil);
   transform: scale(1.1);
 }
 
 .deleteButton {
-  background: #f44336;
+  background: var(--danger);
   font-size: 18px;
 }
 
 .deleteButton:hover {
-  background: #d32f2f;
+  background: #a52f26;
+  color: var(--paper);
   transform: scale(1.1);
 }
 
@@ -110,13 +112,15 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  padding: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 2px);
+  padding: 8px;
   opacity: 0;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.15s;
+  box-shadow: 0 2px 4px rgba(30, 42, 45, 0.12), 0 10px 28px rgba(30, 42, 45, 0.22);
+  font-family: var(--ui-font);
+  color: var(--ink);
   z-index: 100;
   pointer-events: auto;
 }
@@ -126,7 +130,7 @@
 .resizeHandleBottom,
 .resizeHandleCorner {
   position: absolute;
-  background: #607d8b;
+  background: var(--ink-soft);
   opacity: 0;
   transition: all 0.2s;
   z-index: 99;
@@ -143,7 +147,7 @@
 }
 
 .resizeHandleRight:hover {
-  background: #455a64;
+  background: var(--ink);
   width: 10px;
   right: -5px;
 }
@@ -159,7 +163,7 @@
 }
 
 .resizeHandleBottom:hover {
-  background: #455a64;
+  background: var(--ink);
   height: 10px;
   bottom: -5px;
 }
@@ -171,12 +175,12 @@
   height: 16px;
   cursor: nwse-resize;
   border-radius: 0 0 4px 0;
-  border-right: 2px solid white;
-  border-bottom: 2px solid white;
+  border-right: 2px solid var(--paper);
+  border-bottom: 2px solid var(--paper);
 }
 
 .resizeHandleCorner:hover {
-  background: #455a64;
+  background: var(--ink);
   width: 18px;
   height: 18px;
   right: -5px;

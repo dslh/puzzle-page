@@ -1,112 +1,134 @@
 .sidebar {
-  width: 300px;
-  background: #f5f5f5;
-  border-right: 1px solid #ddd;
-  padding: 20px;
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid rgba(0, 0, 0, 0.18);
+  padding: 22px 16px 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
   overflow-y: auto;
+  font-family: var(--ui-font);
+  color: var(--ink);
 }
+
+/* Category colours, one crayon each. Only the tab, the open entries' edge and
+   the hover border use them. */
+.category[data-category='mazes'] { --crayon: #3570ae; }
+.category[data-category='reading'] { --crayon: #c4473a; }
+.category[data-category='writing'] { --crayon: #7b56a8; }
+.category[data-category='numbers'] { --crayon: #d9822b; }
+.category[data-category='thinking'] { --crayon: #2b8a72; }
 
 .title {
   margin: 0;
-  font-size: 24px;
-  color: #333;
+  font-family: var(--hand-font);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
 .ageSwitch {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .ageLabel {
   font-size: 14px;
-  font-weight: 600;
-  color: #555;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 .ageButtons {
-  flex: 1;
   display: flex;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-  background: white;
+  gap: 4px;
+  padding: 4px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--hover);
 }
 
 .ageButton {
   flex: 1;
-  padding: 6px 4px;
+  padding: 8px 4px;
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  border-right: 1px solid #ddd;
-  background: white;
-  color: #333;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.ageButton:last-child {
-  border-right: none;
+  transition: background-color 0.15s;
 }
 
 .ageButton:hover:not(.selected) {
-  background: #f0f7ff;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .ageButton.selected {
-  background: #2196f3;
-  color: white;
+  background: var(--pencil);
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}
+
+.instructions {
+  margin: 0 0 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-soft);
 }
 
 .category {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .categoryTitle {
   margin: 0;
-  border-bottom: 2px solid #ddd;
 }
 
 .categoryToggle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 6px 2px;
+  padding: 10px 10px 10px 0;
   border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
   background: none;
   font: inherit;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #666;
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
 }
 
 .categoryToggle:hover {
-  color: #2196f3;
+  background: none;
+  color: var(--ink);
 }
 
-.chevron {
-  display: inline-block;
-  width: 12px;
-  font-size: 18px;
-  line-height: 1;
-  text-align: center;
-  transition: transform 0.2s;
+.categoryToggle:hover .categoryLabel {
+  text-decoration: underline;
+  text-decoration-color: var(--crayon);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-.chevron.open {
-  transform: rotate(90deg);
+/* A short crayon stub, like the coloured tab on a ring-binder divider */
+.tab {
+  width: 6px;
+  height: 22px;
+  border-radius: 0 3px 3px 0;
+  background: var(--crayon);
 }
 
 .categoryLabel {
@@ -114,84 +136,91 @@
 }
 
 .count {
-  min-width: 22px;
-  padding: 1px 7px;
-  border-radius: 10px;
-  background: #e0e0e0;
-  color: #555;
-  font-size: 11px;
-  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+.chevron {
+  display: inline-block;
+  width: 12px;
+  font-size: 20px;
+  line-height: 1;
   text-align: center;
+  color: var(--ink-soft);
+  transition: transform 0.2s;
+}
+
+.chevron.open {
+  transform: rotate(90deg);
 }
 
 .puzzleList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  padding: 2px 0 10px 10px;
+  border-left: 3px solid var(--crayon);
+  margin-left: 1px;
 }
 
 .puzzleItem {
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
   cursor: grab;
-  transition: all 0.2s;
   user-select: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .puzzleItem:hover {
-  border-color: #2196f3;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
-  transform: translateY(-2px);
+  border-color: var(--crayon);
+  box-shadow: 0 2px 6px rgba(30, 42, 45, 0.12);
 }
 
 .puzzleItem:active {
   cursor: grabbing;
 }
 
+.entryHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .icon {
-  font-size: 32px;
-  text-align: center;
-  margin-bottom: 8px;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .label {
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
-  text-align: center;
-  margin-bottom: 4px;
+  flex: 1;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.25;
 }
 
-.hint {
-  font-size: 12px;
-  color: #666;
-  text-align: center;
-  font-style: italic;
+/* Six dots: the usual "this can be picked up" mark */
+.grip {
+  width: 10px;
+  height: 16px;
+  background-image: radial-gradient(circle, var(--ink-soft) 1.3px, transparent 1.6px);
+  background-size: 5px 5.33px;
+  opacity: 0.55;
+}
+
+.puzzleItem:hover .grip {
+  opacity: 1;
 }
 
 .configSection {
-  margin-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
   font-size: 12px;
-}
-
-.instructions {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.6;
-}
-
-.instructions p {
-  margin: 0 0 8px 0;
-}
-
-.instructions p:last-child {
-  margin: 0;
+  cursor: auto;
 }
 
 @media print {

@@ -1,58 +1,100 @@
 .app {
   height: 100vh;
   display: flex;
-  flex-direction: column;
 }
 
-.controls {
+/* The cutting mat the sheet sits on. Its fine lines are 19mm apart, the same
+   as the puzzle grid's cells. */
+.desk {
+  flex: 1;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: auto;
+  background-color: var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line-major) 1px, transparent 1px),
+    linear-gradient(var(--mat-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 95mm 95mm, 95mm 95mm, 19mm 19mm, 19mm 19mm;
+  background-position: -1px -1px;
 }
 
-.controls button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.controls button:hover:not(:disabled) {
-  background: #f5f5f5;
-  border-color: #2196f3;
-}
-
-.controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Sits along the top edge of the sheet, at its width */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 190mm;
+  max-width: 100%;
+  margin: 8mm 10mm 4mm;
+  font-family: var(--ui-font);
 }
 
 .puzzleCount {
-  margin-left: auto;
-  font-size: 14px;
-  color: #666;
+  margin-right: auto;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.workspace {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
+.clearButton,
+.printButton {
+  padding: 8px 16px;
+  font-family: var(--ui-font);
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--radius);
+}
+
+.clearButton {
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: var(--paper);
+}
+
+.clearButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--paper);
+  color: var(--paper);
+}
+
+.clearButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.printButton {
+  padding: 8px 22px;
+  border: 2px solid var(--pencil-edge);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.printButton:hover {
+  background: #ffd84f;
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}
+
+.toolbar :focus-visible {
+  outline-color: var(--paper);
 }
 
 /* Print styles */
 @media print {
-  .controls {
-    display: none !important;
+  .app {
+    height: auto;
+    display: block;
   }
 
-  .workspace {
+  .desk {
+    display: block;
     overflow: visible;
+    background: none;
+  }
+
+  .toolbar {
+    display: none !important;
   }
 }

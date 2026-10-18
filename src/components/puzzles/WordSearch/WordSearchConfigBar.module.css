@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: white;
+  background: var(--paper);
   padding: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -21,16 +21,16 @@
 .label {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--ink-soft);
   white-space: nowrap;
 }
 
 .buttonBar {
   display: flex;
-  border: 2px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
   overflow: hidden;
-  background: white;
+  background: var(--paper);
 }
 
 .button {
@@ -38,9 +38,9 @@
   font-size: 13px;
   font-weight: 600;
   border: none;
-  border-right: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -50,35 +50,35 @@
 }
 
 .button:hover:not(.selected) {
-  background: #f5f5f5;
+  background: var(--hover);
 }
 
 .selected {
-  background: #2196f3;
-  color: white;
+  background: var(--pencil);
+  color: var(--ink);
 }
 
 .toggleButton {
   padding: 4px 8px;
   font-size: 11px;
   font-weight: 600;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  color: #999;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink-soft);
   cursor: pointer;
   transition: all 0.2s;
   text-decoration: line-through;
 }
 
 .toggleButton:hover:not(.selected) {
-  background: #f5f5f5;
+  background: var(--hover);
 }
 
 .toggleButton.selected {
-  background: #2196f3;
-  color: white;
-  border-color: #2196f3;
+  background: var(--pencil);
+  color: var(--ink);
+  border-color: var(--ink);
   text-decoration: none;
 }
 
@@ -86,8 +86,8 @@
   flex: 1;
   padding: 4px 8px;
   font-size: 13px;
-  border: 2px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
@@ -95,5 +95,5 @@
 
 .textInput:focus {
   outline: none;
-  border-color: #2196f3;
+  border-color: var(--ink);
 }
