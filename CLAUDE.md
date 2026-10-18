@@ -409,10 +409,10 @@ default width×height in grid cells.
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
-| Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 →` / `2 right`, robot / treasure theme, route length, spare boxes |
+| Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 
-Six of these carry notes worth reading before editing them:
+Seven of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -443,14 +443,23 @@ Six of these carry notes worth reading before editing them:
   C/G, or long vowels) and its emoji can't plausibly be named with another
   letter. The second filter is a hand-kept `AMBIGUOUS_PICTURES` set in its
   generator; check new `wordList.ts` entries against it.
-- **Directions** - one puzzle covering both the treasure map and robot paths
-  ideas (GitHub #18, #19); the theme only swaps emoji. Routes are runs that
-  each turn a corner and never cross themselves. Write mode's boxes come from
+- **Directions** - a treasure island map (it covers the robot paths idea too,
+  GitHub #18, #19). Routes are runs that each turn a corner and never cross
+  themselves. The island (`island.ts`) is decided square by square - sea
+  bays, clumps of trees and mountains, landmarks - and every drawn square is
+  blocked, so only blank sand is walkable. In follow mode the landmarks sit
+  where the usual slips end (a run turned the wrong way, or miscounted by
+  one), so a wrong answer lands on something nameable. The coastline
+  (`coast.ts`) is drawn afterwards as a contour of a distance field and never
+  changes which squares are land. The line art is Kenney's Cartography Pack
+  (CC0), pulled into `art.ts` by `scripts/extract-cartography-art.mjs`; don't
+  hand-edit it, and add icons by sheet cell there. Write mode's boxes come from
   a BFS over the map, not from the generated route, so any shortest answer
   fits, and its length setting is the *answer's* run count - maps whose
   obstacles allow a shorter way are rejected. Fix mode only plants a mistake
   that has exactly one single-token fix. All of it is laid out against the mm
-  constants at the top of `generator.ts`, mirrored in the CSS.
+  constants at the top of `generator.ts`, mirrored in the CSS; the strip
+  under the map takes one line of steps when the route fits, else two.
 - **Secret Code** - pictures in a key stand for letters; the child decodes
   each word under it. Words are packed several to a row where the width
   allows, and chosen to reuse each other's letters (`orderBySharedLetters`)

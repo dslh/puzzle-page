@@ -19,11 +19,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.25em;
   font-size: 4mm;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   color: #333;
+}
+
+.inlineIcon {
+  height: 5.5mm;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .mapArea {
@@ -35,26 +42,54 @@
 }
 
 .map {
-  display: grid;
-  border: 1.5px solid #333;
-  background: white;
+  display: block;
+  overflow: visible;
 }
 
-.cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0.5px solid #999;
-  box-sizing: border-box;
+/* Light enough to cost almost no ink */
+.sea {
+  fill: #e6f1f6;
 }
 
-.emoji {
-  line-height: 1;
+.land {
+  fill: white;
 }
 
-/* Two lines of tokens, always - generator.ts sizes the map around it */
+.echo {
+  fill: none;
+  stroke: #8aa4b0;
+  stroke-width: 0.2;
+}
+
+.coast {
+  fill: none;
+  stroke: #2a2a2a;
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+
+.gridLines {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 0.25;
+}
+
+.border {
+  fill: none;
+  stroke: #333;
+  stroke-width: 0.5;
+}
+
+/* Kenney's line art: stroked, never filled */
+.icon path {
+  fill: none;
+  stroke: #2a2a2a;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Height is set inline from the number of lines - see generator.ts */
 .strip {
-  height: 22mm;
   flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
@@ -69,18 +104,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid #999;
   border-radius: 2px;
-  background: white;
-  font-size: 5mm;
+  font-size: 7mm;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   color: #333;
 }
 
+/* A count and its arrow belong together: box them, or they run into the next */
+.boxed {
+  border: 1.5px solid #999;
+  font-size: 5mm;
+}
+
 .answerBox {
-  border-style: dashed;
+  border: 1.5px dashed #999;
 }
 
 /* Print-specific styles */

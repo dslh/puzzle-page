@@ -1,4 +1,6 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
+import { traceCoast } from './coast';
+import { buildIsland, stampIsland, type Stamp } from './island';
 
 // Directions puzzle data structures
 
@@ -19,8 +21,6 @@ export type DirectionsMode = 'follow' | 'write' | 'fix';
  */
 export type Notation = 'arrows' | 'counts' | 'words';
 
-export type Theme = 'robot' | 'treasure';
-
 export type RouteLength = 'short' | 'medium' | 'long';
 
 /** One straight run of the route. Arrows notation has every count at 1. */
@@ -39,8 +39,13 @@ export interface DirectionsPuzzle {
   rows: number;
   /** Map square size, in mm. */
   cellMm: number;
-  /** Emoji on each blocked square, keyed `x,y`. */
-  obstacles: Map<string, string>;
+  /** Squares that can't be walked on, keyed `x,y`: sea, terrain, landmarks. */
+  blocked: Set<string>;
+  /** Everything drawn on the map, in mm. */
+  stamps: Stamp[];
+  /** Coastline loops and the echo lines out to sea, as SVG path data in mm. */
+  coast: string[];
+  echoes: string[];
   start: Point;
   goal: Point;
   /** The route as printed. In fix mode it holds the mistake. */
@@ -49,6 +54,8 @@ export interface DirectionsPuzzle {
   mistake?: { index: number; correct: Token };
   /** Write mode: how many answer boxes to draw. */
   boxCount: number;
+  /** Lines of tokens the strip under the map is sized for. */
+  stripLines: number;
 }
 
 /*
@@ -60,17 +67,17 @@ export const PROMPT_MM = 7;
 const STACK_GAP_MM = 2;
 export const TOKEN_MM = 10;
 export const TOKEN_GAP_MM = 2;
-/** The strip under the map always holds two lines of tokens. */
-const STRIP_LINES = 2;
-const STRIP_MM = STRIP_LINES * TOKEN_MM + (STRIP_LINES - 1) * TOKEN_GAP_MM;
-/** Map squares are kept near this size - big enough to count and draw in. */
-const TARGET_CELL_MM = 14;
+/** Map squares stay within this range - big enough to count and draw in. */
+const MIN_CELL_MM = 12;
+const MAX_CELL_MM = 17;
 
 export const TOKEN_WIDTH_MM: Record<Notation, number> = {
-  arrows: TOKEN_MM,
+  arrows: 9,
   counts: 15,
   words: 22,
 };
+
+export const stripHeightMm = (lines: number) => lines * TOKEN_MM + (lines - 1) * TOKEN_GAP_MM;
 
 const MOVES_FOR_LENGTH: Record<RouteLength, number> = {
   short: 2,
@@ -80,15 +87,13 @@ const MOVES_FOR_LENGTH: Record<RouteLength, number> = {
 
 /** Longest straight run, in squares. Kept low so the counts stay countable. */
 const MAX_RUN = 3;
-/** Share of the squares off the route that get an obstacle. */
-const OBSTACLE_DENSITY = 0.25;
 const ROUTE_TRIES = 200;
 
 export const DIRECTION_ARROWS: Record<Direction, string> = {
-  up: '↑',
-  down: '↓',
-  left: '←',
-  right: '→',
+  up: '⬆️',
+  down: '⬇️',
+  left: '⬅️',
+  right: '➡️',
 };
 
 const STEP: Record<Direction, Point> = {
@@ -102,13 +107,10 @@ const ALL_DIRECTIONS: Direction[] = ['up', 'right', 'down', 'left'];
 
 const isHorizontal = (dir: Direction) => dir === 'left' || dir === 'right';
 
-export const THEMES: Record<Theme, { start: string; goal: string; obstacles: string[] }> = {
-  robot: { start: '🤖', goal: '⭐', obstacles: ['🧱', '📦', '🪨', '🚧'] },
-  treasure: { start: '🚩', goal: '❌', obstacles: ['🌳', '🏠', '🌊', '🪨', '⛰️', '🌴'] },
-};
+const OPPOSITE: Record<Direction, Direction> = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
 // Seeded random number generator for reproducible puzzles
-class SeededRandom {
+export class SeededRandom {
   private seed: number;
 
   constructor(seed: number) {
@@ -150,25 +152,40 @@ function innerWidthMm(gridWidth: number): number {
   return gridWidth * CELL_SIZE_MM - 2 * CONTAINER_PAD_MM;
 }
 
-function mapHeightMm(gridHeight: number): number {
-  return gridHeight * CELL_SIZE_MM - 2 * CONTAINER_PAD_MM - PROMPT_MM - STRIP_MM - 2 * STACK_GAP_MM;
+function mapHeightMm(gridHeight: number, stripLines: number): number {
+  return gridHeight * CELL_SIZE_MM - 2 * CONTAINER_PAD_MM - PROMPT_MM - stripHeightMm(stripLines) - 2 * STACK_GAP_MM;
 }
 
 /** Room for the map's outer border, which sits outside its squares. */
 const MAP_BORDER_MM = 1;
 
-function mapSize(gridWidth: number, gridHeight: number) {
+/**
+ * The squares' count and size that cover the most of the space, square sizes
+ * kept within range. Leftover space is unavoidable in one direction, since the
+ * squares stay square, but this keeps it to a sliver.
+ */
+function mapSize(gridWidth: number, gridHeight: number, stripLines: number) {
   const width = innerWidthMm(gridWidth) - MAP_BORDER_MM;
-  const height = mapHeightMm(gridHeight) - MAP_BORDER_MM;
-  const cols = Math.max(3, Math.floor(width / TARGET_CELL_MM));
-  const rows = Math.max(3, Math.floor(height / TARGET_CELL_MM));
-  return { cols, rows, cellMm: Math.min(width / cols, height / rows) };
+  const height = mapHeightMm(gridHeight, stripLines) - MAP_BORDER_MM;
+  let best = { cols: 3, rows: 3, cellMm: Math.min(width, height) / 3 };
+  let bestArea = 0;
+  for (let cols = 3; cols * MIN_CELL_MM <= width; cols++) {
+    for (let rows = 3; rows * MIN_CELL_MM <= height; rows++) {
+      const cellMm = Math.min(width / cols, height / rows, MAX_CELL_MM);
+      const area = cols * rows * cellMm * cellMm;
+      if (cellMm >= MIN_CELL_MM && area > bestArea + 1) {
+        best = { cols, rows, cellMm };
+        bestArea = area;
+      }
+    }
+  }
+  return best;
 }
 
 /** How many tokens fit in the strip under the map. */
-function maxTokens(gridWidth: number, notation: Notation): number {
+function maxTokens(gridWidth: number, notation: Notation, stripLines: number): number {
   const perLine = Math.floor((innerWidthMm(gridWidth) + TOKEN_GAP_MM) / (TOKEN_WIDTH_MM[notation] + TOKEN_GAP_MM));
-  return Math.max(1, perLine) * STRIP_LINES;
+  return Math.max(1, perLine) * stripLines;
 }
 
 // --- Routes ---
@@ -179,23 +196,25 @@ function toNotation(moves: Token[], notation: Notation): Token[] {
   return moves.flatMap(m => Array.from({ length: m.count }, () => ({ dir: m.dir, count: 1 })));
 }
 
+const NO_BLOCKS = new Set<string>();
+
 /**
  * Walks the tokens from `start`. Returns the squares visited after the start,
- * or undefined if the walk leaves the map or hits an obstacle.
+ * or undefined if the walk leaves the map or hits a blocked square.
  */
 function walk(
   tokens: Token[],
   start: Point,
   cols: number,
   rows: number,
-  obstacles: Map<string, string>
+  blocked: Set<string>
 ): Point[] | undefined {
   const visited: Point[] = [];
   let p = start;
   for (const { dir, count } of tokens) {
     for (let i = 0; i < count; i++) {
       p = { x: p.x + STEP[dir].x, y: p.y + STEP[dir].y };
-      if (p.x < 0 || p.y < 0 || p.x >= cols || p.y >= rows || obstacles.has(key(p))) return undefined;
+      if (p.x < 0 || p.y < 0 || p.x >= cols || p.y >= rows || blocked.has(key(p))) return undefined;
       visited.push(p);
     }
   }
@@ -218,7 +237,7 @@ function randomRoute(rng: SeededRandom, cols: number, rows: number, moveCount: n
     const options: Token[] = [];
     for (const dir of ALL_DIRECTIONS.filter(d => isHorizontal(d) === horizontal)) {
       for (let count = 1; count <= MAX_RUN; count++) {
-        const path = walk([{ dir, count }], p, cols, rows, new Map());
+        const path = walk([{ dir, count }], p, cols, rows, NO_BLOCKS);
         if (!path || path.some(q => seen.has(key(q)))) break;
         // Runs of one are half as likely: they leave nothing to count
         for (let weight = Math.min(count, 2); weight > 0; weight--) options.push({ dir, count });
@@ -226,7 +245,7 @@ function randomRoute(rng: SeededRandom, cols: number, rows: number, moveCount: n
     }
     if (options.length === 0) return undefined;
     const move = rng.pick(options);
-    for (const q of walk([move], p, cols, rows, new Map())!) {
+    for (const q of walk([move], p, cols, rows, NO_BLOCKS)!) {
       seen.add(key(q));
       p = q;
     }
@@ -236,16 +255,28 @@ function randomRoute(rng: SeededRandom, cols: number, rows: number, moveCount: n
   return { start, goal: p, moves, route: seen };
 }
 
-function placeObstacles(rng: SeededRandom, cols: number, rows: number, route: Set<string>, theme: Theme) {
-  const obstacles = new Map<string, string>();
-  const emoji = THEMES[theme].obstacles;
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const k = key({ x, y });
-      if (!route.has(k) && rng.next() < OBSTACLE_DENSITY) obstacles.set(k, rng.pick(emoji));
-    }
+/**
+ * Where the usual slips leave a child: one run turned the wrong way, or
+ * counted one too many or too few. Follow mode puts a landmark on each, so a
+ * wrong answer lands on something the parent can name. Only squares off the
+ * route count - the route itself has to stay clear.
+ */
+function mistakeEnds(moves: Token[], start: Point, cols: number, rows: number, route: Set<string>): Point[] {
+  const variants = moves.flatMap((m, i) => {
+    const swap = (t: Token) => moves.map((s, j) => (j === i ? t : s));
+    return [
+      swap({ dir: OPPOSITE[m.dir], count: m.count }),
+      swap({ dir: m.dir, count: m.count + 1 }),
+      ...(m.count > 1 ? [swap({ dir: m.dir, count: m.count - 1 })] : []),
+    ];
+  });
+  const ends = new Map<string, Point>();
+  for (const variant of variants) {
+    const path = walk(variant, start, cols, rows, NO_BLOCKS);
+    const end = path?.[path.length - 1];
+    if (end && !route.has(key(end))) ends.set(key(end), end);
   }
-  return obstacles;
+  return [...ends.values()];
 }
 
 /**
@@ -258,7 +289,7 @@ function shortestAnswer(
   goal: Point,
   cols: number,
   rows: number,
-  obstacles: Map<string, string>,
+  blocked: Set<string>,
   notation: Notation
 ): number {
   // Breadth-first, a layer per square travelled. For each square, the fewest
@@ -273,7 +304,7 @@ function shortestAnswer(
       for (const dir of ALL_DIRECTIONS) {
         const q = { x: p.x + STEP[dir].x, y: p.y + STEP[dir].y };
         const qk = key(q);
-        if (q.x < 0 || q.y < 0 || q.x >= cols || q.y >= rows || obstacles.has(qk)) continue;
+        if (q.x < 0 || q.y < 0 || q.x >= cols || q.y >= rows || blocked.has(qk)) continue;
         if (!dist.has(qk)) {
           dist.set(qk, d);
           next.push(q);
@@ -296,8 +327,8 @@ function shortestAnswer(
   return Math.min(...Object.values(runs.get(key(goal)) ?? {}));
 }
 
-const reaches = (tokens: Token[], start: Point, goal: Point, cols: number, rows: number, obstacles: Map<string, string>) => {
-  const path = walk(tokens, start, cols, rows, obstacles);
+const reaches = (tokens: Token[], start: Point, goal: Point, cols: number, rows: number, blocked: Set<string>) => {
+  const path = walk(tokens, start, cols, rows, blocked);
   const end = path ? (path[path.length - 1] ?? start) : undefined;
   return end !== undefined && end.x === goal.x && end.y === goal.y;
 };
@@ -321,17 +352,17 @@ function plantMistake(
   goal: Point,
   cols: number,
   rows: number,
-  obstacles: Map<string, string>
+  blocked: Set<string>
 ) {
   const candidates = rng.shuffle(
     tokens.flatMap((token, index) => alternatives(token, notation).map(wrong => ({ index, wrong })))
   );
   for (const { index, wrong } of candidates) {
     const shown = tokens.map((t, i) => (i === index ? wrong : t));
-    if (reaches(shown, start, goal, cols, rows, obstacles)) continue;
+    if (reaches(shown, start, goal, cols, rows, blocked)) continue;
     const fixes = shown.flatMap((t, i) =>
       alternatives(t, notation).filter(alt =>
-        reaches(shown.map((s, j) => (j === i ? alt : s)), start, goal, cols, rows, obstacles)
+        reaches(shown.map((s, j) => (j === i ? alt : s)), start, goal, cols, rows, blocked)
       ).map(() => i)
     );
     if (fixes.length === 1 && fixes[0] === index) {
@@ -341,55 +372,87 @@ function plantMistake(
   return undefined;
 }
 
+/** Landmarks per map: about one per ten squares, at least one, at most four. */
+const landmarkCount = (cols: number, rows: number) => Math.min(4, Math.max(1, Math.round((cols * rows) / 10)));
+
 export function generateDirections(
   gridWidth: number,
   gridHeight: number,
   seed: number,
   mode: DirectionsMode,
   notation: Notation,
-  theme: Theme,
   length: RouteLength,
   spareBoxes: boolean
 ): DirectionsPuzzle {
   const rng = new SeededRandom(seed);
-  const { cols, rows, cellMm } = mapSize(gridWidth, gridHeight);
-  const tokenLimit = maxTokens(gridWidth, notation);
   const spares = mode === 'write' && spareBoxes ? (notation === 'arrows' ? 2 : 1) : 0;
 
-  // Fall back to fewer runs if the map or the strip is too small for the length
+  // Fall back to fewer runs if the map or the strip is too small for the
+  // length. A one-line strip leaves more room for the map, so try that first.
   for (let moveCount = MOVES_FOR_LENGTH[length]; moveCount >= 1; moveCount--) {
-    for (let attempt = 0; attempt < ROUTE_TRIES; attempt++) {
-      const route = randomRoute(rng, cols, rows, moveCount);
-      if (!route) continue;
-      const tokens = toNotation(route.moves, notation);
-      if (tokens.length > tokenLimit) continue;
+    for (const stripLines of [1, 2]) {
+      const { cols, rows, cellMm } = mapSize(gridWidth, gridHeight, stripLines);
+      const tokenLimit = maxTokens(gridWidth, notation, stripLines);
 
-      const obstacles = placeObstacles(rng, cols, rows, route.route, theme);
-      const base = { cols, rows, cellMm, obstacles, start: route.start, goal: route.goal };
+      for (let attempt = 0; attempt < ROUTE_TRIES; attempt++) {
+        const route = randomRoute(rng, cols, rows, moveCount);
+        if (!route) continue;
+        const tokens = toNotation(route.moves, notation);
+        if (tokens.length > tokenLimit) continue;
 
-      if (mode === 'write') {
-        const boxCount = shortestAnswer(route.start, route.goal, cols, rows, obstacles, notation);
-        // The length setting is the answer's length, so the obstacles must stop
-        // any shorter way there. Otherwise most maps have a two-run shortcut.
-        const runs = shortestAnswer(route.start, route.goal, cols, rows, obstacles, 'counts');
-        if (runs < moveCount || boxCount + spares > tokenLimit) continue;
-        return { ...base, tokens, boxCount: boxCount + spares };
+        const wanted = landmarkCount(cols, rows);
+        // Elsewhere there's no wrong end to mark, so fewer, anywhere off the route
+        const candidates = mode === 'follow'
+          ? mistakeEnds(route.moves, route.start, cols, rows, route.route)
+          : Array.from({ length: cols * rows }, (_, i) => ({ x: i % cols, y: Math.floor(i / cols) }))
+              .filter(p => !route.route.has(key(p)));
+        const landmarks = rng.shuffle(candidates).slice(0, mode === 'follow' ? wanted : Math.ceil(wanted / 2));
+        const island = buildIsland(rng, cols, rows, route.route, landmarks);
+        const { blocked } = island;
+
+        const finish = (shown: Token[], extra: Pick<DirectionsPuzzle, 'boxCount' | 'mistake'>): DirectionsPuzzle => {
+          // Follow mode hides the goal: finding it is the puzzle
+          const goal = mode === 'follow' ? undefined : route.goal;
+          const stamps = stampIsland(rng, island, cols, rows, cellMm, route.start, goal);
+          // A slow swell and two faster ripples, each heading a random way
+          const wobble = {
+            terms: [1, 2.6, 5].map(base => {
+              const angle = rng.next() * 2 * Math.PI;
+              const freq = base * (0.8 + rng.next() * 0.4);
+              return { fx: freq * Math.cos(angle), fy: freq * Math.sin(angle), phase: rng.next() * 2 * Math.PI };
+            }),
+          };
+          const { coast, echoes } = traceCoast(cols, rows, cellMm, island.sea, wobble);
+          return {
+            cols, rows, cellMm, blocked, stamps, coast, echoes,
+            start: route.start, goal: route.goal, tokens: shown, stripLines, ...extra,
+          };
+        };
+
+        if (mode === 'write') {
+          const boxCount = shortestAnswer(route.start, route.goal, cols, rows, blocked, notation);
+          // The length setting is the answer's length, so the terrain must stop
+          // any shorter way there. Otherwise most maps have a two-run shortcut.
+          const runs = shortestAnswer(route.start, route.goal, cols, rows, blocked, 'counts');
+          if (runs < moveCount || boxCount + spares > tokenLimit) continue;
+          return finish(tokens, { boxCount: boxCount + spares });
+        }
+
+        if (mode === 'fix') {
+          const planted = plantMistake(rng, tokens, notation, route.start, route.goal, cols, rows, blocked);
+          if (!planted) continue;
+          return finish(planted.shown, { mistake: planted.mistake, boxCount: 0 });
+        }
+
+        return finish(tokens, { boxCount: 0 });
       }
-
-      if (mode === 'fix') {
-        const planted = plantMistake(rng, tokens, notation, route.start, route.goal, cols, rows, obstacles);
-        if (!planted) continue;
-        return { ...base, tokens: planted.shown, mistake: planted.mistake, boxCount: 0 };
-      }
-
-      return { ...base, tokens, boxCount: 0 };
     }
   }
 
   // Unreachable in practice: a one-square route on an empty map always works
-  const start = { x: 0, y: 0 };
+  const { cols, rows, cellMm } = mapSize(gridWidth, gridHeight, 1);
   return {
-    cols, rows, cellMm, obstacles: new Map(), start, goal: { x: 1, y: 0 },
-    tokens: [{ dir: 'right', count: 1 }], boxCount: 1,
+    cols, rows, cellMm, blocked: new Set(), stamps: [], coast: [], echoes: [],
+    start: { x: 0, y: 0 }, goal: { x: 1, y: 0 }, tokens: [{ dir: 'right', count: 1 }], boxCount: 1, stripLines: 1,
   };
 }

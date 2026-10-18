@@ -6,17 +6,16 @@ import DirectionsConfigBar from './DirectionsConfigBar';
 export const puzzleDefinition: PuzzleDefinition<DirectionsConfig> = {
   type: 'directions',
   label: 'Directions',
-  icon: '🧭',
+  icon: '🗺️',
   component: Directions,
   configComponent: DirectionsConfigBar,
-  // The map fills whatever is left above the prompt and the two-line strip of
-  // steps, so the minimum leaves room for a 3×3 map.
+  // The map fills whatever is left around the prompt and the strip of steps
+  // (one or two lines), so the minimum leaves room for a 3×3 map.
   defaultWidth: 6,
   defaultHeight: 7,
   defaultConfig: {
     mode: 'follow',
     notation: 'arrows',
-    theme: 'robot',
     length: 'medium',
     spareBoxes: false,
   },

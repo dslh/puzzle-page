@@ -24,16 +24,9 @@ const GROUPS: { [K in keyof DirectionsConfig]?: { label: string; options: Option
   notation: {
     label: 'Steps:',
     options: [
-      { value: 'arrows', label: '→ →', tooltip: 'One arrow per square' },
-      { value: 'counts', label: '2 →', tooltip: 'A number and an arrow per straight line' },
+      { value: 'arrows', label: '➡️ ➡️', tooltip: 'One arrow per square' },
+      { value: 'counts', label: '2 ➡️', tooltip: 'A number and an arrow per straight line' },
       { value: 'words', label: '2 right', tooltip: 'Written directions' },
-    ],
-  },
-  theme: {
-    label: 'Theme:',
-    options: [
-      { value: 'robot', label: '🤖 Robot' },
-      { value: 'treasure', label: '❌ Treasure' },
     ],
   },
   length: {
@@ -85,7 +78,6 @@ export default function DirectionsConfigBar({ value, onChange }: DirectionsConfi
     <div className={styles.configContainer}>
       <ButtonGroup name="mode" {...props} />
       <ButtonGroup name="notation" {...props} />
-      <ButtonGroup name="theme" {...props} />
       <ButtonGroup name="length" {...props} />
       {value.mode === 'write' && <ButtonGroup name="spareBoxes" {...props} />}
     </div>
