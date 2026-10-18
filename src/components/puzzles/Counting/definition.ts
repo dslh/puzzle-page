@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   type: 'counting',
   label: 'Counting',
   icon: '🔢',
+  category: 'numbers',
   component: Counting,
   defaultWidth: 4,
   defaultHeight: 3,

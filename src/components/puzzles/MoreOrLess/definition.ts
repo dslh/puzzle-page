@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<MoreOrLessConfig> = {
   type: 'moreorless',
   label: 'More or Less',
   icon: '⚖️',
+  category: 'numbers',
   component: MoreOrLess,
   configComponent: MoreOrLessConfigBar,
   // Width sets the difficulty: 8 cells gives up to 8 a side. Height is one row

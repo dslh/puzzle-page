@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<ColourBySightWordConfig> = {
   type: 'coloursightword',
   label: 'Colour by Sight Word',
   icon: '🖍️',
+  category: 'reading',
   component: ColourBySightWord,
   configComponent: ColourBySightWordConfigBar,
   defaultWidth: 6,

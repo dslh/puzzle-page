@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   type: 'lasermaze',
   label: 'Laser Maze',
   icon: '🔦',
+  category: 'mazes',
   component: LaserMaze,
   defaultWidth: 5,
   defaultHeight: 5,

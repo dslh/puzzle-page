@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
   type: 'maze',
   label: 'Maze (4×4)',
   icon: '🧩',
+  category: 'mazes',
   component: Maze,
   configComponent: MazeConfigBar,
   defaultWidth: 4,

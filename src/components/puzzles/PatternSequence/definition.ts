@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<PatternSequenceConfig> = {
   type: 'patternsequence',
   label: 'Pattern Sequence',
   icon: '🔢',
+  category: 'thinking',
   component: PatternSequence,
   configComponent: PatternSequenceConfigBar,
   defaultWidth: 8,

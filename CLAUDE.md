@@ -87,7 +87,7 @@ Simple React hooks pattern - no Redux or external state library:
 ```
 App (state holder)
 └── DragConfigProvider
-    ├── Sidebar
+    ├── Sidebar (grouped by category; one entry per definition + preset)
     │   └── Config UI (when puzzle.configComponent exists)
     └── GridLayout (drag/drop target + collision detection)
         ├── Grid cells (19mm × 19mm visual grid)
@@ -142,6 +142,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   type: 'yourpuzzle',
   label: 'Your Puzzle',
   icon: '🎯',
+  category: 'thinking', // a PUZZLE_CATEGORIES id - picks the sidebar group
   component: YourPuzzle,
   defaultWidth: 4,
   defaultHeight: 4,
@@ -383,8 +384,28 @@ export const CELL_SIZE_MM = 19;   // Physical cell size for print
 
 ## Existing Puzzles
 
-Registered in `src/components/puzzles/index.ts`, in sidebar order. "Size" is the
-default width×height in grid cells.
+Registered in `src/components/puzzles/index.ts`. "Size" is the default
+width×height in grid cells.
+
+### Categories and presets
+
+The sidebar is grouped by category, in `PUZZLE_CATEGORIES` order
+(`src/types/puzzle.ts`). Within a category, entries keep registry order. Every
+definition has a required `category`. A definition can also list `presets`:
+extra sidebar entries for the same puzzle under another name and category, whose
+`config` is merged over `defaultConfig`. `SIDEBAR_ENTRIES` in the registry
+flattens definitions and presets into what the sidebar draws. A preset only
+picks the starting config; the config bar still offers every option.
+
+| Category | Puzzles |
+|---|---|
+| Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions |
+| Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
+| Writing | Handwriting, Letter Formation |
+| Numbers | Counting, Ordering, Sums, Take Away, More or Less |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Picture Scramble, Odd One Out, Size Ordering *(preset)*, Chess |
+
+The puzzles in registry order:
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
@@ -518,8 +539,9 @@ parent chose on purpose.
 
 The config system has already been through this cycle. `Sidebar.tsx` once held
 Sudoku-specific config code; with enough configurable puzzles to see the pattern,
-it was generalised - it now initialises a `Record<PuzzleType, unknown>` from each
-definition's `defaultConfig` and renders `configComponent` generically. No
+it was generalised - it now initialises a `Record<string, unknown>` from each
+sidebar entry's config (keyed by entry, so a puzzle listed twice keeps two
+configs) and renders `configComponent` generically. No
 per-puzzle code remains in the sidebar, and adding a configurable puzzle needs no
 core changes.
 

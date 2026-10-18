@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<WordSearchConfig> = {
   type: 'wordsearch',
   label: 'Word Search',
   icon: '🔍',
+  category: 'reading',
   component: WordSearch,
   configComponent: WordSearchConfigBar,
   defaultWidth: 5,

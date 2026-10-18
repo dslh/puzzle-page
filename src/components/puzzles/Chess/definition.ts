@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition<ChessConfig> = {
   type: 'chess',
   label: 'Chess Puzzle',
   icon: '♟️',
+  category: 'thinking',
   component: Chess,
   configComponent: ChessConfigBar,
   defaultWidth: 5,

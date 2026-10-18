@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<LetterFormationConfig> = {
   type: 'letterformation',
   label: 'Letter Formation',
   icon: '✍️',
+  category: 'writing',
   component: LetterFormation,
   configComponent: LetterFormationConfigBar,
   defaultWidth: 6,

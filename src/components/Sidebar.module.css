@@ -15,6 +15,23 @@
   color: #333;
 }
 
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.categoryTitle {
+  margin: 0;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #ddd;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #666;
+}
+
 .puzzleList {
   display: flex;
   flex-direction: column;

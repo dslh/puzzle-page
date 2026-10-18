@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<WeavingMazeConfig> = {
   type: 'weavingmaze',
   label: 'Weaving Maze',
   icon: '🪢',
+  category: 'mazes',
   component: WeavingMaze,
   configComponent: WeavingMazeConfigBar,
   defaultWidth: 5,

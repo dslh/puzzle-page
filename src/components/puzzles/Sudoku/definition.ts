@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition<SudokuConfig> = {
   type: 'sudoku',
   label: 'Sudoku',
   icon: '🔢',
+  category: 'thinking',
   component: Sudoku,
   configComponent: SudokuConfigBar,
   defaultWidth: 3,

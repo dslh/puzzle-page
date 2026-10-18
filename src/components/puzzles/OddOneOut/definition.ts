@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition<OddOneOutConfig> = {
   type: 'oddoneout',
   label: 'Odd One Out',
   icon: '🔍',
+  category: 'thinking',
   component: OddOneOut,
   configComponent: OddOneOutConfigBar,
   defaultWidth: 5,

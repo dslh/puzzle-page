@@ -21,6 +21,7 @@ import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
 import { puzzleDefinition as secretCode } from './SecretCode/definition';
+import type { PuzzleCategory, PuzzlePreset } from '../../types/puzzle';
 
 /**
  * Registry of all available puzzle types
@@ -51,6 +52,41 @@ export const PUZZLE_DEFINITIONS = [
   directions,
   secretCode,
 ] as const;
+
+export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];
+
+/**
+ * One item in the sidebar: a puzzle under a name, in a category, with the
+ * config it starts from. Every puzzle gets one for its definition, plus one
+ * per preset.
+ */
+export interface SidebarEntry {
+  key: string;
+  definition: AnyPuzzleDefinition;
+  label: string;
+  icon: string;
+  category: PuzzleCategory;
+  config: unknown;
+}
+
+export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(definition => [
+  {
+    key: definition.type,
+    definition,
+    label: definition.label,
+    icon: definition.icon,
+    category: definition.category,
+    config: definition.defaultConfig,
+  },
+  ...(definition.presets ?? []).map((preset: PuzzlePreset<unknown>) => ({
+    key: `${definition.type}:${preset.id}`,
+    definition,
+    label: preset.label,
+    icon: preset.icon ?? definition.icon,
+    category: preset.category,
+    config: { ...(definition.defaultConfig as object), ...(preset.config as object) },
+  })),
+]);
 
 /**
  * Get puzzle definition by type

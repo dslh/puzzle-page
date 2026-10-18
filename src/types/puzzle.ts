@@ -63,16 +63,43 @@ export interface PuzzleConfigProps<TConfig> {
   onChange: (config: TConfig) => void;
 }
 
+/**
+ * Sidebar groups, in display order.
+ */
+export const PUZZLE_CATEGORIES = [
+  { id: 'mazes', label: 'Mazes & Paths' },
+  { id: 'reading', label: 'Reading & Phonics' },
+  { id: 'writing', label: 'Writing' },
+  { id: 'numbers', label: 'Numbers' },
+  { id: 'thinking', label: 'Thinking & Logic' },
+] as const;
+
+export type PuzzleCategory = typeof PUZZLE_CATEGORIES[number]['id'];
+
+/**
+ * An extra sidebar entry for a puzzle: the same puzzle under another name,
+ * usually in another category, starting from different settings.
+ */
+export interface PuzzlePreset<TConfig = unknown> {
+  id: string;                // Unique within the puzzle
+  label: string;
+  icon?: string;             // Defaults to the puzzle's icon
+  category: PuzzleCategory;
+  config: Partial<TConfig>;  // Merged over defaultConfig
+}
+
 export interface PuzzleDefinition<TConfig = unknown> {
   type: PuzzleType;
   label: string;
   icon: string;
+  category: PuzzleCategory;
   component: React.ComponentType<PuzzleProps<TConfig>>;
   defaultWidth: number;
   defaultHeight: number;
   resizable?: ResizableConfig;
   configComponent?: React.ComponentType<PuzzleConfigProps<TConfig>>;
   defaultConfig?: TConfig;
+  presets?: PuzzlePreset<TConfig>[];
 }
 
 export const GRID_COLS = 10;

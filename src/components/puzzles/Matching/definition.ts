@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
   type: 'matching',
   label: 'Matching',
   icon: '🔗',
+  category: 'thinking',
   component: Matching,
   configComponent: MatchingConfigBar,
   defaultWidth: 5,
@@ -19,6 +20,11 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
     rhymeDisplay: 'pictures',
     workedExample: true,
   },
+  presets: [
+    { id: 'words', label: 'Word Matching', icon: '🔤', category: 'reading', config: { mode: 'word' } },
+    { id: 'letters', label: 'Letter Matching', icon: '🅰️', category: 'reading', config: { mode: 'letter' } },
+    { id: 'rhymes', label: 'Rhyme Matching', icon: '🎵', category: 'reading', config: { mode: 'rhyme' } },
+  ],
   resizable: {
     width: true,
     height: true,

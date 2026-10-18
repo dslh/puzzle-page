@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<OrderingConfig> = {
   type: 'ordering',
   label: 'Ordering',
   icon: '📊',
+  category: 'numbers',
   component: Ordering,
   configComponent: OrderingConfigBar,
   defaultWidth: 4,
@@ -14,6 +15,9 @@ export const puzzleDefinition: PuzzleDefinition<OrderingConfig> = {
   defaultConfig: {
     mode: 'numbers',
   },
+  presets: [
+    { id: 'sizes', label: 'Size Ordering', category: 'thinking', config: { mode: 'emoji' } },
+  ],
   resizable: {
     width: true,
     height: true,

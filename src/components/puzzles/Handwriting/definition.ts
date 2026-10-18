@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<HandwritingConfig> = {
   type: 'handwriting',
   label: 'Handwriting',
   icon: '✏️',
+  category: 'writing',
   component: Handwriting,
   configComponent: HandwritingConfigBar,
   defaultWidth: 6,

@@ -6,6 +6,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   type: 'whichdoesntbelong',
   label: "Which Doesn't Belong?",
   icon: '🤔',
+  category: 'thinking',
   component: WhichDoesntBelong,
   defaultWidth: 4,
   defaultHeight: 1,

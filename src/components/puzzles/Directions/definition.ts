@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<DirectionsConfig> = {
   type: 'directions',
   label: 'Directions',
   icon: '🗺️',
+  category: 'mazes',
   component: Directions,
   configComponent: DirectionsConfigBar,
   // The map fills whatever is left around the prompt and the strip of steps
