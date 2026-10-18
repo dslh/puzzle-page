@@ -186,6 +186,7 @@
 @media print {
   .buttonGroup,
   .dragHandle,
+  .configPanel,
   .resizeHandleRight,
   .resizeHandleBottom,
   .resizeHandleCorner {
