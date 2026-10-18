@@ -227,15 +227,23 @@ function walk(
  * square the child has already passed.
  */
 function randomRoute(rng: SeededRandom, cols: number, rows: number, moveCount: number) {
-  const start = { x: rng.nextInt(cols), y: rng.nextInt(rows) };
+  // The ship moors in a square on the edge, and the first run heads inland
+  const inland: Direction = rng.pick(ALL_DIRECTIONS);
+  const along = (n: number) => rng.nextInt(n);
+  const start =
+    inland === 'down' ? { x: along(cols), y: 0 }
+    : inland === 'up' ? { x: along(cols), y: rows - 1 }
+    : inland === 'right' ? { x: 0, y: along(rows) }
+    : { x: cols - 1, y: along(rows) };
   const seen = new Set([key(start)]);
   const moves: Token[] = [];
   let p = start;
-  let horizontal = rng.next() < 0.5;
+  let horizontal = isHorizontal(inland);
 
   for (let m = 0; m < moveCount; m++) {
     const options: Token[] = [];
-    for (const dir of ALL_DIRECTIONS.filter(d => isHorizontal(d) === horizontal)) {
+    const dirs = m === 0 ? [inland] : ALL_DIRECTIONS.filter(d => isHorizontal(d) === horizontal);
+    for (const dir of dirs) {
       for (let count = 1; count <= MAX_RUN; count++) {
         const path = walk([{ dir, count }], p, cols, rows, NO_BLOCKS);
         if (!path || path.some(q => seen.has(key(q)))) break;
@@ -407,7 +415,7 @@ export function generateDirections(
           : Array.from({ length: cols * rows }, (_, i) => ({ x: i % cols, y: Math.floor(i / cols) }))
               .filter(p => !route.route.has(key(p)));
         const landmarks = rng.shuffle(candidates).slice(0, mode === 'follow' ? wanted : Math.ceil(wanted / 2));
-        const island = buildIsland(rng, cols, rows, route.route, landmarks);
+        const island = buildIsland(rng, cols, rows, route.route, route.start, landmarks);
         const { blocked } = island;
 
         const finish = (shown: Token[], extra: Pick<DirectionsPuzzle, 'boxCount' | 'mistake'>): DirectionsPuzzle => {

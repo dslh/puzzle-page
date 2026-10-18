@@ -55,8 +55,17 @@ function InlineIcon({ icon }: { icon: ArtName }) {
       className={`${styles.icon} ${styles.inlineIcon}`}
       viewBox={`${box[0] - 2} ${box[1] - 2} ${box[2] - box[0] + 4} ${box[3] - box[1] + 4}`}
     >
-      <path d={thick} strokeWidth={4} />
-      <path d={thin} strokeWidth={2.5} />
+      <path d={thick} strokeWidth={3.5} />
+      <path d={thin} strokeWidth={2} />
+    </svg>
+  );
+}
+
+/** A plain X, as the child will draw it - the art set's cross is too fussy small. */
+function DrawnX() {
+  return (
+    <svg className={styles.inlineIcon} viewBox="0 0 10 10">
+      <path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" className={styles.drawnX} />
     </svg>
   );
 }
@@ -66,12 +75,12 @@ function InlineIcon({ icon }: { icon: ArtName }) {
  * minimum width of 4, which leaves about 70mm.
  */
 function Prompt({ mode, notation }: { mode: DirectionsMode; notation: Notation }) {
-  const steps = notation === 'words' ? 'directions' : 'arrows';
+  const steps = notation === 'words' ? 'steps' : 'arrows';
   switch (mode) {
     case 'follow':
-      return <>Where is the treasure? Draw <InlineIcon icon="cross" />.</>;
+      return <>Where is the treasure? Draw <DrawnX />.</>;
     case 'write':
-      return <>Write the {steps} from <InlineIcon icon="flag" /> to <InlineIcon icon="chest" />.</>;
+      return <>Write the {steps} from <InlineIcon icon="ship" /> to <InlineIcon icon="chest" />.</>;
     case 'fix':
       return <>One {notation === 'words' ? 'step' : 'arrow'} is wrong. Circle it.</>;
   }

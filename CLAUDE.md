@@ -445,7 +445,8 @@ Seven of these carry notes worth reading before editing them:
   generator; check new `wordList.ts` entries against it.
 - **Directions** - a treasure island map (it covers the robot paths idea too,
   GitHub #18, #19). Routes are runs that each turn a corner and never cross
-  themselves. The island (`island.ts`) is decided square by square - sea
+  themselves. They start from the ship, moored in a sea square on the edge,
+  and the first run heads inland. The island (`island.ts`) is decided square by square - sea
   bays, clumps of trees and mountains, landmarks - and every drawn square is
   blocked, so only blank sand is walkable. In follow mode the landmarks sit
   where the usual slips end (a run turned the wrong way, or miscounted by

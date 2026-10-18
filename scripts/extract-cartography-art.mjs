@@ -13,7 +13,6 @@ const CELL = 64;
 
 /** Icon name -> [column, row] on the sheet. */
 const ICONS = {
-  flag: [0, 1],
   hut: [3, 1],
   tent: [6, 1],
   ship: [0, 2],
@@ -34,7 +33,6 @@ const ICONS = {
   campfire: [5, 4],
   well: [6, 4],
   chest: [7, 4],
-  cross: [8, 4],
   waves: [5, 5],
   compass: [8, 6],
 };

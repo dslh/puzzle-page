@@ -43,19 +43,22 @@ const NEIGHBOURS = [
 
 /**
  * Lays out the island around a route. `keepClear` squares (the route) stay
- * walkable sand; `landmarks` squares each get a landmark, all different.
+ * walkable sand, except `harbour`, the route's start on the edge, which is
+ * sea for the ship to moor in. `landmarks` squares each get a landmark, all
+ * different.
  */
 export function buildIsland(
   rng: SeededRandom,
   cols: number,
   rows: number,
   keepClear: Set<string>,
+  harbour: Point,
   landmarks: Point[]
 ): Island {
   const inMap = (p: Point) => p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
   const onEdge = (p: Point) => p.x === 0 || p.y === 0 || p.x === cols - 1 || p.y === rows - 1;
   const features = new Map<string, Feature>();
-  const sea = new Set<string>();
+  const sea = new Set([key(harbour)]);
   const taken = (k: string) => keepClear.has(k) || sea.has(k) || features.has(k);
 
   // Landmarks first: in follow mode they mark where the usual mistakes end
@@ -124,7 +127,8 @@ export function buildIsland(
 }
 
 /**
- * The icons that draw the island, plus the start and (if shown) the goal.
+ * The icons that draw the island, the ship at the start and (if shown) the
+ * chest at the goal.
  * Edge squares lose their outer part to the sea strip, so their icons are
  * pulled inward and shrunk to stay on the sand.
  */
@@ -163,21 +167,21 @@ export function stampIsland(
     });
   };
 
-  // Sea: waves everywhere, the compass in a corner and a ship in another bay
+  // Sea: waves everywhere, the ship at the start and the compass in a corner
   const seaSquares = [...island.sea].map(k => {
     const [x, y] = k.split(',').map(Number);
     return { x, y };
   });
   const isCorner = (p: Point) => (p.x === 0 || p.x === cols - 1) && (p.y === 0 || p.y === rows - 1);
-  const compass = seaSquares.find(isCorner);
-  const ship = rng.shuffle(seaSquares).find(p => p !== compass);
+  const isStart = (p: Point) => p.x === start.x && p.y === start.y;
+  const compass = seaSquares.find(p => isCorner(p) && !isStart(p));
   for (const p of seaSquares) {
-    const icon: ArtName = p === compass ? 'compass' : p === ship ? 'ship' : 'waves';
+    const icon: ArtName = isStart(p) ? 'ship' : p === compass ? 'compass' : 'waves';
     stamps.push({
       icon,
       x: (p.x + 0.5) * cellMm,
       y: (p.y + 0.5) * cellMm,
-      size: cellMm * (icon === 'waves' ? 0.75 : 0.8),
+      size: cellMm * (icon === 'waves' ? 0.75 : icon === 'ship' ? 0.9 : 0.8),
     });
   }
 
@@ -214,7 +218,6 @@ export function stampIsland(
     }
   }
 
-  single(start, 'flag', 0.8, 0);
   if (goal) single(goal, 'chest', 0.85, 0);
   return stamps;
 }
