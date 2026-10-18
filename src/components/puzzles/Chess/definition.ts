@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<ChessConfig> = {
   label: 'Chess Puzzle',
   icon: '♟️',
   category: 'thinking',
+  ages: ['4-5', '6-7'],
   component: Chess,
   configComponent: ChessConfigBar,
   defaultWidth: 5,

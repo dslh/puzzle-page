@@ -8,6 +8,10 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
   label: 'Maze (4×4)',
   icon: '🧩',
   category: 'mazes',
+  ageConfig: {
+    '2-3': { branchiness: 'low' },
+    '6-7': { cellSizeRatio: 3 },
+  },
   component: Maze,
   configComponent: MazeConfigBar,
   defaultWidth: 4,

@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<SecretCodeConfig> = {
   label: 'Secret Code',
   icon: '🕵️',
   category: 'reading',
+  ages: ['4-5', '6-7'],
   component: SecretCode,
   configComponent: SecretCodeConfigBar,
   defaultWidth: 6,

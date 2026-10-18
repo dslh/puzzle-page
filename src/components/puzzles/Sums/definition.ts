@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<SumsConfig> = {
   label: 'Sums',
   icon: '➕',
   category: 'numbers',
+  ages: ['4-5', '6-7'],
   component: Sums,
   configComponent: SumsConfigBar,
   defaultWidth: 4,

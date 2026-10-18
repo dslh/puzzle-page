@@ -21,7 +21,7 @@ import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
 import { puzzleDefinition as secretCode } from './SecretCode/definition';
-import type { PuzzleCategory, PuzzlePreset } from '../../types/puzzle';
+import type { AgeBand, AgeSetting, PuzzleCategory, PuzzleDefinition, PuzzlePreset } from '../../types/puzzle';
 
 /**
  * Registry of all available puzzle types
@@ -56,17 +56,17 @@ export const PUZZLE_DEFINITIONS = [
 export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];
 
 /**
- * One item in the sidebar: a puzzle under a name, in a category, with the
- * config it starts from. Every puzzle gets one for its definition, plus one
- * per preset.
+ * One item in the sidebar: a puzzle under a name, in a category. Every puzzle
+ * gets one for its definition, plus one per preset.
  */
 export interface SidebarEntry {
   key: string;
   definition: AnyPuzzleDefinition;
+  preset?: PuzzlePreset<object>;
   label: string;
   icon: string;
   category: PuzzleCategory;
-  config: unknown;
+  ages?: AgeBand[];
 }
 
 export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(definition => [
@@ -76,17 +76,40 @@ export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(defini
     label: definition.label,
     icon: definition.icon,
     category: definition.category,
-    config: definition.defaultConfig,
+    ages: definition.ages,
   },
-  ...(definition.presets ?? []).map((preset: PuzzlePreset<unknown>) => ({
+  ...(definition.presets ?? []).map((preset: PuzzlePreset<object>) => ({
     key: `${definition.type}:${preset.id}`,
     definition,
+    preset,
     label: preset.label,
     icon: preset.icon ?? definition.icon,
     category: preset.category,
-    config: { ...(definition.defaultConfig as object), ...(preset.config as object) },
+    ages: preset.ages ?? definition.ages,
   })),
 ]);
+
+export function isEntryForAge(entry: SidebarEntry, age: AgeSetting): boolean {
+  return age === 'all' || !entry.ages || entry.ages.includes(age);
+}
+
+/**
+ * The config an entry starts from at an age. Later layers win: the puzzle's
+ * defaults, its changes for that age, then the preset's, then the preset's
+ * changes for that age.
+ */
+export function startingConfig(entry: SidebarEntry, age: AgeSetting): unknown {
+  // Cast needed: registry aggregates heterogeneous puzzle types
+  const definition = entry.definition as unknown as PuzzleDefinition<object>;
+  if (definition.defaultConfig === undefined) return undefined;
+  const band = age === 'all' ? undefined : age;
+  return {
+    ...definition.defaultConfig,
+    ...(band && definition.ageConfig?.[band]),
+    ...entry.preset?.config,
+    ...(band && entry.preset?.ageConfig?.[band]),
+  };
+}
 
 /**
  * Get puzzle definition by type

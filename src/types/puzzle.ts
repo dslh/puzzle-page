@@ -77,6 +77,25 @@ export const PUZZLE_CATEGORIES = [
 export type PuzzleCategory = typeof PUZZLE_CATEGORIES[number]['id'];
 
 /**
+ * Age bands for the sidebar's age switch, youngest first. 'all' shows every
+ * entry with its base config.
+ */
+export const AGE_BANDS = [
+  { id: '2-3', label: '2–3' },
+  { id: '4-5', label: '4–5' },
+  { id: '6-7', label: '6–7' },
+] as const;
+
+export type AgeBand = typeof AGE_BANDS[number]['id'];
+export type AgeSetting = AgeBand | 'all';
+
+/**
+ * Per-band config changes, merged over the base config when that band is
+ * selected. Only list what differs; most puzzles need none.
+ */
+export type AgeConfig<TConfig> = Partial<Record<AgeBand, Partial<TConfig>>>;
+
+/**
  * An extra sidebar entry for a puzzle: the same puzzle under another name,
  * usually in another category, starting from different settings.
  */
@@ -86,6 +105,8 @@ export interface PuzzlePreset<TConfig = unknown> {
   icon?: string;             // Defaults to the puzzle's icon
   category: PuzzleCategory;
   config: Partial<TConfig>;  // Merged over defaultConfig
+  ages?: AgeBand[];          // Defaults to the puzzle's ages
+  ageConfig?: AgeConfig<TConfig>;
 }
 
 export interface PuzzleDefinition<TConfig = unknown> {
@@ -100,6 +121,8 @@ export interface PuzzleDefinition<TConfig = unknown> {
   configComponent?: React.ComponentType<PuzzleConfigProps<TConfig>>;
   defaultConfig?: TConfig;
   presets?: PuzzlePreset<TConfig>[];
+  ages?: AgeBand[];          // Bands the sidebar lists it under; all if absent
+  ageConfig?: AgeConfig<TConfig>;
 }
 
 export const GRID_COLS = 10;

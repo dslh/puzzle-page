@@ -7,6 +7,7 @@ export const puzzleDefinition: PuzzleDefinition<SudokuConfig> = {
   label: 'Sudoku',
   icon: '🔢',
   category: 'thinking',
+  ages: ['4-5', '6-7'],
   component: Sudoku,
   configComponent: SudokuConfigBar,
   defaultWidth: 3,

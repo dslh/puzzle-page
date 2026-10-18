@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<HandwritingConfig> = {
   label: 'Handwriting',
   icon: '✏️',
   category: 'writing',
+  ages: ['4-5', '6-7'],
   component: Handwriting,
   configComponent: HandwritingConfigBar,
   defaultWidth: 6,

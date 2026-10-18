@@ -21,9 +21,9 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
     workedExample: true,
   },
   presets: [
-    { id: 'words', label: 'Word Matching', icon: '🔤', category: 'reading', config: { mode: 'word' } },
-    { id: 'letters', label: 'Letter Matching', icon: '🅰️', category: 'reading', config: { mode: 'letter' } },
-    { id: 'rhymes', label: 'Rhyme Matching', icon: '🎵', category: 'reading', config: { mode: 'rhyme' } },
+    { id: 'words', label: 'Word Matching', icon: '🔤', category: 'reading', config: { mode: 'word' }, ages: ['4-5', '6-7'] },
+    { id: 'letters', label: 'Letter Matching', icon: '🅰️', category: 'reading', config: { mode: 'letter' }, ages: ['4-5', '6-7'] },
+    { id: 'rhymes', label: 'Rhyme Matching', icon: '🎵', category: 'reading', config: { mode: 'rhyme' }, ages: ['4-5', '6-7'] },
   ],
   resizable: {
     width: true,

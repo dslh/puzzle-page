@@ -9,6 +9,7 @@ export const puzzleDefinition: PuzzleDefinition<PictureScrambleConfig> = {
   label: 'Picture Scramble',
   icon: '🖼️',
   category: 'thinking',
+  ages: ['4-5', '6-7'],
   component: PictureScramble,
   defaultWidth: 7,
   defaultHeight: 7,

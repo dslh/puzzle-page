@@ -9,6 +9,9 @@ export const puzzleDefinition: PuzzleDefinition<PatternSequenceConfig> = {
   label: 'Pattern Sequence',
   icon: '🔢',
   category: 'thinking',
+  ageConfig: {
+    '2-3': { style: 'colours', families: ['simple'], gaps: 'end' },
+  },
   component: PatternSequence,
   configComponent: PatternSequenceConfigBar,
   defaultWidth: 8,

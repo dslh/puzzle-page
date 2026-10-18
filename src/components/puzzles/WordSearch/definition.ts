@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<WordSearchConfig> = {
   label: 'Word Search',
   icon: '🔍',
   category: 'reading',
+  ages: ['4-5', '6-7'],
   component: WordSearch,
   configComponent: WordSearchConfigBar,
   defaultWidth: 5,

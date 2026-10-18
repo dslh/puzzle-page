@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<TakeAwayConfig> = {
   label: 'Take Away',
   icon: '➖',
   category: 'numbers',
+  ages: ['4-5', '6-7'],
   component: TakeAway,
   configComponent: TakeAwayConfigBar,
   // Width sets the difficulty: 6 cells gives starting numbers up to 9

@@ -8,6 +8,10 @@ export const puzzleDefinition: PuzzleDefinition<DirectionsConfig> = {
   label: 'Directions',
   icon: '🗺️',
   category: 'mazes',
+  ageConfig: {
+    '6-7': { length: 'long' },
+  },
+  ages: ['4-5', '6-7'],
   component: Directions,
   configComponent: DirectionsConfigBar,
   // The map fills whatever is left around the prompt and the strip of steps

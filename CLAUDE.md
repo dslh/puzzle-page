@@ -87,7 +87,7 @@ Simple React hooks pattern - no Redux or external state library:
 ```
 App (state holder)
 └── DragConfigProvider
-    ├── Sidebar (grouped by category; one entry per definition + preset)
+    ├── Sidebar (age switch; collapsible categories; one entry per definition + preset)
     │   └── Config UI (when puzzle.configComponent exists)
     └── GridLayout (drag/drop target + collision detection)
         ├── Grid cells (19mm × 19mm visual grid)
@@ -396,6 +396,27 @@ extra sidebar entries for the same puzzle under another name and category, whose
 `config` is merged over `defaultConfig`. `SIDEBAR_ENTRIES` in the registry
 flattens definitions and presets into what the sidebar draws. A preset only
 picks the starting config; the config bar still offers every option.
+Categories start collapsed; each header shows how many entries it holds.
+
+### Age switch
+
+The sidebar has an age switch: All / 2–3 / 4–5 / 6–7 (`AGE_BANDS`), remembered
+in `localStorage`. A definition or preset can give:
+
+- `ages` - the bands it is listed under. Absent means every band. A preset
+  without its own `ages` inherits the puzzle's.
+- `ageConfig` - per-band changes merged over the base config.
+
+`startingConfig` in the registry layers them: `defaultConfig`, the puzzle's
+`ageConfig` for the band, the preset's `config`, the preset's `ageConfig` for
+the band. "All" uses the base only. Switching age resets every sidebar entry to
+its new starting config; puzzles already on the page are untouched.
+
+The base defaults are pitched at the main audience (about five), so 4–5 rarely
+needs overrides; the other bands carry them. Only six entries suit 2–3 (Maze,
+Pattern Sequence, Matching shadows, Size Ordering, Which Doesn't Belong?, Odd
+One Out); everything else is `ages: ['4-5', '6-7']`. New toddler-level puzzles
+are planned. Keep overrides to settings you're sure of - the user tunes them.
 
 | Category | Puzzles |
 |---|---|

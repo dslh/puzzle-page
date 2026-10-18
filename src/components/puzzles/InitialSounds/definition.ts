@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<InitialSoundsConfig> = {
   label: 'Initial Sounds',
   icon: '🔤',
   category: 'reading',
+  ages: ['4-5', '6-7'],
   component: InitialSounds,
   configComponent: InitialSoundsConfigBar,
   defaultWidth: 6,

@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<PuzzleMazeConfig> = {
   label: 'Puzzle Maze',
   icon: '🎯',
   category: 'mazes',
+  ages: ['4-5', '6-7'],
   component: PuzzleMaze,
   defaultWidth: 4,
   defaultHeight: 4,

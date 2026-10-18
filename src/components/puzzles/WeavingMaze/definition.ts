@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition<WeavingMazeConfig> = {
   label: 'Weaving Maze',
   icon: '🪢',
   category: 'mazes',
+  ages: ['4-5', '6-7'],
   component: WeavingMaze,
   configComponent: WeavingMazeConfigBar,
   defaultWidth: 5,
