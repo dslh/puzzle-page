@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import GridLayout from './components/GridLayout';
 import { DragConfigProvider } from './contexts/DragConfigContext';
+import { GRID_COLS, GRID_ROWS } from './types/puzzle';
 import type { PlacedPuzzle } from './types/puzzle';
 import styles from './App.module.css';
 
@@ -36,6 +37,9 @@ function App() {
     // Find the puzzle being resized
     const puzzle = puzzles.find(p => p.id === id);
     if (!puzzle) return;
+
+    // Keep the puzzle on the page
+    if (puzzle.x + width > GRID_COLS || puzzle.y + height > GRID_ROWS) return;
 
     // Check for collisions with other puzzles
     const hasCollision = puzzles.some(other => {

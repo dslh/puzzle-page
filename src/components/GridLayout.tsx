@@ -31,7 +31,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
   const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string): boolean => {
     // Check if puzzle would go out of bounds
-    if (x + width > GRID_COLS || y + height > GRID_ROWS) {
+    if (x < 0 || y < 0 || x + width > GRID_COLS || y + height > GRID_ROWS) {
       return true;
     }
 
