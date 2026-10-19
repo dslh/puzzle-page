@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<WeavingMazeConfig> = {
   category: 'mazes',
   ages: ['4-5', '6-7'],
   component: WeavingMaze,
+  docs: () => import('./docs'),
   configComponent: WeavingMazeConfigBar,
   defaultWidth: 5,
   defaultHeight: 5,

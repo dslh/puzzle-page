@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<PuzzleMazeConfig> = {
   category: 'mazes',
   ages: ['4-5', '6-7'],
   component: PuzzleMaze,
+  docs: () => import('./docs'),
   defaultWidth: 4,
   defaultHeight: 4,
   resizable: {

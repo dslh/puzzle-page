@@ -13,6 +13,7 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     '6-7': { cellSizeRatio: 3 },
   },
   component: Maze,
+  docs: () => import('./docs'),
   configComponent: MazeConfigBar,
   defaultWidth: 4,
   defaultHeight: 4,
