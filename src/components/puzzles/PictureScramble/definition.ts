@@ -11,6 +11,7 @@ export const puzzleDefinition: PuzzleDefinition<PictureScrambleConfig> = {
   category: 'thinking',
   ages: ['4-5', '6-7'],
   component: PictureScramble,
+  docs: () => import('./docs'),
   defaultWidth: 7,
   defaultHeight: 7,
   resizable: {

@@ -9,6 +9,7 @@ export const puzzleDefinition: PuzzleDefinition<ChessConfig> = {
   category: 'thinking',
   ages: ['4-5', '6-7'],
   component: Chess,
+  docs: () => import('./docs'),
   configComponent: ChessConfigBar,
   defaultWidth: 5,
   defaultHeight: 5,

@@ -13,6 +13,7 @@ export const puzzleDefinition: PuzzleDefinition<PatternSequenceConfig> = {
     '2-3': { style: 'colours', families: ['simple'], gaps: 'end' },
   },
   component: PatternSequence,
+  docs: () => import('./docs'),
   configComponent: PatternSequenceConfigBar,
   defaultWidth: 8,
   defaultHeight: 3,

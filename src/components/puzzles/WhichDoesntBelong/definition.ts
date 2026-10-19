@@ -8,6 +8,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   icon: '🤔',
   category: 'thinking',
   component: WhichDoesntBelong,
+  docs: () => import('./docs'),
   defaultWidth: 4,
   defaultHeight: 1,
   resizable: {

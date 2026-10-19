@@ -11,6 +11,7 @@ export const puzzleDefinition: PuzzleDefinition<OddOneOutConfig> = {
     '2-3': { size: 3 },
   },
   component: OddOneOut,
+  docs: () => import('./docs'),
   configComponent: OddOneOutConfigBar,
   defaultWidth: 5,
   defaultHeight: 5,
