@@ -230,8 +230,9 @@ reader, plain words, and a reading age of about 9. On top of that:
 - UK spelling and school terms: Reception, Year 1, EYFS, Key Stage 1.
 
 The Laser Maze, Directions, Initial Sounds and Counting guides are the worked
-examples of all this; match them. Documented so far: Laser Maze, Directions, Initial
-Sounds, Counting.
+examples of all this; match them. Every puzzle now has a guide; a new puzzle
+needs one too. A guide that serves several sidebar entries (Matching, Ordering)
+must read right from each, with the mode setting showing every option.
 
 ## Adding Configuration to a Puzzle
 
