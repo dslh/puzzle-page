@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<SumsConfig> = {
   category: 'numbers',
   ages: ['4-5', '6-7'],
   component: Sums,
+  docs: () => import('./docs'),
   configComponent: SumsConfigBar,
   defaultWidth: 4,
   defaultHeight: 3,

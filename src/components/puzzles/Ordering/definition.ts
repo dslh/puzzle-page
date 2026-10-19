@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<OrderingConfig> = {
   category: 'numbers',
   ages: ['4-5', '6-7'],
   component: Ordering,
+  docs: () => import('./docs'),
   configComponent: OrderingConfigBar,
   defaultWidth: 4,
   defaultHeight: 3,
