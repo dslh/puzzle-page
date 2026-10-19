@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<WordSearchConfig> = {
   category: 'reading',
   ages: ['4-5', '6-7'],
   component: WordSearch,
+  docs: () => import('./docs'),
   configComponent: WordSearchConfigBar,
   defaultWidth: 5,
   defaultHeight: 6,

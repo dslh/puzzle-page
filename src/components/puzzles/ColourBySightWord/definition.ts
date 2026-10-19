@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<ColourBySightWordConfig> = {
   category: 'reading',
   ages: ['4-5', '6-7'],
   component: ColourBySightWord,
+  docs: () => import('./docs'),
   configComponent: ColourBySightWordConfigBar,
   defaultWidth: 6,
   defaultHeight: 7,

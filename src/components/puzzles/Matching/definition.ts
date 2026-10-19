@@ -9,6 +9,7 @@ export const puzzleDefinition: PuzzleDefinition<MatchingConfig> = {
   icon: '🔗',
   category: 'thinking',
   component: Matching,
+  docs: () => import('./docs'),
   configComponent: MatchingConfigBar,
   defaultWidth: 5,
   defaultHeight: 4,

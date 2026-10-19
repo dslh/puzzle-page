@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<SecretCodeConfig> = {
   category: 'reading',
   ages: ['4-5', '6-7'],
   component: SecretCode,
+  docs: () => import('./docs'),
   configComponent: SecretCodeConfigBar,
   defaultWidth: 6,
   defaultHeight: 7,
