@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<HandwritingConfig> = {
   category: 'writing',
   ages: ['4-5', '6-7'],
   component: Handwriting,
+  docs: () => import('./docs'),
   configComponent: HandwritingConfigBar,
   defaultWidth: 6,
   defaultHeight: 4,

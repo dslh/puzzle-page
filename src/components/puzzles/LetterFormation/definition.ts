@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<LetterFormationConfig> = {
   category: 'writing',
   ages: ['4-5', '6-7'],
   component: LetterFormation,
+  docs: () => import('./docs'),
   configComponent: LetterFormationConfigBar,
   defaultWidth: 6,
   defaultHeight: 3,
