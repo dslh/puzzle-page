@@ -1,4 +1,5 @@
 import { WORD_LIST, type PuzzleWord } from '../WordSearch/wordList';
+import type { LeftOutWords } from '../../LeftOutNotice';
 
 class SeededRandom {
   private seed: number;
@@ -39,6 +40,7 @@ export interface HandwritingRow {
 
 export interface HandwritingPuzzle {
   rows: HandwritingRow[];
+  leftOut: LeftOutWords;
 }
 
 /**
@@ -74,19 +76,24 @@ export function generateHandwriting(
 
   // Custom words come first so a spelling list from school always makes the cut
   const used = new Set<string>();
-  const customWords: PuzzleWord[] = customWordsText
+  const typed = customWordsText
     .toUpperCase()
     .split(/[,\s]+/)
     .map(w => w.replace(/[^A-Z]/g, ''))
-    .filter(w => w.length > 0 && w.length <= maxWordLength)
     .filter(w => {
-      if (used.has(w)) return false;
+      if (w.length === 0 || used.has(w)) return false;
       used.add(w);
       return true;
-    })
+    });
+  const customWords: PuzzleWord[] = typed
+    .filter(w => w.length <= maxWordLength)
     .map(word => ({ word, emoji: wordListMap.get(word) ?? FALLBACK_EMOJI }));
 
   const selected: PuzzleWord[] = customWords.slice(0, wordCount);
+  const leftOut: LeftOutWords = {
+    tooLong: typed.filter(w => w.length > maxWordLength),
+    noRoom: customWords.slice(wordCount).map(w => w.word),
+  };
 
   if (selected.length < wordCount) {
     const pool = WORD_LIST.filter(
@@ -101,5 +108,6 @@ export function generateHandwriting(
       emoji: entry.emoji,
       missingIndex: pickMissingIndex(entry.word, random),
     })),
+    leftOut,
   };
 }

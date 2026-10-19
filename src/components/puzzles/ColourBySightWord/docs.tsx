@@ -96,7 +96,9 @@ const docs: PuzzleDoc<ColourBySightWordConfig> = {
       description: (
         <p>
           Type words, e.g. this week’s tricky words, and they are used first. Look-alike
-          words you type are kept in. A narrow puzzle quietly leaves out long words.
+          words you type are kept in. A note on the puzzle (on screen, not printed)
+          names any too long for the squares, or more than there are colours. Reroll
+          to get the others.
         </p>
       ),
       options: [

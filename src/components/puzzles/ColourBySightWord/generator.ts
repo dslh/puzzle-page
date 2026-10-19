@@ -1,5 +1,6 @@
 import { PICTURES, type Picture } from './pictures';
 import { SIGHT_WORDS } from './sightWords';
+import type { LeftOutWords } from '../../LeftOutNotice';
 
 class SeededRandom {
   private seed: number;
@@ -64,6 +65,7 @@ export interface ColourBySightWordPuzzle {
   /** Region index per cell, row-major. Index into `key`. */
   cells: number[];
   key: KeyEntry[];
+  leftOut: LeftOutWords;
 }
 
 /** '.' is the background; '1'-'3' are the foreground regions. */
@@ -101,15 +103,14 @@ function buildCells(picture: Picture, colourCount: number) {
 }
 
 /** Split a "the, and is" style config string into clean lowercase words. */
-function parseCustomWords(text: string, maxWordLength: number): string[] {
+function parseCustomWords(text: string): string[] {
   const seen = new Set<string>();
   return text
     .toLowerCase()
     .split(/[,\s]+/)
     .map(word => word.replace(/[^a-z']/g, ''))
     .filter(word => {
-      if (word.length === 0 || word.length > maxWordLength) return false;
-      if (seen.has(word)) return false;
+      if (word.length === 0 || seen.has(word)) return false;
       seen.add(word);
       return true;
     });
@@ -144,11 +145,12 @@ function chooseWords(
   count: number,
   maxWordLength: number,
   customWordsText: string
-): string[] {
+): { words: string[]; leftOut: LeftOutWords } {
   // Custom words win: the whole point of the field is that a parent can drive
   // the sheet from the list their child brought home. Shuffled among
   // themselves so rerolling still varies a long list.
-  const custom = random.shuffle(parseCustomWords(customWordsText, maxWordLength));
+  const typed = parseCustomWords(customWordsText);
+  const custom = random.shuffle(typed.filter(w => w.length <= maxWordLength));
   const taken = new Set(custom);
 
   const fitting = SIGHT_WORDS.filter(w => w.length <= maxWordLength && !taken.has(w));
@@ -174,7 +176,13 @@ function chooseWords(
     if (!chosen.includes(word)) chosen.push(word);
   }
 
-  return chosen.slice(0, count);
+  return {
+    words: chosen.slice(0, count),
+    leftOut: {
+      tooLong: typed.filter(w => w.length > maxWordLength),
+      noRoom: custom.slice(count),
+    },
+  };
 }
 
 /**
@@ -211,7 +219,7 @@ export function generateColourBySightWord(
   const random = new SeededRandom(seed + 977);
 
   const { cells, regionCount } = buildCells(picture, colourCount);
-  const words = chooseWords(random, regionCount, maxWordLength, customWordsText);
+  const { words, leftOut } = chooseWords(random, regionCount, maxWordLength, customWordsText);
 
   return {
     pictureName: picture.name,
@@ -219,5 +227,6 @@ export function generateColourBySightWord(
     rows: picture.rows.length,
     cells,
     key: assignColours(random, words),
+    leftOut,
   };
 }

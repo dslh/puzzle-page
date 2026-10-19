@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { generateHandwriting, type HandwritingRow } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
+import LeftOutNotice from '../../LeftOutNotice';
 import styles from './Handwriting.module.css';
 
 export type HandwritingMode = 'trace' | 'copy' | 'missing';
@@ -186,6 +187,7 @@ export default function Handwriting({
           </svg>
         </div>
       ))}
+      <LeftOutNotice words={puzzle.leftOut} />
     </div>
   );
 }

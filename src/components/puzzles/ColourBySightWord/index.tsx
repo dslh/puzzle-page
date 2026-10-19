@@ -5,6 +5,7 @@ import {
   type KeyEntry,
 } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
+import LeftOutNotice from '../../LeftOutNotice';
 import styles from './ColourBySightWord.module.css';
 
 export type ColourCount = 2 | 3 | 4;
@@ -221,6 +222,7 @@ export default function ColourBySightWord({
           })}
         </div>
       </div>
+      <LeftOutNotice words={puzzle.leftOut} />
     </div>
   );
 }

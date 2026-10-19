@@ -1,4 +1,5 @@
 import { WORD_LIST, type PuzzleWord } from './wordList';
+import type { LeftOutWords } from '../../LeftOutNotice';
 
 class SeededRandom {
   private seed: number;
@@ -69,6 +70,7 @@ export interface WordSearchPuzzle {
   grid: string[][];
   words: PlacedWord[];
   gridSize: number;
+  leftOut: LeftOutWords;
 }
 
 function canPlaceWord(
@@ -211,11 +213,15 @@ export function generateWordSearch(
 
   // Parse custom words from text input, matching emoji from word list when possible
   const wordListMap = new Map(WORD_LIST.map(w => [w.word, w.emoji]));
-  const validCustomWords: PuzzleWord[] = customWordsText
-    .toUpperCase()
-    .split(/[,\s]+/)
-    .map(w => w.replace(/[^A-Z]/g, ''))
-    .filter(w => w.length > 0 && w.length <= maxWordLength)
+  const typed = [...new Set(
+    customWordsText
+      .toUpperCase()
+      .split(/[,\s]+/)
+      .map(w => w.replace(/[^A-Z]/g, ''))
+      .filter(w => w.length > 0)
+  )];
+  const validCustomWords: PuzzleWord[] = typed
+    .filter(w => w.length <= maxWordLength)
     .map(word => ({ word, emoji: wordListMap.get(word) ?? '' }));
 
   // Get available predefined words
@@ -283,5 +289,13 @@ export function generateWordSearch(
     }
   }
 
-  return { grid, words: placedWords, gridSize };
+  // A custom word is missing either because the word count was already met,
+  // or because no free line in the grid could take it
+  const placedSet = new Set(placedWords.map(w => w.word));
+  const leftOut: LeftOutWords = {
+    tooLong: typed.filter(w => w.length > maxWordLength),
+    noRoom: validCustomWords.map(w => w.word).filter(w => !placedSet.has(w)),
+  };
+
+  return { grid, words: placedWords, gridSize, leftOut };
 }

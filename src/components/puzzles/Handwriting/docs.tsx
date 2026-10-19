@@ -116,7 +116,8 @@ const docs: PuzzleDoc<HandwritingConfig> = {
             fills any lines left.
           </p>
           <p>
-            Words too long for the line are dropped without warning; widen the puzzle.
+            A note on the puzzle (on screen, not printed) names any word too long for
+            the line, or with no line left. Widen or lengthen the puzzle.
             Words with no picture in the list get a ✏️ instead.
           </p>
         </>

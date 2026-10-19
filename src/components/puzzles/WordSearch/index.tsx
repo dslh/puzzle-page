@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { generateWordSearch } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
+import LeftOutNotice from '../../LeftOutNotice';
 import styles from './WordSearch.module.css';
 
 export interface WordSearchConfig {
@@ -82,6 +83,7 @@ export default function WordSearch({
           </div>
         ))}
       </div>
+      <LeftOutNotice words={puzzle.leftOut} />
     </div>
   );
 }

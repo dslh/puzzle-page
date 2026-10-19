@@ -119,8 +119,9 @@ const docs: PuzzleDoc<WordSearchConfig> = {
       description: (
         <>
           <p>
-            Type words, e.g. this week’s spellings, and they are hidden first. Words
-            longer than the square is wide are left out.
+            Type words, e.g. this week’s spellings, and they are hidden first. A note on
+            the puzzle (on screen, not printed) names any it left out: too long for the
+            square, or no room.
           </p>
           <p>
             Words from the puzzle’s list get their picture; others are listed without
