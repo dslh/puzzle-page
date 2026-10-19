@@ -8,6 +8,7 @@
 
 .wrapper:hover .deleteButton,
 .wrapper:hover .rerollButton,
+.wrapper:hover .helpButton,
 .wrapper:hover .dragHandle,
 .wrapper:hover .configPanel,
 .wrapper:hover .resizeHandleRight,
@@ -66,6 +67,7 @@
   justify-content: center;
 }
 
+.helpButton,
 .rerollButton,
 .deleteButton {
   width: 24px;
@@ -85,8 +87,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.rerollButton {
+.rerollButton,
+.helpButton {
   background: var(--ink);
+}
+
+.helpButton {
+  font-weight: 800;
+}
+
+.helpButton:hover {
+  background: var(--ink);
+  color: var(--pencil);
+  transform: scale(1.1);
 }
 
 .rerollButton:hover {

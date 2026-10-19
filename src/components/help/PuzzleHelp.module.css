@@ -1,0 +1,393 @@
+/* A puzzle's help: a long sheet of paper laid over the mat. */
+.dialog {
+  width: min(880px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100vh - 48px);
+  margin: 24px auto;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dialog::backdrop {
+  background: rgba(23, 41, 35, 0.6);
+}
+
+.sheet {
+  padding: 28px 40px 40px;
+  border-top: 8px solid var(--crayon);
+  font-family: var(--ui-font);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.headerIcon {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.headerText {
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--hand-font);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+.categoryChip {
+  border-color: var(--crayon);
+  color: var(--crayon);
+  background: var(--paper);
+}
+
+.closeButton {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.closeButton:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.status {
+  margin: 32px 0 8px;
+  color: var(--ink-soft);
+}
+
+.summary {
+  margin: 20px 0 0;
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+/* At a glance: four facts in a strip */
+.glance {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: 20px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.glance > div {
+  padding: 10px 14px;
+  background: var(--panel);
+}
+
+.glance dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.glance dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Examples: the puzzle on a scrap of paper on the mat */
+.mainExample {
+  margin: 24px 0 0;
+  padding: 20px;
+  border-radius: var(--radius);
+  background-color: var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.examplePaper {
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 6px 16px rgba(0, 0, 0, 0.2);
+  font-family: var(--hand-font);
+  line-height: normal;
+  color: #000;
+}
+
+/* Mirrors the page wrapper, which puzzles are written to fill */
+.exampleArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.exampleCaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  font-size: 14px;
+  color: var(--paper);
+}
+
+.rerollButton {
+  padding: 6px 14px;
+  font-family: var(--ui-font);
+  font-size: 14px;
+  font-weight: 700;
+  border: 2px solid var(--pencil-edge);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.rerollButton:hover {
+  background: #ffd84f;
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}
+
+.section {
+  margin-top: 32px;
+}
+
+.section h3,
+.atSchool h3 {
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--line);
+  font-family: var(--hand-font);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.section h4 {
+  margin: 18px 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sectionNote {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.section ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.section li + li {
+  margin-top: 6px;
+}
+
+/* After the section's list rules, so lists in prose keep their spacing */
+.prose > p,
+.prose > ul,
+.prose > ol {
+  margin: 0 0 10px;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* What to say: read aloud, so set like speech */
+.sayAloud {
+  padding: 14px 18px;
+  border-left: 4px solid var(--pencil);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: #fdf6dc;
+  font-family: var(--hand-font);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.sayAloud p {
+  margin: 0;
+}
+
+.sayAloud p + p {
+  margin-top: 8px;
+}
+
+.section ul.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.section .skills li {
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--crayon);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.setting + .setting {
+  margin-top: 8px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Options with no example to show sit side by side */
+.compactOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.optionExample {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  min-width: 220px;
+}
+
+.optionText {
+  flex: 1;
+  font-size: 15px;
+}
+
+.optionLabel {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 1px 10px;
+  border: 2px solid var(--pencil-edge);
+  border-radius: var(--radius);
+  background: var(--pencil);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.twoUp {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.twoUp h4 {
+  margin-top: 0;
+}
+
+.mistakes {
+  margin: 0;
+}
+
+.mistakes > div {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.mistakes dt {
+  font-weight: 700;
+}
+
+.mistakes dd {
+  margin: 0;
+}
+
+.atSchool {
+  margin-top: 32px;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  font-size: 14px;
+}
+
+.atSchool h3 {
+  font-size: 17px;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .sheet {
+    padding: 20px 16px 28px;
+  }
+
+  .glance {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .option,
+  .twoUp,
+  .mistakes > div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .dialog {
+    display: none !important;
+  }
+}

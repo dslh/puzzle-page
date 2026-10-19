@@ -9,6 +9,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   category: 'mazes',
   ages: ['4-5', '6-7'],
   component: LaserMaze,
+  docs: () => import('./docs'),
   defaultWidth: 5,
   defaultHeight: 5,
   resizable: {

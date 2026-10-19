@@ -9,6 +9,7 @@ export const puzzleDefinition: PuzzleDefinition = {
   category: 'numbers',
   ages: ['4-5', '6-7'],
   component: Counting,
+  docs: () => import('./docs'),
   defaultWidth: 4,
   defaultHeight: 3,
   resizable: {

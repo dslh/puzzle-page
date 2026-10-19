@@ -13,6 +13,7 @@ export const puzzleDefinition: PuzzleDefinition<DirectionsConfig> = {
   },
   ages: ['4-5', '6-7'],
   component: Directions,
+  docs: () => import('./docs'),
   configComponent: DirectionsConfigBar,
   // The map fills whatever is left around the prompt and the strip of steps
   // (one or two lines), so the minimum leaves room for a 3×3 map.

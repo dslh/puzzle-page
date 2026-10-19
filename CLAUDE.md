@@ -181,6 +181,58 @@ export type PuzzleType = 'maze' | 'sudoku' | 'yourpuzzle' | /* ... */;
 
 **That's it!** The puzzle automatically appears in the sidebar and can be placed on the grid.
 
+### 6. Write its help page
+
+Add `docs.tsx` beside the definition and point the definition at it with
+`docs: () => import('./docs')`. See **Help pages** below. Without it, the
+puzzle simply has no `?` button.
+
+## Help pages
+
+Each sidebar entry and each placed puzzle has a `?` button (`HelpButton`) that
+opens a full-page `<dialog>` (`src/components/help/PuzzleHelp.tsx`) with the
+puzzle's guide. The dialog is portalled to `<body>` so it sits outside the
+draggable sidebar entry and the drop target, and it is hidden in print.
+
+A guide is a `PuzzleDoc<TConfig>` (`src/types/puzzleDoc.ts`) default-exported
+from the puzzle's `docs.tsx` and lazy-loaded, so guides cost nothing until
+opened. Live examples are the puzzle component itself (`PuzzleExample`), drawn
+from data (`ExampleSpec`), not screenshots: the main one uses the settings in
+force where the help was opened, and each setting option can show a small one
+with that option merged over them. "Show another" rerolls every example's seed
+together.
+
+`settings` is keyed on the config type, so **adding a config field does not
+compile until its guide entry is written** - keep it that way.
+
+Guides are written for a parent sitting beside one child: plain words, a short
+script of what to say aloud, what it practises and why, easier / harder,
+common slips and what they mean, ideas away from the page, and a brief "At
+school" note (EYFS / KS1, England) that claims no more than the puzzle covers.
+Keep them terse - about 400-900 words of source per puzzle, one job per
+section, a sentence per slip or option; the user cut the first drafts by half.
+Read the generator before describing a setting - several have effects the
+config bar doesn't show.
+
+**House style.** Follow the GOV.UK content design guidance
+(https://www.gov.uk/guidance/content-design/writing-for-gov-uk) and its A-Z
+style guide: sentences under about 25 words, the point first, "you" for the
+reader, plain words, and a reading age of about 9. On top of that:
+
+- Speak to the parent as "you"; the child is "they" / "them" ("ask them"),
+  never "the student" or "the learner".
+- Sounds go in slashes (/s/), letter names in quotes ("s"), as school phonics
+  materials write them.
+- Name settings and options exactly as the config bar prints them.
+- "What to say" lines are for the child: no word a five-year-old wouldn't know.
+- Say a slip is normal before saying what to do about it. Reassure, don't
+  alarm.
+- UK spelling and school terms: Reception, Year 1, EYFS, Key Stage 1.
+
+The Laser Maze, Directions, Initial Sounds and Counting guides are the worked
+examples of all this; match them. Documented so far: Laser Maze, Directions, Initial
+Sounds, Counting.
+
 ## Adding Configuration to a Puzzle
 
 If your puzzle needs per-instance configuration (like Sudoku's size selector):

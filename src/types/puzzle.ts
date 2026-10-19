@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { PuzzleDoc } from './puzzleDoc';
 
 export type PuzzleType = 'maze'
                        | 'weavingmaze'
@@ -123,6 +124,8 @@ export interface PuzzleDefinition<TConfig = unknown> {
   presets?: PuzzlePreset<TConfig>[];
   ages?: AgeBand[];          // Bands the sidebar lists it under; all if absent
   ageConfig?: AgeConfig<TConfig>;
+  /** The help page, loaded when it is opened: `() => import('./docs')` */
+  docs?: () => Promise<{ default: PuzzleDoc<TConfig> }>;
 }
 
 export const GRID_COLS = 10;

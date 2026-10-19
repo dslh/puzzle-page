@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { DragEvent } from 'react';
 import { SIDEBAR_ENTRIES, isEntryForAge, startingConfig, type SidebarEntry } from './puzzles';
 import { useDragConfig } from '../contexts/DragConfigContext';
+import HelpButton from './help/HelpButton';
 import { AGE_BANDS, PUZZLE_CATEGORIES, type AgeSetting, type PuzzleCategory } from '../types/puzzle';
 import styles from './Sidebar.module.css';
 
@@ -106,6 +107,10 @@ export default function Sidebar() {
         <div className={styles.entryHead}>
           <span className={styles.icon}>{entry.icon}</span>
           <span className={styles.label}>{entry.label}</span>
+          <HelpButton
+            className={styles.helpButton}
+            subject={{ ...entry, config: currentConfig }}
+          />
           <span className={styles.grip} aria-hidden="true" title="Drag onto the page" />
         </div>
         {ConfigComponent && currentConfig !== undefined && (

@@ -10,6 +10,7 @@ export const puzzleDefinition: PuzzleDefinition<InitialSoundsConfig> = {
   category: 'reading',
   ages: ['4-5', '6-7'],
   component: InitialSounds,
+  docs: () => import('./docs'),
   configComponent: InitialSoundsConfigBar,
   defaultWidth: 6,
   defaultHeight: 4,

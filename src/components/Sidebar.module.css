@@ -12,14 +12,6 @@
   color: var(--ink);
 }
 
-/* Category colours, one crayon each. Only the tab, the open entries' edge and
-   the hover border use them. */
-.category[data-category='mazes'] { --crayon: #3570ae; }
-.category[data-category='reading'] { --crayon: #c4473a; }
-.category[data-category='writing'] { --crayon: #7b56a8; }
-.category[data-category='numbers'] { --crayon: #d9822b; }
-.category[data-category='thinking'] { --crayon: #2b8a72; }
-
 .title {
   margin: 0;
   font-family: var(--hand-font);
@@ -200,6 +192,26 @@
   font-weight: 700;
   font-size: 15px;
   line-height: 1.25;
+}
+
+.helpButton {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.helpButton:hover {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 /* Six dots: the usual "this can be picked up" mark */

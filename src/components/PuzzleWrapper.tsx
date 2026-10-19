@@ -1,6 +1,7 @@
 import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
+import HelpButton from './help/HelpButton';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -129,6 +130,19 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         ⋮⋮
       </div>
       <div className={styles.buttonGroup}>
+        {puzzleDef && (
+          <HelpButton
+            className={styles.helpButton}
+            subject={{
+              definition: puzzleDef,
+              label: puzzleDef.label,
+              icon: puzzleDef.icon,
+              category: puzzleDef.category,
+              ages: puzzleDef.ages,
+              config: puzzle.config ?? puzzleDef.defaultConfig,
+            }}
+          />
+        )}
         {onReroll && (
           <button
             className={styles.rerollButton}
