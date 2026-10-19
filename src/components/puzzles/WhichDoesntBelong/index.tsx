@@ -5,11 +5,10 @@ import styles from './WhichDoesntBelong.module.css';
 
 export default function WhichDoesntBelong({ gridHeight = 1, seed }: PuzzleProps) {
   // Generate one puzzle per row
-  const puzzles = useMemo(() => {
-    return Array.from({ length: gridHeight }, (_, i) =>
-      generateWhichDoesntBelong(seed + i)
-    );
-  }, [gridHeight, seed]);
+  const puzzles = useMemo(
+    () => generateWhichDoesntBelong(seed, gridHeight),
+    [gridHeight, seed]
+  );
 
   return (
     <div className={styles.container}>

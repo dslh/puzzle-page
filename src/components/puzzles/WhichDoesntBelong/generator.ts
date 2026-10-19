@@ -2,6 +2,12 @@
 interface Category {
   name: string;
   items: string[];
+  /**
+   * Broader groups this one belongs to. Two categories sharing a family are
+   * never paired in a row: a cow among dogs and cats is "not a pet", but it
+   * is still an animal, so the row would have no single right answer.
+   */
+  families: string[];
 }
 
 // Puzzle data structure
@@ -38,167 +44,208 @@ class SeededRandom {
   }
 }
 
-// Predefined categories with emoji items
+// Predefined categories with emoji items. No emoji appears in two
+// categories, and each has at least four, the most a row takes from one.
 const CATEGORIES: Category[] = [
   {
     name: 'Animals',
     items: ['🐶', '🐱', '🐭', '🐰', '🐼', '🐨', '🦊', '🐸', '🐷', '🐵', '🦁', '🐯'],
+    families: ['animal'],
   },
   {
     name: 'Fruits',
     items: ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍑', '🍒', '🍍', '🥝', '🍋', '🥥'],
+    families: ['food'],
   },
   {
     name: 'Vehicles',
     items: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚'],
+    families: ['transport'],
   },
   {
     name: 'Sports',
     items: ['⚽', '🏀', '🎾', '⚾', '🏐', '🏈', '🎱', '🏓', '🏸', '🏒', '🥏', '🎳'],
+    families: ['sport'],
   },
   {
     name: 'Flowers',
     items: ['🌸', '🌺', '🌻', '🌹', '🌷', '🌼', '💐', '🏵️', '🪷'],
+    families: ['plant'],
   },
   {
     name: 'Tools',
     items: ['🔨', '🔧', '🪛', '✂️', '🪚', '⚒️', '🔩', '⛏️', '🪓', '🗜️'],
+    families: ['tool'],
   },
   {
     name: 'Food',
     items: ['🍕', '🍔', '🌭', '🌮', '🍟', '🥪', '🥙', '🌯', '🥗', '🍝', '🍜', '🥘'],
+    families: ['food'],
   },
   {
     name: 'Ocean',
     items: ['🐠', '🐟', '🐡', '🦈', '🐙', '🦀', '🐚', '🦞', '🦑', '🐬', '🐳', '🦭'],
+    families: ['animal', 'water'],
   },
   {
     name: 'Weather',
-    items: ['☀️', '🌙', '⭐', '☁️', '⛅', '🌈', '❄️', '⚡', '🌧️', '🌩️', '🌪️'],
+    items: ['☀️', '☁️', '⛅', '🌈', '❄️', '⚡', '🌧️', '🌩️', '🌪️'],
+    families: ['sky'],
   },
   {
     name: 'Birds',
     items: ['🐦', '🦅', '🦆', '🦉', '🦚', '🦜', '🐧', '🦩', '🕊️', '🦢'],
+    families: ['animal', 'flying'],
   },
   {
     name: 'Insects',
     items: ['🐝', '🐛', '🦋', '🐞', '🐜', '🦗', '🕷️', '🪰', '🪲', '🦟'],
+    families: ['animal'],
   },
   {
     name: 'Vegetables',
     items: ['🥕', '🥦', '🌽', '🥒', '🍅', '🥔', '🧅', '🧄', '🫑', '🥬'],
+    families: ['food'],
   },
   {
     name: 'Desserts',
     items: ['🍰', '🎂', '🧁', '🍪', '🍩', '🍦', '🍨', '🍧', '🧇', '🥧'],
+    families: ['food', 'party'],
   },
   {
     name: 'Drinks',
-    items: ['🥤', '🧃', '🧋', '🥛', '☕', '🍵', '🧉', '🍼', '🥤'],
+    items: ['🥤', '🧃', '🧋', '🥛', '☕', '🍵', '🧉', '🍼'],
+    families: ['food'],
   },
   {
     name: 'Musical Instruments',
     items: ['🎸', '🎹', '🎺', '🎷', '🥁', '🎻', '🪕', '🪗'],
+    families: ['music'],
   },
   {
     name: 'Clothing',
     items: ['👕', '👔', '👗', '👠', '👞', '👟', '🧦', '🧤', '🎩', '👒', '🧢'],
+    families: ['wear'],
   },
   {
     name: 'Buildings',
     items: ['🏠', '🏡', '🏢', '🏰', '🏛️', '⛪', '🕌', '🏗️', '🏭'],
+    families: ['home'],
   },
   {
     name: 'Farm Animals',
-    items: ['🐄', '🐖', '🐓', '🐔', '🐏', '🐑', '🦆', '🐴', '🦃', '🐐'],
+    items: ['🐄', '🐖', '🐓', '🐔', '🐏', '🐑', '🐴', '🦃', '🐐'],
+    families: ['animal'],
   },
   {
     name: 'Household Items',
     items: ['🪑', '🛋️', '🛏️', '🚪', '🪟', '🚿', '🛁', '🚽', '💡', '🕯️'],
+    families: ['home'],
   },
   {
     name: 'Trees & Plants',
-    items: ['🌲', '🌳', '🌴', '🎄', '🌱', '🪴', '🌿', '🍀', '🎋'],
+    items: ['🌲', '🌳', '🌴', '🌱', '🪴', '🌿', '🍀', '🎋'],
+    families: ['plant'],
   },
   {
     name: 'Space',
-    items: ['🌍', '🌎', '🌏', '🪐', '⭐', '✨', '💫', '🌟', '🚀', '🛸'],
+    items: ['🌍', '🌎', '🌏', '🪐', '🌙', '⭐', '✨', '💫', '🌟', '🚀', '🛸'],
+    families: ['sky', 'flying'],
   },
   {
     name: 'Wild Animals',
     items: ['🦒', '🦓', '🦏', '🦛', '🐘', '🦘', '🦙', '🦌', '🐪', '🦣'],
+    families: ['animal'],
   },
   {
     name: 'Reptiles',
     items: ['🐊', '🐢', '🦎', '🐍', '🦕', '🦖', '🐲', '🐉'],
+    families: ['animal'],
   },
   {
     name: 'Aircraft',
-    items: ['✈️', '🛩️', '🚁', '🛫', '🛬', '🪂', '🎈'],
+    items: ['✈️', '🛩️', '🚁', '🛫', '🛬', '🪂'],
+    families: ['transport', 'flying', 'sky'],
   },
   {
     name: 'Water Transport',
-    items: ['⛵', '🚤', '🛥️', '⛴️', '🚢', '🛶', '⚓', '🏊'],
+    items: ['⛵', '🚤', '🛥️', '⛴️', '🚢', '🛶'],
+    families: ['transport', 'water'],
   },
   {
-    name: 'Gems & Jewelry',
-    items: ['💎', '💍', '👑', '📿', '💄', '🔮'],
+    name: 'Jewellery',
+    items: ['💎', '💍', '👑', '📿'],
+    families: ['wear'],
   },
   {
     name: 'Kitchen',
-    items: ['🍽️', '🥄', '🔪', '🥢', '🧂', '🥣', '🍴', '🥃', '🍷'],
+    items: ['🍽️', '🥄', '🔪', '🥢', '🧂', '🥣', '🍴'],
+    families: ['home', 'tool'],
   },
   {
     name: 'Books & Reading',
     items: ['📕', '📗', '📘', '📙', '📚', '📖', '📰', '🗞️', '📄'],
+    families: ['books'],
   },
   {
     name: 'Celebration',
-    items: ['🎉', '🎊', '🎈', '🎁', '🎀', '🪅', '🎆', '🎇', '✨'],
+    items: ['🎉', '🎊', '🎈', '🎁', '🎀', '🪅', '🎆', '🎇'],
+    families: ['party'],
   },
   {
     name: 'Music & Sound',
     items: ['🎵', '🎶', '🎼', '🎧', '📻', '📢', '📣', '🔔', '🔕'],
+    families: ['music'],
   },
 ];
 
-/**
- * Generates a "Which Doesn't Belong?" puzzle
- * @param seed - Random seed for reproducible generation
- * @returns Puzzle with 5 items (4 from one category, 1 outlier)
- */
-export function generateWhichDoesntBelong(seed: number): WhichDoesntBelongPuzzle {
-  const random = new SeededRandom(seed);
+const ITEMS_PER_GROUP = 4;
 
-  // Select two different categories
-  const categoryIndices = random.shuffle([...Array(CATEGORIES.length).keys()]);
-  const correctCategoryIndex = categoryIndices[0];
-  const outlierCategoryIndex = categoryIndices[1];
+function clash(a: Category, b: Category): boolean {
+  return a.families.some(family => b.families.includes(family));
+}
 
-  const correctCategory = CATEGORIES[correctCategoryIndex];
-  const outlierCategory = CATEGORIES[outlierCategoryIndex];
+function generateRow(
+  random: SeededRandom,
+  correctCategory: Category
+): WhichDoesntBelongPuzzle {
+  // Any category from an unrelated family can supply the odd one out
+  const outlierCategory = random.shuffle(
+    CATEGORIES.filter(category => !clash(category, correctCategory))
+  )[0];
 
-  // Pick 4 items from the correct category
-  const shuffledCorrectItems = random.shuffle([...correctCategory.items]);
-  const correctItems = shuffledCorrectItems.slice(0, 4);
+  const correctItems = random.shuffle([...correctCategory.items]).slice(0, ITEMS_PER_GROUP);
+  const outlierItem = random.shuffle([...outlierCategory.items])[0];
 
-  // Pick 1 item from the outlier category
-  const shuffledOutlierItems = random.shuffle([...outlierCategory.items]);
-  const outlierItem = shuffledOutlierItems[0];
-
-  // Combine and shuffle all 5 items
-  const allItems = [...correctItems, outlierItem];
-  const shuffledItems = random.shuffle(allItems);
-
-  // Find the index of the outlier in the shuffled array
-  const outlierIndex = shuffledItems.indexOf(outlierItem);
+  const items = random.shuffle([...correctItems, outlierItem]);
 
   return {
-    items: shuffledItems,
+    items,
     categories: {
       correct: correctCategory.name,
       outlier: outlierCategory.name,
     },
-    outlierIndex,
+    outlierIndex: items.indexOf(outlierItem),
   };
+}
+
+/**
+ * A sheet of "Which Doesn't Belong?" rows, all drawn from one random sequence
+ * so that neighbouring seeds give unrelated sheets. Each row's group of four
+ * is used once per sheet until every category has had a turn.
+ * @returns One puzzle per row: 4 items from one category, 1 outlier
+ */
+export function generateWhichDoesntBelong(
+  seed: number,
+  rowCount: number
+): WhichDoesntBelongPuzzle[] {
+  const random = new SeededRandom(seed);
+
+  const rows: WhichDoesntBelongPuzzle[] = [];
+  let order: Category[] = [];
+  for (let i = 0; i < rowCount; i++) {
+    if (order.length === 0) order = random.shuffle(CATEGORIES);
+    rows.push(generateRow(random, order.pop() as Category));
+  }
+  return rows;
 }

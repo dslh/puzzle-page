@@ -27,9 +27,9 @@ const docs: PuzzleDoc = {
         vehicles, and one from a different group. The order is mixed up.
       </p>
       <p>
-        There are 30 groups, and some sit close together: birds and farm animals, fruit
-        and vegetables, weather and space. Now and then a row can be argued two ways. If
-        their reason makes sense, it counts.
+        There are 30 groups. Groups that overlap, like birds and farm animals or fruit
+        and vegetables, are never mixed in one row, and no row repeats another’s group.
+        A child may still find a reason of their own. If it makes sense, it counts.
       </p>
       <p>The dots at the top are a reminder of the idea: four the same, one different.</p>
     </>
