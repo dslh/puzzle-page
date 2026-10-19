@@ -1,4 +1,5 @@
 import type { SudokuConfig } from './index';
+import { parseCustomSymbols } from './symbols';
 import styles from './SudokuConfigBar.module.css';
 
 interface SudokuConfigBarProps {
@@ -20,7 +21,8 @@ export default function SudokuConfigBar({ value, onChange }: SudokuConfigBarProp
   };
 
   const handleCustomSymbolsChange = (newSymbols: string) => {
-    onChange({ ...value, customSymbols: newSymbols });
+    // Kept tidy as typed, so the box shows exactly the symbols the grid uses
+    onChange({ ...value, customSymbols: parseCustomSymbols(newSymbols.toUpperCase(), size).join('') });
   };
 
   return (
@@ -90,9 +92,8 @@ export default function SudokuConfigBar({ value, onChange }: SudokuConfigBarProp
             type="text"
             className={styles.textInput}
             value={customSymbols}
-            onChange={(e) => handleCustomSymbolsChange(e.target.value.toUpperCase())}
-            placeholder={`Enter ${size} letters...`}
-            maxLength={size}
+            onChange={(e) => handleCustomSymbolsChange(e.target.value)}
+            placeholder={`${size} different letters or emoji`}
           />
         </div>
       )}

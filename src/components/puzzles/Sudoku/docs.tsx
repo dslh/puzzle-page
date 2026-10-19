@@ -95,7 +95,7 @@ const docs: PuzzleDoc<SudokuConfig> = {
         },
         {
           label: 'Custom',
-          description: <p>Your own letters, typed into the box that appears.</p>,
+          description: <p>Your own letters or emoji, typed into the box that appears.</p>,
           example: { config: { symbolType: 'custom', size: 3, customSymbols: 'DOG' } },
         },
       ],
@@ -104,9 +104,9 @@ const docs: PuzzleDoc<SudokuConfig> = {
       label: 'Custom letters',
       description: (
         <p>
-          Type one letter for each symbol, up to the grid size. They turn into capitals. Use
-          different letters, such as the letters of their name. If you type too few, numbers
-          fill the gaps.
+          Type one letter or emoji for each symbol, up to the grid size. Letters turn into
+          capitals, and a repeat is skipped, so every symbol is different. Try the letters
+          of their name. If you type too few, numbers fill the gaps.
         </p>
       ),
     },

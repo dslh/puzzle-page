@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { generateSudoku, type Sudoku as SudokuType } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
+import { parseCustomSymbols } from './symbols';
 import styles from './Sudoku.module.css';
 
 const COLOR_SETS = {
@@ -21,7 +22,7 @@ export interface SudokuConfig {
 export default function Sudoku({ seed = 0, config }: PuzzleProps<SudokuConfig>) {
   const size = config?.size ?? 3;
   const symbolType = config?.symbolType ?? 'colors';
-  const customSymbols = config?.customSymbols ?? '';
+  const customSymbols = parseCustomSymbols(config?.customSymbols ?? '', size);
 
   const puzzle: SudokuType = useMemo(() => {
     return generateSudoku(size, seed);
