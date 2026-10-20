@@ -1,0 +1,118 @@
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  max-height: 55dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--panel);
+  border-top: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
+  font-family: var(--ui-font);
+  color: var(--ink);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roundButton {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.roundButton:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.action:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.remove,
+.remove:hover {
+  color: var(--danger);
+}
+
+.done {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border: 2px solid var(--pencil-edge);
+  background: var(--pencil);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.done:hover {
+  border-color: var(--pencil-edge);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+/* Config bars were drawn for a desktop width; scroll sideways rather than
+   spill off the screen until each one wraps on its own. */
+.config {
+  overflow: auto;
+  padding: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+@media print {
+  .sheet {
+    display: none !important;
+  }
+}

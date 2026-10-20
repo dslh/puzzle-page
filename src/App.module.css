@@ -1,5 +1,6 @@
 .app {
   height: 100vh;
+  height: 100dvh;
   display: flex;
 }
 
@@ -75,6 +76,61 @@
   background: #ffd84f;
   border-color: var(--pencil-edge);
   color: var(--ink);
+}
+
+/* Only on narrow screens, where the sidebar is a drawer */
+.menuButton {
+  display: none;
+  padding: 8px 14px;
+  font-family: var(--ui-font);
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid var(--pencil-edge);
+  border-radius: var(--radius);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.menuButton:hover {
+  border-color: var(--pencil-edge);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.backdrop {
+  display: none;
+}
+
+/* Room to scroll the page's foot clear of the bottom sheet */
+.desk.withSheet {
+  padding-bottom: 50dvh;
+}
+
+@media (max-width: 900px) {
+  .toolbar {
+    flex-wrap: wrap;
+    margin: 12px 12px 10px;
+    width: auto;
+    align-self: stretch;
+  }
+
+  .menuButton {
+    display: block;
+    margin-right: auto;
+  }
+
+  .puzzleCount {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    background: rgba(0, 0, 0, 0.35);
+  }
 }
 
 .toolbar :focus-visible {

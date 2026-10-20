@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
@@ -10,11 +11,19 @@ interface PuzzleWrapperProps {
   onReroll?: (id: string) => void;
   onResize?: (id: string, width: number, height: number) => void;
   onConfigChange?: (id: string, config: unknown) => void;
+  selected?: boolean;
+  onSelect?: (id: string | null) => void;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, selected, onSelect }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
+
+  // Bring a newly selected puzzle into view, e.g. one just added from the drawer
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (selected) wrapperRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selected]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -32,6 +41,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     const startX = e.clientX;
     const startY = e.clientY;
     const startWidth = puzzle.width;
+    const startWidthPx = wrapperRef.current?.getBoundingClientRect().width ?? startWidth * 72;
     const startHeight = puzzle.height;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
@@ -39,9 +49,9 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       const deltaX = moveEvent.clientX - startX;
       const deltaY = moveEvent.clientY - startY;
 
-      // Convert pixel delta to grid cells (approximate, will be refined by grid snapping)
-      // Using rough estimate: each grid cell is about 19mm ≈ 72px at 96 DPI
-      const cellSizePx = 72;
+      // Convert pixel delta to grid cells, measured from the puzzle's on-screen
+      // width since the sheet may be zoomed to fit the window
+      const cellSizePx = startWidthPx / startWidth;
       const deltaCellsX = Math.round(deltaX / cellSizePx);
       const deltaCellsY = Math.round(deltaY / cellSizePx);
 
@@ -113,7 +123,13 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
 
   return (
     <div
-      className={styles.wrapper}
+      ref={wrapperRef}
+      className={`${styles.wrapper} ${selected ? styles.selected : ''}`}
+      onClick={onSelect && ((e) => {
+        // Keep the page behind from clearing the selection again
+        e.stopPropagation();
+        onSelect(puzzle.id);
+      })}
       style={{
         left: `${puzzle.x * CELL_SIZE_MM}mm`,
         top: `${puzzle.y * CELL_SIZE_MM}mm`,

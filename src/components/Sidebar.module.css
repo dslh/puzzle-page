@@ -12,6 +12,33 @@
   color: var(--ink);
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Only in the drawer */
+.closeButton {
+  display: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
 .title {
   margin: 0;
   font-family: var(--hand-font);
@@ -214,6 +241,26 @@
   color: var(--paper);
 }
 
+.addButton {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1.5px solid var(--pencil-edge);
+  border-radius: 50%;
+  background: var(--pencil);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  border-color: var(--ink);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
 /* Six dots: the usual "this can be picked up" mark */
 .grip {
   width: 10px;
@@ -233,6 +280,49 @@
   border-top: 1px dashed var(--line);
   font-size: 12px;
   cursor: auto;
+}
+
+/* Narrow screens: the sidebar slides in over the page from the left */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 300;
+    width: min(360px, 88vw);
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.3);
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition: transform 0.2s, visibility 0.2s;
+  }
+
+  .sidebar.open {
+    transform: none;
+    visibility: visible;
+  }
+
+  .closeButton {
+    display: block;
+  }
+}
+
+/* Touch: bigger targets, and no drag grip since dragging is mouse-only */
+@media (hover: none) {
+  .helpButton,
+  .addButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .grip {
+    display: none;
+  }
+
+  .puzzleItem {
+    cursor: auto;
+  }
 }
 
 @media print {

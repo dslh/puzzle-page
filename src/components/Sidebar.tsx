@@ -4,6 +4,7 @@ import { SIDEBAR_ENTRIES, isEntryForAge, startingConfig, type SidebarEntry } fro
 import { useDragConfig } from '../contexts/DragConfigContext';
 import HelpButton from './help/HelpButton';
 import { AGE_BANDS, PUZZLE_CATEGORIES, type AgeSetting, type PuzzleCategory } from '../types/puzzle';
+import { useCompactLayout } from '../utils/useCompactLayout';
 import styles from './Sidebar.module.css';
 
 const AGE_STORAGE_KEY = 'puzzle-page:age';
@@ -31,7 +32,17 @@ function startingConfigs(age: AgeSetting): Record<string, unknown> {
   return configs;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  /** Puts the entry's puzzle in the first space it fits; false if none. */
+  onAdd: (entry: SidebarEntry, config: unknown) => boolean;
+  /** Drawer state, for narrow screens; ignored where the sidebar always shows. */
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ onAdd, open, onClose }: SidebarProps) {
+  const compact = useCompactLayout();
+
   const [age, setAge] = useState<AgeSetting>(loadAge);
 
   // Generic config state: maps sidebar entry key to its current config.
@@ -111,6 +122,15 @@ export default function Sidebar() {
             className={styles.helpButton}
             subject={{ ...entry, config: currentConfig }}
           />
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={() => onAdd(entry, currentConfig ?? entry.definition.defaultConfig)}
+            title={`Add ${entry.label} to the page`}
+            aria-label={`Add ${entry.label} to the page`}
+          >
+            +
+          </button>
           <span className={styles.grip} aria-hidden="true" title="Drag onto the page" />
         </div>
         {ConfigComponent && currentConfig !== undefined && (
@@ -135,8 +155,13 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      <h1 className={styles.title}>Puzzle page</h1>
+    <aside className={`${styles.sidebar} ${open ? styles.open : ''}`}>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>Puzzle page</h1>
+        <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close puzzle list">
+          ×
+        </button>
+      </div>
       <div className={styles.ageSwitch} role="group" aria-labelledby="age-label">
         <span id="age-label" className={styles.ageLabel}>Child’s age</span>
         <div className={styles.ageButtons}>
@@ -154,8 +179,9 @@ export default function Sidebar() {
         </div>
       </div>
       <p className={styles.instructions}>
-        Drag a puzzle onto the page. The squares turn green where it fits and
-        red where it would overlap.
+        {compact
+          ? 'Tap + to add a puzzle. It goes in the first space on the page where it fits.'
+          : 'Drag a puzzle onto the page, or click + to put it in the first space it fits. The squares turn green where it fits and red where it would overlap.'}
       </p>
       {PUZZLE_CATEGORIES.map(category => {
         const entries = SIDEBAR_ENTRIES.filter(entry =>

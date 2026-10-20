@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
-import type { PlacedPuzzle, PuzzleType } from '../types/puzzle';
+import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
+import { collides, newPlacedPuzzle } from '../utils/placement';
 import { useDragConfig } from '../contexts/DragConfigContext';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
@@ -15,7 +16,12 @@ interface GridLayoutProps {
   onUpdatePuzzle?: (id: string, x: number, y: number) => void;
   onResizePuzzle?: (id: string, width: number, height: number) => void;
   onConfigChange?: (id: string, config: unknown) => void;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
 }
+
+// The sheet's width on screen at 100%: CSS's 96px to the inch
+const SHEET_WIDTH_PX = (GRID_COLS * CELL_SIZE_MM * 96) / 25.4;
 
 interface DragState {
   type: string;
@@ -24,31 +30,27 @@ interface DragState {
   puzzleId?: string; // If present, we're moving an existing puzzle
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange, selectedId, onSelect }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
   const { dragConfig, setDragConfig } = useDragConfig();
 
-  const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string): boolean => {
-    // Check if puzzle would go out of bounds
-    if (x < 0 || y < 0 || x + width > GRID_COLS || y + height > GRID_ROWS) {
-      return true;
-    }
+  // Shrink the sheet to fit a narrow screen. Applied with CSS zoom on screen
+  // only, so the printed page keeps its exact mm sizes.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setScale(Math.min(1, entry.contentRect.width / SHEET_WIDTH_PX));
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
-    // Check collision with existing puzzles
-    for (const puzzle of puzzles) {
-      if (puzzle.id === excludeId) continue;
-
-      const xOverlap = x < puzzle.x + puzzle.width && x + width > puzzle.x;
-      const yOverlap = y < puzzle.y + puzzle.height && y + height > puzzle.y;
-
-      if (xOverlap && yOverlap) {
-        return true;
-      }
-    }
-
-    return false;
-  };
+  const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string) =>
+    collides(puzzles, x, y, width, height, excludeId);
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -110,18 +112,9 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
           ? dragConfig.config
           : definition?.defaultConfig;
 
-        const newPuzzle: PlacedPuzzle = {
-          id: `${dragData.type}-${Date.now()}-${Math.random()}`,
-          type: dragData.type as PuzzleType,
-          x: dragOver.x,
-          y: dragOver.y,
-          seed: Date.now() + Math.floor(Math.random() * 1000),
-          width: dragData.width,
-          height: dragData.height,
-          config,
-        };
-
-        onAddPuzzle(newPuzzle);
+        onAddPuzzle(newPlacedPuzzle(
+          dragData.type, dragOver.x, dragOver.y, dragData.width, dragData.height, config,
+        ));
       }
     }
 
@@ -175,7 +168,9 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
   return (
     <div
+      ref={containerRef}
       className={styles.gridContainer}
+      onClick={() => onSelect?.(null)}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -185,7 +180,8 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         style={{
           width: `${GRID_COLS * CELL_SIZE_MM}mm`,
           height: `${GRID_ROWS * CELL_SIZE_MM}mm`,
-        }}
+          '--sheet-scale': scale,
+        } as React.CSSProperties}
       >
         {renderGridCells()}
 
@@ -200,6 +196,8 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
               onReroll={onRerollPuzzle}
               onResize={onResizePuzzle}
               onConfigChange={onConfigChange}
+              selected={puzzle.id === selectedId}
+              onSelect={onSelect}
             />
           ))}
 

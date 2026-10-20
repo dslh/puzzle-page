@@ -6,15 +6,37 @@
   justify-content: center;
 }
 
-.wrapper:hover .deleteButton,
-.wrapper:hover .rerollButton,
-.wrapper:hover .helpButton,
-.wrapper:hover .dragHandle,
-.wrapper:hover .configPanel,
-.wrapper:hover .resizeHandleRight,
-.wrapper:hover .resizeHandleBottom,
-.wrapper:hover .resizeHandleCorner {
-  opacity: 1;
+/* Only where there's a mouse to hover with. On a touch screen, tapping a
+   puzzle selects it and its controls open in App's bottom sheet instead. */
+@media (hover: hover) {
+  .wrapper:hover .deleteButton,
+  .wrapper:hover .rerollButton,
+  .wrapper:hover .helpButton,
+  .wrapper:hover .dragHandle,
+  .wrapper:hover .configPanel,
+  .wrapper:hover .resizeHandleRight,
+  .wrapper:hover .resizeHandleBottom,
+  .wrapper:hover .resizeHandleCorner {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .buttonGroup,
+  .dragHandle,
+  .configPanel,
+  .resizeHandleRight,
+  .resizeHandleBottom,
+  .resizeHandleCorner {
+    display: none;
+  }
+}
+
+.wrapper.selected {
+  /* Divided by the sheet's zoom so it stays 4px on screen */
+  outline: calc(4px / var(--sheet-scale, 1)) solid var(--pencil);
+  outline-offset: calc(2px / var(--sheet-scale, 1));
+  border-radius: 2px;
 }
 
 .dragHandle {
@@ -201,6 +223,10 @@
 }
 
 @media print {
+  .wrapper.selected {
+    outline: none;
+  }
+
   .buttonGroup,
   .dragHandle,
   .configPanel,

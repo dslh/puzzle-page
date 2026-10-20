@@ -61,7 +61,7 @@ This enables:
 - **Cell size**: 19mm (`CELL_SIZE_MM` constant in `puzzle.ts`)
 - **Coordinate system**: Grid cells (0-based), not pixels
 - **Positioning**: CSS absolute positioning with mm units
-- **Collision detection**: AABB (axis-aligned bounding box) algorithm in `GridLayout` and `App`
+- **Collision detection**: AABB (axis-aligned bounding box) in `src/utils/placement.ts`
 
 ### State Management
 
@@ -87,10 +87,12 @@ Simple React hooks pattern - no Redux or external state library:
 ```
 App (state holder)
 └── DragConfigProvider
-    ├── Sidebar (age switch; collapsible categories; one entry per definition + preset)
+    ├── Sidebar (age switch; collapsible categories; one entry per definition + preset;
+    │   │        a drawer on narrow screens)
+    │   ├── + button (puts the puzzle in the first free space)
     │   └── Config UI (when puzzle.configComponent exists)
-    └── desk (green mat: toolbar with count / Clear page / Print)
-        └── GridLayout (drag/drop target + collision detection)
+    ├── desk (green mat: toolbar with + Puzzles (narrow only) / count / Clear page / Print)
+    │   └── GridLayout (drag/drop target + collision detection; zooms the sheet to fit)
             ├── Grid cells (19mm × 19mm visual grid)
             ├── PuzzleWrapper (for each PlacedPuzzle)
             │   ├── Drag handle
@@ -99,7 +101,31 @@ App (state holder)
             │   ├── Resize handles (when puzzle.resizable)
             │   └── Dynamic puzzle component
             └── Drag preview (while dragging)
+    └── PuzzleSheet (compact layout: the selected puzzle's controls, along the bottom)
 ```
+
+### Mobile / compact layout
+
+`useCompactLayout` (`src/utils/useCompactLayout.ts`) is true on touch screens
+and windows under 900px - `(hover: none), (max-width: 900px)`, mirrored in the
+CSS. There:
+
+- The sidebar is a drawer, opened from the toolbar's **+ Puzzles**.
+- Puzzles are added with **+**, which `findFreeSpot` places reading the page
+  like a book (the + also works on desktop). No room shows a toolbar notice.
+- Tapping a puzzle selects it (`App.selectedId`), and its help, reroll, remove
+  and config bar open in `PuzzleSheet`. Tapping the empty page deselects.
+
+The on-puzzle hover controls only appear under `(hover: hover)` and are hidden
+under `(hover: none)`. Moving and resizing are still mouse-only (HTML5 drag and
+drop, `onMouseDown`).
+
+On screen the sheet is shrunk to fit with CSS `zoom` (`--sheet-scale`, set by
+a `ResizeObserver` in `GridLayout`), under `@media screen` so print keeps exact
+mm sizes. Anything that measures pixels must read the on-screen size, not
+assume 72px a cell. The selection outline divides by `--sheet-scale` to stay
+4px. Config bars inside the sheet scroll sideways if too wide; most were drawn
+for desktop width and haven't been checked at phone width.
 
 ## Adding a New Puzzle
 
@@ -355,16 +381,11 @@ const config = dragConfig?.puzzleType === dragData.type
 
 ### Collision Detection
 
-AABB (axis-aligned bounding box), in two implementations:
-
-1. `GridLayout.checkCollision` - one helper covering both drop validation and the
-   green/red cell highlight during `dragover`. Also bounds-checks against
-   `GRID_COLS`/`GRID_ROWS`, and takes an `excludeId` so a puzzle being moved
-   doesn't collide with itself.
-2. `App.handleResizePuzzle` - the same test again, inline, for resizes.
-
-These two are duplicates of each other. Worth folding into a shared helper if a
-third caller ever appears.
+AABB (axis-aligned bounding box), in one helper: `collides` in
+`src/utils/placement.ts`. It bounds-checks against `GRID_COLS`/`GRID_ROWS` and
+takes an `excludeId` so a puzzle being moved or resized doesn't collide with
+itself. Callers: `GridLayout` (drop validation and the green/red highlight
+during `dragover`), `App.handleResizePuzzle`, and `findFreeSpot` (tap to add).
 
 ```typescript
 // Check if two rectangles overlap
@@ -628,9 +649,8 @@ configs) and renders `configComponent` generically. No
 per-puzzle code remains in the sidebar, and adding a configurable puzzle needs no
 core changes.
 
-The remaining known duplication is the collision test (see above) and the
-`SeededRandom` LCG class, which is copy-pasted into most generators. Both are
-deliberate for now.
+The remaining known duplication is the `SeededRandom` LCG class, which is
+copy-pasted into most generators. It is deliberate for now.
 
 **Rule:** Duplication < Wrong Abstraction
 
@@ -649,8 +669,8 @@ Update constants in `src/types/puzzle.ts` (`GRID_COLS`, `GRID_ROWS`). All compon
 Edit files in `src/components/puzzles/{PuzzleName}/`. Changes to generator/component don't affect other puzzles.
 
 ### Debug collision detection
-Two implementations: `GridLayout.checkCollision` (drop + hover highlight) and the
-inline check in `App.handleResizePuzzle`. Same AABB algorithm; fix both.
+One implementation: `collides` in `src/utils/placement.ts`, used for drops,
+the drag highlight, resizes and tap-to-add.
 
 ### Update drag/drop format
 Encoding lives in `Sidebar.handleDragStart` (new puzzles) and

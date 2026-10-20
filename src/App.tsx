@@ -1,16 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import GridLayout from './components/GridLayout';
+import PuzzleSheet from './components/PuzzleSheet';
+import type { SidebarEntry } from './components/puzzles';
 import { DragConfigProvider } from './contexts/DragConfigContext';
-import { GRID_COLS, GRID_ROWS } from './types/puzzle';
 import type { PlacedPuzzle } from './types/puzzle';
+import { collides, findFreeSpot, newPlacedPuzzle } from './utils/placement';
+import { useCompactLayout } from './utils/useCompactLayout';
 import styles from './App.module.css';
 
 function App() {
   const [puzzles, setPuzzles] = useState<PlacedPuzzle[]>([]);
+  const compact = useCompactLayout();
+
+  // Compact layout only: the puzzle whose controls are in the bottom sheet,
+  // and whether the sidebar drawer is out.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const selectedPuzzle = compact ? puzzles.find(p => p.id === selectedId) : undefined;
+
+  // A short message in the toolbar, e.g. when a tapped puzzle has no room
+  const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(null), 4000);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   const handleAddPuzzle = (puzzle: PlacedPuzzle) => {
     setPuzzles([...puzzles, puzzle]);
+  };
+
+  const handleAddFromSidebar = (entry: SidebarEntry, config: unknown): boolean => {
+    const { type, defaultWidth, defaultHeight } = entry.definition;
+    const spot = findFreeSpot(puzzles, defaultWidth, defaultHeight);
+    if (!spot) {
+      setNotice(`No room for ${entry.label} - remove or shrink a puzzle first`);
+      setDrawerOpen(false);
+      return false;
+    }
+    const puzzle = newPlacedPuzzle(type, spot.x, spot.y, defaultWidth, defaultHeight, config);
+    setPuzzles([...puzzles, puzzle]);
+    setNotice(null);
+    setDrawerOpen(false);
+    if (compact) setSelectedId(puzzle.id);
+    return true;
   };
 
   const handleRemovePuzzle = (id: string) => {
@@ -38,21 +72,8 @@ function App() {
     const puzzle = puzzles.find(p => p.id === id);
     if (!puzzle) return;
 
-    // Keep the puzzle on the page
-    if (puzzle.x + width > GRID_COLS || puzzle.y + height > GRID_ROWS) return;
-
-    // Check for collisions with other puzzles
-    const hasCollision = puzzles.some(other => {
-      if (other.id === id) return false; // Don't check against itself
-
-      const xOverlap = puzzle.x < other.x + other.width && puzzle.x + width > other.x;
-      const yOverlap = puzzle.y < other.y + other.height && puzzle.y + height > other.y;
-
-      return xOverlap && yOverlap;
-    });
-
-    // Only update if no collision
-    if (!hasCollision) {
+    // Only update if it stays on the page and clear of other puzzles
+    if (!collides(puzzles, puzzle.x, puzzle.y, width, height, id)) {
       setPuzzles(puzzles.map(p =>
         p.id === id
           ? { ...p, width, height }
@@ -82,13 +103,24 @@ function App() {
   return (
     <DragConfigProvider>
       <div className={styles.app}>
-        <Sidebar />
-        <main className={styles.desk}>
+        <Sidebar onAdd={handleAddFromSidebar} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+        {drawerOpen && (
+          <div className={styles.backdrop} onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+        )}
+        <main className={`${styles.desk} ${selectedPuzzle ? styles.withSheet : ''}`}>
           <div className={styles.toolbar}>
-            <span className={styles.puzzleCount}>
-              {puzzles.length === 0
-                ? 'Drag a puzzle onto the page'
-                : `${puzzles.length} puzzle${puzzles.length !== 1 ? 's' : ''} on the page`}
+            <button
+              type="button"
+              className={styles.menuButton}
+              onClick={() => setDrawerOpen(true)}
+              aria-expanded={drawerOpen}
+            >
+              + Puzzles
+            </button>
+            <span className={styles.puzzleCount} role="status">
+              {notice ?? (puzzles.length === 0
+                ? (compact ? 'Add a puzzle to start' : 'Drag a puzzle onto the page')
+                : `${puzzles.length} puzzle${puzzles.length !== 1 ? 's' : ''} on the page`)}
             </span>
             <button
               type="button"
@@ -110,8 +142,19 @@ function App() {
             onUpdatePuzzle={handleUpdatePuzzle}
             onResizePuzzle={handleResizePuzzle}
             onConfigChange={handleConfigChange}
+            selectedId={selectedPuzzle?.id}
+            onSelect={compact ? setSelectedId : undefined}
           />
         </main>
+        {selectedPuzzle && (
+          <PuzzleSheet
+            puzzle={selectedPuzzle}
+            onReroll={handleRerollPuzzle}
+            onRemove={handleRemovePuzzle}
+            onConfigChange={handleConfigChange}
+            onClose={() => setSelectedId(null)}
+          />
+        )}
       </div>
     </DragConfigProvider>
   );
