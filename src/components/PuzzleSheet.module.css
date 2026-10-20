@@ -101,8 +101,8 @@
   color: var(--ink);
 }
 
-/* Config bars were drawn for a desktop width; scroll sideways rather than
-   spill off the screen until each one wraps on its own. */
+/* Every config bar fits 360px wide (they are built for the 248px sidebar);
+   scrolling sideways is only a fallback for a future bar that doesn't. */
 .config {
   overflow: auto;
   padding: 8px;

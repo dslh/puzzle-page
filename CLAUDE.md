@@ -124,8 +124,9 @@ On screen the sheet is shrunk to fit with CSS `zoom` (`--sheet-scale`, set by
 a `ResizeObserver` in `GridLayout`), under `@media screen` so print keeps exact
 mm sizes. Anything that measures pixels must read the on-screen size, not
 assume 72px a cell. The selection outline divides by `--sheet-scale` to stay
-4px. Config bars inside the sheet scroll sideways if too wide; most were drawn
-for desktop width and haven't been checked at phone width.
+4px. Every config bar fits the sheet at 360px wide, since they're built for the
+248px sidebar; keep new ones within that. The sheet scrolls sideways only as a
+fallback.
 
 ## Adding a New Puzzle
 
