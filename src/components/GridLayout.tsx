@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import type { DragEvent } from 'react';
+import type { DragEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
 import { collides, newPlacedPuzzle } from '../utils/placement';
+import { trackPointerDrag } from '../utils/pointerDrag';
 import { useDragConfig } from '../contexts/DragConfigContext';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
@@ -23,16 +24,36 @@ interface GridLayoutProps {
 // The sheet's width on screen at 100%: CSS's 96px to the inch
 const SHEET_WIDTH_PX = (GRID_COLS * CELL_SIZE_MM * 96) / 25.4;
 
+// A new puzzle being dragged in from the sidebar (HTML5 drag and drop)
 interface DragState {
   type: string;
   width: number;
   height: number;
-  puzzleId?: string; // If present, we're moving an existing puzzle
+}
+
+// A placed puzzle being moved (pointer events), and where it would land
+interface MoveState {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+// Where a dragged puzzle would land, for the cell highlight and preview
+interface Ghost {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  excludeId?: string;
 }
 
 export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange, selectedId, onSelect }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
+  const [move, setMove] = useState<MoveState | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const { dragConfig, setDragConfig } = useDragConfig();
 
   // Shrink the sheet to fit a narrow screen. Applied with CSS zoom on screen
@@ -52,6 +73,44 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
   const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string) =>
     collides(puzzles, x, y, width, height, excludeId);
 
+  // The grid cell under a point on screen. Measured from the sheet as drawn,
+  // so it holds at any zoom.
+  const cellAt = (clientX: number, clientY: number) => {
+    const rect = gridRef.current!.getBoundingClientRect();
+    return {
+      x: Math.floor((clientX - rect.left) / (rect.width / GRID_COLS)),
+      y: Math.floor((clientY - rect.top) / (rect.height / GRID_ROWS)),
+    };
+  };
+
+  // Moving a placed puzzle: from its drag handle with a mouse, or by dragging
+  // the selected puzzle itself on a touch screen. The puzzle keeps the cell
+  // that was grabbed under the pointer, and stays on the page.
+  const handleMoveStart = (puzzle: PlacedPuzzle, e: ReactPointerEvent) => {
+    const grabbed = cellAt(e.clientX, e.clientY);
+    const offsetX = Math.min(Math.max(grabbed.x - puzzle.x, 0), puzzle.width - 1);
+    const offsetY = Math.min(Math.max(grabbed.y - puzzle.y, 0), puzzle.height - 1);
+    let target: { x: number; y: number } | null = null;
+
+    trackPointerDrag(e, {
+      onMove: moveEvent => {
+        const cell = cellAt(moveEvent.clientX, moveEvent.clientY);
+        target = {
+          x: Math.min(Math.max(cell.x - offsetX, 0), GRID_COLS - puzzle.width),
+          y: Math.min(Math.max(cell.y - offsetY, 0), GRID_ROWS - puzzle.height),
+        };
+        setMove({ id: puzzle.id, ...target, width: puzzle.width, height: puzzle.height });
+      },
+      onEnd: endEvent => {
+        if (endEvent && target && onUpdatePuzzle
+          && !checkCollision(target.x, target.y, puzzle.width, puzzle.height, puzzle.id)) {
+          onUpdatePuzzle(puzzle.id, target.x, target.y);
+        }
+        setMove(null);
+      },
+    });
+  };
+
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
@@ -62,22 +121,13 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         const puzzleType = parts[1];
         const width = parseInt(parts[2]);
         const height = parseInt(parts[3]);
-        const puzzleId = parts[4] || undefined;
 
-        setDragData({ type: puzzleType, width, height, puzzleId });
+        setDragData({ type: puzzleType, width, height });
       }
       return;
     }
 
-    // Get the actual grid element's position, not the container
-    const gridElement = e.currentTarget.querySelector(`.${styles.grid}`) as HTMLElement;
-    if (!gridElement) return;
-
-    const rect = gridElement.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) / (rect.width / GRID_COLS));
-    const y = Math.floor((e.clientY - rect.top) / (rect.height / GRID_ROWS));
-
-    setDragOver({ x, y });
+    setDragOver(cellAt(e.clientX, e.clientY));
   };
 
   const handleDragLeave = () => {
@@ -90,38 +140,31 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
     if (!dragOver || !dragData) return;
 
-    // Exclude the puzzle being moved from collision detection
-    const hasCollision = checkCollision(
-      dragOver.x,
-      dragOver.y,
-      dragData.width,
-      dragData.height,
-      dragData.puzzleId
-    );
+    if (!checkCollision(dragOver.x, dragOver.y, dragData.width, dragData.height)) {
+      const definition = getPuzzleDefinition(dragData.type);
 
-    if (!hasCollision) {
-      if (dragData.puzzleId && onUpdatePuzzle) {
-        // Moving an existing puzzle
-        onUpdatePuzzle(dragData.puzzleId, dragOver.x, dragOver.y);
-      } else {
-        // Adding a new puzzle from sidebar
-        const definition = getPuzzleDefinition(dragData.type);
+      // Get config from context if available, otherwise use definition default
+      const config = dragConfig?.puzzleType === dragData.type
+        ? dragConfig.config
+        : definition?.defaultConfig;
 
-        // Get config from context if available, otherwise use definition default
-        const config = dragConfig?.puzzleType === dragData.type
-          ? dragConfig.config
-          : definition?.defaultConfig;
-
-        onAddPuzzle(newPlacedPuzzle(
-          dragData.type, dragOver.x, dragOver.y, dragData.width, dragData.height, config,
-        ));
-      }
+      onAddPuzzle(newPlacedPuzzle(
+        dragData.type, dragOver.x, dragOver.y, dragData.width, dragData.height, config,
+      ));
     }
 
     setDragOver(null);
     setDragData(null);
     setDragConfig(null);
   };
+
+  const ghost: Ghost | null = move
+    ? { ...move, excludeId: move.id }
+    : dragOver && dragData
+      ? { ...dragOver, width: dragData.width, height: dragData.height }
+      : null;
+  const ghostCollides = ghost !== null
+    && checkCollision(ghost.x, ghost.y, ghost.width, ghost.height, ghost.excludeId);
 
   const renderGridCells = () => {
     const cells = [];
@@ -130,22 +173,15 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         let className = styles.gridCell;
 
         // Highlight cells under drag
-        if (dragOver && dragData) {
+        if (ghost) {
           const isUnderDrag =
-            x >= dragOver.x &&
-            x < dragOver.x + dragData.width &&
-            y >= dragOver.y &&
-            y < dragOver.y + dragData.height;
+            x >= ghost.x &&
+            x < ghost.x + ghost.width &&
+            y >= ghost.y &&
+            y < ghost.y + ghost.height;
 
           if (isUnderDrag) {
-            const hasCollision = checkCollision(
-              dragOver.x,
-              dragOver.y,
-              dragData.width,
-              dragData.height,
-              dragData.puzzleId
-            );
-            className += hasCollision ? ` ${styles.invalid}` : ` ${styles.valid}`;
+            className += ghostCollides ? ` ${styles.invalid}` : ` ${styles.valid}`;
           }
         }
 
@@ -176,6 +212,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       onDrop={handleDrop}
     >
       <div
+        ref={gridRef}
         className={styles.grid}
         style={{
           width: `${GRID_COLS * CELL_SIZE_MM}mm`,
@@ -186,30 +223,30 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         {renderGridCells()}
 
         {/* Render placed puzzles */}
-        {puzzles
-          .filter(puzzle => !dragData?.puzzleId || puzzle.id !== dragData.puzzleId)
-          .map(puzzle => (
-            <PuzzleWrapper
-              key={puzzle.id}
-              puzzle={puzzle}
-              onRemove={onRemovePuzzle}
-              onReroll={onRerollPuzzle}
-              onResize={onResizePuzzle}
-              onConfigChange={onConfigChange}
-              selected={puzzle.id === selectedId}
-              onSelect={onSelect}
-            />
-          ))}
+        {puzzles.map(puzzle => (
+          <PuzzleWrapper
+            key={puzzle.id}
+            puzzle={puzzle}
+            onRemove={onRemovePuzzle}
+            onReroll={onRerollPuzzle}
+            onResize={onResizePuzzle}
+            onConfigChange={onConfigChange}
+            onMoveStart={onUpdatePuzzle && handleMoveStart}
+            moving={puzzle.id === move?.id}
+            selected={puzzle.id === selectedId}
+            onSelect={onSelect}
+          />
+        ))}
 
         {/* Drag preview */}
-        {dragOver && dragData && (
+        {ghost && (
           <div
             className={styles.dragPreview}
             style={{
-              left: `${dragOver.x * CELL_SIZE_MM}mm`,
-              top: `${dragOver.y * CELL_SIZE_MM}mm`,
-              width: `${dragData.width * CELL_SIZE_MM}mm`,
-              height: `${dragData.height * CELL_SIZE_MM}mm`,
+              left: `${ghost.x * CELL_SIZE_MM}mm`,
+              top: `${ghost.y * CELL_SIZE_MM}mm`,
+              width: `${ghost.width * CELL_SIZE_MM}mm`,
+              height: `${ghost.height * CELL_SIZE_MM}mm`,
             }}
           />
         )}

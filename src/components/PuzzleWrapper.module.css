@@ -21,6 +21,9 @@
   }
 }
 
+/* Touch: the selected puzzle moves by dragging it, and resizes by tabs on
+   its right and bottom edges. The tabs are divided by the sheet's zoom, so
+   they stay big enough for a finger however small the sheet is drawn. */
 @media (hover: none) {
   .buttonGroup,
   .dragHandle,
@@ -30,6 +33,38 @@
   .resizeHandleCorner {
     display: none;
   }
+
+  .wrapper.selected .resizeHandleRight,
+  .wrapper.selected .resizeHandleBottom,
+  .wrapper.selected .resizeHandleCorner {
+    display: block;
+    opacity: 1;
+    background: var(--ink);
+    border: calc(2px / var(--sheet-scale, 1)) solid var(--paper);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .wrapper.selected .resizeHandleRight {
+    right: calc(-12px / var(--sheet-scale, 1));
+    width: calc(20px / var(--sheet-scale, 1));
+    height: calc(48px / var(--sheet-scale, 1));
+    border-radius: calc(10px / var(--sheet-scale, 1));
+  }
+
+  .wrapper.selected .resizeHandleBottom {
+    bottom: calc(-12px / var(--sheet-scale, 1));
+    width: calc(48px / var(--sheet-scale, 1));
+    height: calc(20px / var(--sheet-scale, 1));
+    border-radius: calc(10px / var(--sheet-scale, 1));
+  }
+
+  .wrapper.selected .resizeHandleCorner {
+    right: calc(-14px / var(--sheet-scale, 1));
+    bottom: calc(-14px / var(--sheet-scale, 1));
+    width: calc(28px / var(--sheet-scale, 1));
+    height: calc(28px / var(--sheet-scale, 1));
+    border-radius: 50%;
+  }
 }
 
 .wrapper.selected {
@@ -37,6 +72,21 @@
   outline: calc(4px / var(--sheet-scale, 1)) solid var(--pencil);
   outline-offset: calc(2px / var(--sheet-scale, 1));
   border-radius: 2px;
+  /* A drag on the selected puzzle moves it rather than scrolling the page */
+  touch-action: none;
+  /* Scrolled into view clear of the bottom sheet (at most 55dvh tall) */
+  scroll-margin: calc(16px / var(--sheet-scale, 1)) 0 calc(58dvh / var(--sheet-scale, 1));
+}
+
+.wrapper.moving {
+  opacity: 0.35;
+}
+
+.dragHandle,
+.resizeHandleRight,
+.resizeHandleBottom,
+.resizeHandleCorner {
+  touch-action: none;
 }
 
 .dragHandle {

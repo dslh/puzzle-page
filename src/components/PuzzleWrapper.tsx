@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
 import HelpButton from './help/HelpButton';
+import { trackPointerDrag } from '../utils/pointerDrag';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -11,11 +13,15 @@ interface PuzzleWrapperProps {
   onReroll?: (id: string) => void;
   onResize?: (id: string, width: number, height: number) => void;
   onConfigChange?: (id: string, config: unknown) => void;
+  /** Starts moving this puzzle; GridLayout follows the pointer from here. */
+  onMoveStart?: (puzzle: PlacedPuzzle, e: ReactPointerEvent) => void;
+  /** Being moved: drawn faintly where it was until it lands. */
+  moving?: boolean;
   selected?: boolean;
   onSelect?: (id: string | null) => void;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, selected, onSelect }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
 
@@ -25,18 +31,27 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     if (selected) wrapperRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [selected]);
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+  // With a mouse, a puzzle moves by its drag handle
+  const handleHandlePointerDown = (e: ReactPointerEvent) => {
+    if (e.button !== 0 || !onMoveStart) return;
     e.stopPropagation();
-    // Pass puzzle ID to indicate we're moving an existing puzzle
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData(`puzzle/${puzzle.type}/${puzzle.width}/${puzzle.height}/${puzzle.id}`, '');
+    e.preventDefault();
+    onMoveStart(puzzle, e);
   };
 
-  const handleResizeStart = (e: React.MouseEvent, direction: 'right' | 'bottom' | 'corner') => {
+  // In the compact layout, the selected puzzle moves by dragging the puzzle
+  // itself. Only the selected one, so a swipe across the others still
+  // scrolls the page.
+  const handlePointerDown = (e: ReactPointerEvent) => {
+    if (e.button !== 0 || !selected || !onMoveStart) return;
+    onMoveStart(puzzle, e);
+  };
+
+  const handleResizeStart = (e: ReactPointerEvent, direction: 'right' | 'bottom' | 'corner') => {
     e.stopPropagation();
     e.preventDefault();
 
-    if (!onResize || !resizable) return;
+    if (!onResize || !resizable || e.button !== 0) return;
 
     const startX = e.clientX;
     const startY = e.clientY;
@@ -44,7 +59,10 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     const startWidthPx = wrapperRef.current?.getBoundingClientRect().width ?? startWidth * 72;
     const startHeight = puzzle.height;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
+    let lastWidth = startWidth;
+    let lastHeight = startHeight;
+
+    const handleMove = (moveEvent: PointerEvent) => {
       // Calculate how many grid cells we've moved
       const deltaX = moveEvent.clientX - startX;
       const deltaY = moveEvent.clientY - startY;
@@ -77,18 +95,14 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       }
 
       // Only update if size changed
-      if (newWidth !== puzzle.width || newHeight !== puzzle.height) {
+      if (newWidth !== lastWidth || newHeight !== lastHeight) {
+        lastWidth = newWidth;
+        lastHeight = newHeight;
         onResize(puzzle.id, newWidth, newHeight);
       }
     };
 
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    trackPointerDrag(e, { onMove: handleMove, onEnd: () => {} });
   };
 
   const renderPuzzle = () => {
@@ -124,7 +138,8 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
   return (
     <div
       ref={wrapperRef}
-      className={`${styles.wrapper} ${selected ? styles.selected : ''}`}
+      className={`${styles.wrapper} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''}`}
+      onPointerDown={handlePointerDown}
       onClick={onSelect && ((e) => {
         // Keep the page behind from clearing the selection again
         e.stopPropagation();
@@ -139,8 +154,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     >
       <div
         className={styles.dragHandle}
-        draggable
-        onDragStart={handleDragStart}
+        onPointerDown={handleHandlePointerDown}
         title="Drag to reposition"
       >
         ⋮⋮
@@ -209,21 +223,21 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
           {resizable.width && (
             <div
               className={styles.resizeHandleRight}
-              onMouseDown={(e) => handleResizeStart(e, 'right')}
+              onPointerDown={(e) => handleResizeStart(e, 'right')}
               title="Resize width"
             />
           )}
           {resizable.height && (
             <div
               className={styles.resizeHandleBottom}
-              onMouseDown={(e) => handleResizeStart(e, 'bottom')}
+              onPointerDown={(e) => handleResizeStart(e, 'bottom')}
               title="Resize height"
             />
           )}
           {resizable.width && resizable.height && (
             <div
               className={styles.resizeHandleCorner}
-              onMouseDown={(e) => handleResizeStart(e, 'corner')}
+              onPointerDown={(e) => handleResizeStart(e, 'corner')}
               title="Resize both"
             />
           )}

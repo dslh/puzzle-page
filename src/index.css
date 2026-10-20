@@ -98,6 +98,12 @@ body {
   color: var(--ink);
 }
 
+/* Set by trackPointerDrag while a puzzle is being moved or resized */
+body[data-pointer-drag] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 button, input, select, textarea {
   font-family: inherit;
 }

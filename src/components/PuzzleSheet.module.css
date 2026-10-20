@@ -111,6 +111,17 @@
   border-radius: var(--radius);
 }
 
+/* Out of the way while a puzzle is moved or resized, so the whole page shows */
+:global(body[data-pointer-drag]) .sheet {
+  visibility: hidden;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
 @media print {
   .sheet {
     display: none !important;

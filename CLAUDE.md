@@ -95,12 +95,12 @@ App (state holder)
     │   └── GridLayout (drag/drop target + collision detection; zooms the sheet to fit)
             ├── Grid cells (19mm × 19mm visual grid)
             ├── PuzzleWrapper (for each PlacedPuzzle)
-            │   ├── Drag handle
+            │   ├── Drag handle (mouse; pointer events)
             │   ├── Reroll/delete buttons
             │   ├── Config UI (hover, when puzzle.configComponent exists)
-            │   ├── Resize handles (when puzzle.resizable)
+            │   ├── Resize handles (when puzzle.resizable; big tabs on touch)
             │   └── Dynamic puzzle component
-            └── Drag preview (while dragging)
+            └── Drag preview (while dragging in or moving)
     └── PuzzleSheet (compact layout: the selected puzzle's controls, along the bottom)
 ```
 
@@ -115,10 +115,13 @@ CSS. There:
   like a book (the + also works on desktop). No room shows a toolbar notice.
 - Tapping a puzzle selects it (`App.selectedId`), and its help, reroll, remove
   and config bar open in `PuzzleSheet`. Tapping the empty page deselects.
+- The selected puzzle moves by dragging the puzzle itself, and resizes by
+  tabs on its right and bottom edges. Only the selected one takes a drag
+  (`touch-action: none`), so a swipe across the rest still scrolls the page.
 
 The on-puzzle hover controls only appear under `(hover: hover)` and are hidden
-under `(hover: none)`. Moving and resizing are still mouse-only (HTML5 drag and
-drop, `onMouseDown`).
+under `(hover: none)`. Dragging a new puzzle in from the sidebar is still HTML5
+drag and drop, so mouse-only; on touch, + covers it.
 
 On screen the sheet is shrunk to fit with CSS `zoom` (`--sheet-scale`, set by
 a `ResizeObserver` in `GridLayout`), under `@media screen` so print keeps exact
@@ -354,19 +357,31 @@ This allows:
 
 ### Drag & Drop Protocol
 
-Drag metadata is smuggled through the dataTransfer **type** string, not its
+There are two kinds of drag:
+
+- **Moving and resizing a placed puzzle** use pointer events, so mouse, touch
+  and pen all work. `trackPointerDrag` (`src/utils/pointerDrag.ts`) follows
+  the pointer on the window once it has moved 4px (so a tap still selects),
+  sets `data-pointer-drag` on `<body>` meanwhile (stops text selection, hides
+  `PuzzleSheet`), and swallows the click that follows the release. Moves live
+  in `GridLayout.handleMoveStart`: the grabbed cell stays under the pointer,
+  the target is clamped to the page, and the puzzle is drawn faintly where it
+  was until it lands. Resizes live in `PuzzleWrapper.handleResizeStart`.
+  Both measure cells from the sheet as drawn, so they hold at any zoom.
+- **Dragging a new puzzle in from the sidebar** is HTML5 drag and drop, below.
+  Moving it to pointer events too would retire the type-string trick and
+  `DragConfigContext`, at the cost of drawing our own drag image.
+
+Sidebar drag metadata is smuggled through the dataTransfer **type** string, not its
 value. Browsers hide `getData()` during `dragover` for security, but the list of
 types stays readable - so the payload is encoded into the type itself and read
 back with `e.dataTransfer.types.find(t => t.startsWith('puzzle/'))`.
 
-Format: `puzzle/{type}/{width}/{height}[/{puzzleId}]`
-
-- New puzzle from sidebar: `puzzle/sudoku/3/3` (set in `Sidebar.handleDragStart`)
-- Existing puzzle being moved: `puzzle/sudoku/3/3/puzzle-id-123` (set in
-  `PuzzleWrapper.handleDragStart`)
+Format: `puzzle/{type}/{width}/{height}`, e.g. `puzzle/sudoku/3/3` (set in
+`Sidebar.handleDragStart`).
 
 **Parsing** (in `GridLayout.handleDragOver`): `parts[1]` type, `parts[2]` width,
-`parts[3]` height, `parts[4]` puzzleId - absent for new puzzles.
+`parts[3]` height.
 
 **Config does not travel in the string.** It used to (as trailing
 `/{configJson}` segments), but was moved out in commit 02b0ad6 when sidebar
@@ -674,7 +689,7 @@ One implementation: `collides` in `src/utils/placement.ts`, used for drops,
 the drag highlight, resizes and tap-to-add.
 
 ### Update drag/drop format
-Encoding lives in `Sidebar.handleDragStart` (new puzzles) and
-`PuzzleWrapper.handleDragStart` (moves); parsing is in
-`GridLayout.handleDragOver`. Config goes through `DragConfigContext`, not the
+Only sidebar drags use it now. Encoding lives in `Sidebar.handleDragStart`;
+parsing is in `GridLayout.handleDragOver`. Moves and resizes are pointer
+events. Config goes through `DragConfigContext`, not the
 format string. See **Drag & Drop Protocol** above.

@@ -55,6 +55,11 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
           Remove
         </button>
       </div>
+      <p className={styles.hint}>
+        {definition.resizable
+          ? 'Drag the puzzle to move it. Drag the dark tabs on its edges to change its size.'
+          : 'Drag the puzzle to move it.'}
+      </p>
       {ConfigComponent && config !== undefined && (
         <div className={styles.config}>
           <ConfigComponent value={config} onChange={newConfig => onConfigChange(puzzle.id, newConfig)} />
