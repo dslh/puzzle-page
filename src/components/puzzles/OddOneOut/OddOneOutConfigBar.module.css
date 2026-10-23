@@ -1,4 +1,29 @@
+.configContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--paper);
+  padding: 8px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  width: 34px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
 .buttonBar {
+  flex: 1;
   display: flex;
   border: 2px solid var(--line);
   border-radius: var(--radius);
@@ -8,9 +33,10 @@
 
 .button {
   flex: 1;
-  padding: 6px 12px;
-  font-size: 14px;
+  padding: 4px 10px;
+  font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
   border: none;
   border-right: 1px solid var(--line);
   background: var(--paper);
@@ -27,7 +53,7 @@
   background: var(--hover);
 }
 
-.button.selected {
+.selected {
   background: var(--pencil);
   color: var(--ink);
 }

@@ -512,9 +512,9 @@ the band. "All" uses the base only. Switching age resets every sidebar entry to
 its new starting config; puzzles already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Nine entries suit 2–3 (Maze,
+needs overrides; the other bands carry them. Ten entries suit 2–3 (Maze,
 Roads, Pre-Writing Patterns, Pattern Sequence, Matching shadows, Match the
-Halves, Size Ordering, Which Doesn't Belong?, Odd One Out); everything else is
+Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair); everything else is
 `ages: ['4-5', '6-7']`. New toddler-level puzzles are planned. Keep overrides to settings you're sure of - the user tunes them.
 
 | Category | Puzzles |
@@ -523,7 +523,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out); everything else is
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less |
-| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Size Ordering *(preset)*, Chess |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Size Ordering *(preset)*, Chess |
 
 The puzzles in registry order:
 
@@ -538,7 +538,7 @@ The puzzles in registry order:
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
-| Odd One Out | `oddoneout` | 5×5 | fixed | grid size |
+| Odd One Out | `oddoneout` | 5×5 | fixed | odd one out / pair (all different but two), grid size |
 | Counting | `counting` | 4×3 | both | - |
 | Ordering | `ordering` | 4×3 | both | numbers / emoji |
 | Chess Puzzle | `chess` | 5×5 | fixed | difficulty, mate / capture |

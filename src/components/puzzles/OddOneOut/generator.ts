@@ -32,7 +32,7 @@ interface EmojiTheme {
 const EMOJI_THEMES: EmojiTheme[] = [
   {
     name: 'Animals',
-    emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄'],
+    emojis: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦆', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🦓', '🦒', '🐘', '🦛', '🦏', '🐪', '🦘', '🦬', '🐄', '🐖', '🐑', '🐐', '🦌', '🐿️', '🦔', '🦡', '🦥', '🦨', '🐓', '🦃', '🦚', '🦜', '🦩'],
   },
   {
     name: 'Faces',
@@ -52,15 +52,15 @@ const EMOJI_THEMES: EmojiTheme[] = [
   },
   {
     name: 'Vehicles',
-    emojis: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🛴', '🚂', '🚁', '✈️', '🚀', '🛸', '⛵', '🚤'],
+    emojis: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🛻', '🚚', '🚛', '🚜', '🏍️', '🛵', '🚲', '🛴', '🚂', '🚁', '✈️', '🚀', '🛸', '⛵', '🚤', '🚃', '🚋', '🚄', '🚅', '🚇', '🚊', '🚝', '🚞', '🚍', '🚔', '🚖', '🚘', '🛺', '🛩️', '🚡', '🚠', '🛶', '🚢', '⛴️', '🛥️', '🛹', '🛼', '🪂'],
   },
   {
     name: 'Food',
-    emojis: ['🍕', '🍔', '🍟', '🌭', '🥪', '🌮', '🌯', '🥗', '🍿', '🧂', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🍤', '🍙', '🍚', '🍘', '🍥', '🥮', '🍡'],
+    emojis: ['🍕', '🍔', '🍟', '🌭', '🥪', '🌮', '🌯', '🥗', '🍿', '🧂', '🥫', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🍤', '🍙', '🍚', '🍘', '🍥', '🥮', '🍡', '🥐', '🥖', '🥨', '🥯', '🥞', '🧇', '🧀', '🍗', '🥩', '🥓', '🍳', '🍞', '🧁', '🍰', '🎂', '🍩', '🍪', '🍫', '🍬', '🍭', '🍮', '🍦', '🍨'],
   },
   {
     name: 'Sports',
-    emojis: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🥍', '🏑', '🥌', '⛳', '🎿', '🛷', '🥊', '🎯', '🪃', '🏹', '🎣', '🤿'],
+    emojis: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🥍', '🏑', '🥌', '⛳', '🎿', '🛷', '🥊', '🎯', '🪃', '🏹', '🎣', '🤿', '🏆', '🥇', '🏅', '🎽', '⛸️', '🪁', '🥅', '🏏', '🎳', '🪀', '🛹', '🛼', '🏋️', '🤸', '⛹️', '🏊', '🚴', '🏄', '🤺', '🏇', '🧗', '🤾', '🚣'],
   },
   {
     name: 'Sea Life',
@@ -68,39 +68,48 @@ const EMOJI_THEMES: EmojiTheme[] = [
   },
   {
     name: 'Nature',
-    emojis: ['🌸', '🌹', '🌺', '🌻', '🌼', '🌷', '💐', '🌱', '🪴', '🌲', '🌳', '🌴', '🌵', '🍀', '☘️', '🍃', '🍂', '🍁', '🌾', '🌿', '🪻', '🪷', '💮', '🏵️', '🌈'],
+    emojis: ['🌸', '🌹', '🌺', '🌻', '🌼', '🌷', '💐', '🌱', '🪴', '🌲', '🌳', '🌴', '🌵', '🍀', '☘️', '🍃', '🍂', '🍁', '🌾', '🌿', '🪻', '🪷', '💮', '🏵️', '🌈', '🥀', '🍄', '🪨', '🪵', '🌰', '🪹', '🌊', '🔥', '💧', '❄️', '☀️', '⛅', '🌧️', '⛈️', '🌪️', '☃️', '⛄', '⚡', '🌋', '🏔️', '🏝️', '🌙', '⭐'],
   },
 ];
 
+/**
+ * 'odd': every picture appears twice, apart from one on its own.
+ * 'pair': every picture appears once, apart from one that appears twice.
+ */
+export type OddOneOutMode = 'odd' | 'pair';
+
 export interface OddOneOutPuzzle {
   grid: string[][];
-  oddEmoji: string;
+  /** The picture to find: the one on its own, or the one in the pair. */
+  answer: string;
   themeName: string;
 }
 
-export function generateOddOneOut(size: 3 | 5 | 7, seed: number): OddOneOutPuzzle {
+export function generateOddOneOut(size: 3 | 5 | 7, mode: OddOneOutMode, seed: number): OddOneOutPuzzle {
   const random = new SeededRandom(seed);
-
-  // Select a random theme
-  const theme = EMOJI_THEMES[random.nextInt(EMOJI_THEMES.length)];
-
-  // Calculate how many cells and pairs we need
   const cellCount = size * size;
-  const pairCount = (cellCount - 1) / 2; // e.g., 12 for 5×5 (25 cells = 12 pairs + 1 odd)
 
-  // Shuffle emojis and pick enough for pairs + 1 odd
-  const shuffledEmojis = random.shuffle(theme.emojis);
-  const selectedEmojis = shuffledEmojis.slice(0, pairCount + 1);
+  // How many different pictures the grid needs: 12 pairs + 1 for a 5×5 odd
+  // one out, or 23 singles + 1 pair for a 5×5 pair. A 7×7 pair needs 48, which
+  // only some themes have; every theme has enough for the other grids.
+  const distinctCount = mode === 'odd' ? (cellCount + 1) / 2 : cellCount - 1;
+  const themes = EMOJI_THEMES.filter(t => t.emojis.length >= distinctCount);
+  const theme = themes[random.nextInt(themes.length)];
 
-  // The last selected emoji is the odd one (appears once)
-  const oddEmoji = selectedEmojis[pairCount];
+  const selectedEmojis = random.shuffle(theme.emojis).slice(0, distinctCount);
 
-  // Create the flat array: each of the first pairCount emojis appears twice, odd appears once
-  const cells: string[] = [];
-  for (let i = 0; i < pairCount; i++) {
-    cells.push(selectedEmojis[i], selectedEmojis[i]);
+  // Odd: the last picture appears once, the rest twice.
+  // Pair: every picture appears once, and the first one again.
+  let cells: string[];
+  let answer: string;
+  if (mode === 'odd') {
+    answer = selectedEmojis[distinctCount - 1];
+    cells = selectedEmojis.slice(0, -1).flatMap(e => [e, e]);
+    cells.push(answer);
+  } else {
+    answer = selectedEmojis[0];
+    cells = [...selectedEmojis, answer];
   }
-  cells.push(oddEmoji);
 
   // Shuffle the positions
   const shuffledCells = random.shuffle(cells);
@@ -113,7 +122,7 @@ export function generateOddOneOut(size: 3 | 5 | 7, seed: number): OddOneOutPuzzl
 
   return {
     grid,
-    oddEmoji,
+    answer,
     themeName: theme.name,
   };
 }

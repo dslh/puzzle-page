@@ -4,15 +4,16 @@ import type { OddOneOutConfig } from './index';
 const docs: PuzzleDoc<OddOneOutConfig> = {
   summary: (
     <>
-      A grid of pictures where every picture has a twin, except one. Find the picture
-      that has no match and circle it.
+      A grid of pictures to search. In Odd one out, every picture has a twin except one:
+      circle the one on its own. In Pair, every picture is different except two: circle
+      the two that are the same.
     </>
   ),
 
   ages: (
     <>
       2–7. At 2–3 it starts at 3×3: nine pictures. Point to each one together and ask
-      “where’s the other one?”
+      “is there another one like this?”
     </>
   ),
   time: <>2–10 minutes, depending on size</>,
@@ -24,9 +25,14 @@ const docs: PuzzleDoc<OddOneOutConfig> = {
   howItWorks: (
     <>
       <p>
-        Each puzzle takes one theme, such as animals, faces, fruit or vehicles. Every
-        picture appears twice, apart from one, and they are shuffled. The pictures are
-        nudged off-centre a little so the grid doesn’t line up neatly.
+        Each puzzle takes one theme, such as animals, faces, fruit or vehicles. The
+        pictures are shuffled and nudged off-centre a little so the grid doesn’t line up
+        neatly.
+      </p>
+      <p>
+        The two modes ask for opposite things. Odd one out is mostly pairs with one picture
+        left over. Pair is mostly different pictures with one matching pair hidden among
+        them.
       </p>
       <p>
         Some themes are harder than others. Faces and space (with its moon shapes) have
@@ -36,8 +42,10 @@ const docs: PuzzleDoc<OddOneOutConfig> = {
   ),
 
   sayAloud: [
-    'Every picture has a twin, except one. Can you find the one on its own?',
-    'Find this one’s twin. Join them with a line, then find the next pair.',
+    'Odd one out: every picture has a twin, except one. Can you find the one on its own?',
+    'Odd one out: find this one’s twin. Join them with a line, then find the next pair.',
+    'Pair: all the pictures are different, but two are the same. Can you find them?',
+    'Pair: look at this one. Is there another one like it? No? Cross it off and try the next.',
   ],
 
   skills: [
@@ -54,23 +62,49 @@ const docs: PuzzleDoc<OddOneOutConfig> = {
   ),
 
   settings: {
+    mode: {
+      label: 'Find',
+      description: <p>What they are looking for. Both use the same grids and themes.</p>,
+      options: [
+        {
+          label: 'Odd one out',
+          description: <p>Every picture has a twin, except one. Find the one on its own.</p>,
+          example: { config: { mode: 'odd', size: 3 } },
+        },
+        {
+          label: 'Pair',
+          description: (
+            <p>
+              Every picture is different, except two. Find the matching pair. Ticking off
+              pairs doesn’t help here, so it needs a different way of searching.
+            </p>
+          ),
+          example: { config: { mode: 'pair', size: 3 } },
+        },
+      ],
+    },
     size: {
       label: 'Grid',
       description: <p>How many pictures. The puzzle takes the same space on the page.</p>,
       options: [
         {
           label: '3×3',
-          description: <p>Nine pictures, four pairs. Big and quick. Good for toddlers.</p>,
+          description: <p>Nine pictures. Big and quick. Good for toddlers.</p>,
           example: { config: { size: 3 } },
         },
         {
           label: '5×5',
-          description: <p>25 pictures, twelve pairs. Default.</p>,
+          description: <p>25 pictures. Default.</p>,
           example: { config: { size: 5 } },
         },
         {
           label: '7×7',
-          description: <p>49 small pictures, 24 pairs. Needs patience and a system.</p>,
+          description: (
+            <p>
+              49 small pictures. Needs patience and a system. In Pair, only the bigger themes
+              have enough pictures: animals, faces, food, vehicles, sport and nature.
+            </p>
+          ),
           example: { config: { size: 7 } },
         },
       ],
@@ -90,7 +124,7 @@ const docs: PuzzleDoc<OddOneOutConfig> = {
   ],
   mistakes: [
     {
-      sign: 'Circles one that does have a twin',
+      sign: 'Odd one out: circles one that does have a twin',
       meaning: <>Common in a busy grid. They missed its twin. Ask them to look for one more like it.</>,
     },
     {
@@ -98,13 +132,18 @@ const docs: PuzzleDoc<OddOneOutConfig> = {
       meaning: <>Normal, especially with faces. Ask what’s different: the eyes? the mouth?</>,
     },
     {
+      sign: 'Pair: circles two that only look alike',
+      meaning: <>A fair guess with lookalike themes. Put them side by side and ask what’s different.</>,
+    },
+    {
       sign: 'Searches everywhere at once and gives up',
-      meaning: <>Show them how to go one picture at a time, crossing off each pair.</>,
+      meaning: <>Normal on a big grid. Show them how to go one picture at a time, crossing each off when it’s done.</>,
     },
   ],
   beyondThePage: [
     'Pairs (pelmanism) with a pack of cards or picture cards.',
     'Sort a pile of socks into pairs. Is there one left over?',
+    'Lay out some toys with two the same. Can they spot the two?',
   ],
 };
 

@@ -10,12 +10,22 @@ export const puzzleDefinition: PuzzleDefinition<OddOneOutConfig> = {
   ageConfig: {
     '2-3': { size: 3 },
   },
+  presets: [
+    {
+      id: 'findthepair',
+      label: 'Find the Pair',
+      icon: '🧦',
+      category: 'thinking',
+      config: { mode: 'pair' },
+    },
+  ],
   component: OddOneOut,
   docs: () => import('./docs'),
   configComponent: OddOneOutConfigBar,
   defaultWidth: 5,
   defaultHeight: 5,
   defaultConfig: {
+    mode: 'odd',
     size: 5,
   },
 };

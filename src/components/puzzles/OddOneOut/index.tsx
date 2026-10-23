@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { generateOddOneOut } from './generator';
+import { generateOddOneOut, type OddOneOutMode } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
 import styles from './OddOneOut.module.css';
 
 export interface OddOneOutConfig {
+  mode: OddOneOutMode;
   size: 3 | 5 | 7;
 }
 
@@ -15,11 +16,12 @@ function seededRandom(seed: number): number {
 }
 
 export default function OddOneOut({ gridWidth, gridHeight, seed, config }: PuzzleProps<OddOneOutConfig>) {
+  const mode = config?.mode ?? 'odd';
   const size = config?.size ?? 5;
 
   const puzzle = useMemo(() => {
-    return generateOddOneOut(size, seed);
-  }, [size, seed]);
+    return generateOddOneOut(size, mode, seed);
+  }, [size, mode, seed]);
 
   // Calculate cell size to fit within the allocated grid space
   // Use the smaller dimension to ensure it fits
