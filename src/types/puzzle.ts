@@ -23,7 +23,8 @@ export type PuzzleType = 'maze'
                        | 'moreorless'
                        | 'initialsounds'
                        | 'directions'
-                       | 'secretcode';
+                       | 'secretcode'
+                       | 'prewriting';
 
 export interface PlacedPuzzle {
   id: string;

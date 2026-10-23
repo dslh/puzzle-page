@@ -1,0 +1,69 @@
+.container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  box-sizing: border-box;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* All strokes are in mm: the SVG's units are millimetres. */
+
+/* The model at the start of each row, drawn as a pencil line. */
+.example {
+  fill: none;
+  stroke: #444;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Round dots to trace over: a zero-length dash with a round cap is a dot.
+   Their size and spacing are set inline, from the pattern's size. */
+.trace {
+  fill: none;
+  stroke: #8e8e8e;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Where the pencil goes down. */
+.start {
+  fill: #222;
+}
+
+/* A road is the same line drawn twice: thick in ink, then a little thinner
+   in white on top, which leaves the two edges. */
+.roadEdge {
+  fill: none;
+  stroke: #333;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+
+.roadSurface {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .example,
+  .roadEdge {
+    stroke: #000;
+  }
+
+  .start {
+    fill: #000;
+  }
+}

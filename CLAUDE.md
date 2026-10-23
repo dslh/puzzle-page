@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 23 puzzle types - see **Existing Puzzles** below.
+There are currently 24 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -512,16 +512,16 @@ the band. "All" uses the base only. Switching age resets every sidebar entry to
 its new starting config; puzzles already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Only six entries suit 2–3 (Maze,
-Pattern Sequence, Matching shadows, Size Ordering, Which Doesn't Belong?, Odd
-One Out); everything else is `ages: ['4-5', '6-7']`. New toddler-level puzzles
+needs overrides; the other bands carry them. Eight entries suit 2–3 (Maze,
+Roads, Pre-Writing Patterns, Pattern Sequence, Matching shadows, Size Ordering,
+Which Doesn't Belong?, Odd One Out); everything else is `ages: ['4-5', '6-7']`. New toddler-level puzzles
 are planned. Keep overrides to settings you're sure of - the user tunes them.
 
 | Category | Puzzles |
 |---|---|
-| Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions |
+| Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Roads *(preset)* |
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
-| Writing | Handwriting, Letter Formation |
+| Writing | Handwriting, Letter Formation, Pre-Writing Patterns |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less |
 | Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Picture Scramble, Odd One Out, Size Ordering *(preset)*, Chess |
 
@@ -552,8 +552,9 @@ The puzzles in registry order:
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
+| Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
 
-Seven of these carry notes worth reading before editing them:
+Eight of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -612,6 +613,16 @@ Seven of these carry notes worth reading before editing them:
   "sounds" key reuses Initial Sounds' `isEligible`/`firstSoundLetter`, plus
   a few key-only extras for I, U and Y; Q and X have no picture, so words
   with them are skipped in that mode and named in the config bar.
+
+- **Pre-Writing Patterns** - one centreline per row, drawn two ways. Dotted
+  rows are a solid example, then dots (zero-length dashes with round caps) to
+  trace, each run a whole number of repeats. A road is the same line stroked
+  thick in ink, then thinner in white on top; it takes only the flowing
+  shapes (`ROAD_PATTERNS`), since a road can't lift off or cross itself.
+  Road waves and arch tops are stretched, and lowered if need be, so no bend
+  is tighter than half the road's width - tighter pinches the inside edge to
+  a point. Rows follow `PATTERNS` order, which is the order children usually
+  manage the shapes. Start and end pictures come from Maze's `themes.ts`.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather

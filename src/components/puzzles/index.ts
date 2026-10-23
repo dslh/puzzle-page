@@ -21,6 +21,7 @@ import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
 import { puzzleDefinition as secretCode } from './SecretCode/definition';
+import { puzzleDefinition as preWriting } from './PreWriting/definition';
 import type { AgeBand, AgeSetting, PuzzleCategory, PuzzleDefinition, PuzzlePreset } from '../../types/puzzle';
 
 /**
@@ -51,6 +52,7 @@ export const PUZZLE_DEFINITIONS = [
   initialSounds,
   directions,
   secretCode,
+  preWriting,
 ] as const;
 
 export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];
