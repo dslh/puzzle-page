@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 24 puzzle types - see **Existing Puzzles** below.
+There are currently 25 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -512,8 +512,8 @@ the band. "All" uses the base only. Switching age resets every sidebar entry to
 its new starting config; puzzles already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Ten entries suit 2–3 (Maze,
-Roads, Pre-Writing Patterns, Pattern Sequence, Matching shadows, Match the
+needs overrides; the other bands carry them. Eleven entries suit 2–3 (Maze,
+Roads, Pre-Writing Patterns, Dot Marker, Pattern Sequence, Matching shadows, Match the
 Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair); everything else is
 `ages: ['4-5', '6-7']`. New toddler-level puzzles are planned. Keep overrides to settings you're sure of - the user tunes them.
 
@@ -521,7 +521,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair); every
 |---|---|
 | Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Roads *(preset)* |
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
-| Writing | Handwriting, Letter Formation, Pre-Writing Patterns |
+| Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less |
 | Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Size Ordering *(preset)*, Chess |
 
@@ -553,8 +553,9 @@ The puzzles in registry order:
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
+| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | circle / heart / star / square / triangle, small / big dots, edge / filled, picture |
 
-Nine of these carry notes worth reading before editing them:
+Ten of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -629,6 +630,14 @@ Nine of these carry notes worth reading before editing them:
   is tighter than half the road's width - tighter pinches the inside edge to
   a point. Rows follow `PATTERNS` order, which is the order children usually
   manage the shapes. Start and end pictures come from Maze's `themes.ts`.
+
+- **Dot Marker** - circle, heart and star are Maze's `OUTLINES`; square and
+  triangle are its own. Any vertex turning more than 25° is a corner and gets
+  a dot, and the stretch between corners is shared out evenly by length, so
+  the gaps stay even on the pointy shapes. Filled adds a honeycomb inside,
+  offset only by whole or half spacings so symmetric shapes stay symmetric.
+  The picture goes at the sampled spot furthest from every edge dot. Letters
+  and numbers aren't star-shaped and need their own dot paths (GitHub #24).
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather

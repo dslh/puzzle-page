@@ -1,0 +1,41 @@
+.container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  box-sizing: border-box;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* All strokes are in mm: the SVG's units are millimetres. Everything is
+   thick, since a dot marker covers anything thin. */
+
+/* The shape, joining the dots; mostly hidden once they're dabbed. */
+.outline {
+  fill: none;
+  stroke: #333;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: #fff;
+  stroke: #222;
+  stroke-width: 1.2;
+}
+
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .outline,
+  .dot {
+    stroke: #000;
+  }
+}

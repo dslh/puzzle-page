@@ -24,7 +24,8 @@ export type PuzzleType = 'maze'
                        | 'initialsounds'
                        | 'directions'
                        | 'secretcode'
-                       | 'prewriting';
+                       | 'prewriting'
+                       | 'dotmarker';
 
 export interface PlacedPuzzle {
   id: string;

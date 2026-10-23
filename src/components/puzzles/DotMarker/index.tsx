@@ -1,0 +1,53 @@
+import { useMemo } from 'react';
+import type { PuzzleProps } from '../../../types/puzzle';
+import { generateDotMarker, type DotFill, type DotShape, type DotSize } from './generator';
+import styles from './DotMarker.module.css';
+
+export interface DotMarkerConfig {
+  shape: DotShape;
+  size: DotSize;
+  /** Dots round the edge only, or filling the inside too. */
+  fill: DotFill;
+  /** A picture in the middle, to talk about. */
+  picture: boolean;
+}
+
+export default function DotMarker({ gridWidth, gridHeight, seed, config }: PuzzleProps<DotMarkerConfig>) {
+  const shape = config?.shape ?? 'heart';
+  const size = config?.size ?? 'big';
+  const fill = config?.fill ?? 'outline';
+  const picture = config?.picture ?? true;
+
+  const puzzle = useMemo(
+    () => generateDotMarker(gridWidth, gridHeight, seed, shape, size, fill, picture),
+    [gridWidth, gridHeight, seed, shape, size, fill, picture],
+  );
+
+  const outline = puzzle.outline.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+
+  return (
+    <div className={styles.container}>
+      <svg
+        className={styles.svg}
+        viewBox={`0 0 ${puzzle.width} ${puzzle.height}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <polygon points={outline} className={styles.outline} />
+        {puzzle.dots.map((d, i) => (
+          <circle key={i} cx={d.x} cy={d.y} r={puzzle.radius} className={styles.dot} />
+        ))}
+        {puzzle.picture && (
+          <text
+            x={puzzle.picture.at.x}
+            y={puzzle.picture.at.y}
+            fontSize={puzzle.picture.size}
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            {puzzle.picture.emoji}
+          </text>
+        )}
+      </svg>
+    </div>
+  );
+}
