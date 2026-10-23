@@ -512,10 +512,10 @@ the band. "All" uses the base only. Switching age resets every sidebar entry to
 its new starting config; puzzles already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Eight entries suit 2–3 (Maze,
-Roads, Pre-Writing Patterns, Pattern Sequence, Matching shadows, Size Ordering,
-Which Doesn't Belong?, Odd One Out); everything else is `ages: ['4-5', '6-7']`. New toddler-level puzzles
-are planned. Keep overrides to settings you're sure of - the user tunes them.
+needs overrides; the other bands carry them. Nine entries suit 2–3 (Maze,
+Roads, Pre-Writing Patterns, Pattern Sequence, Matching shadows, Match the
+Halves, Size Ordering, Which Doesn't Belong?, Odd One Out); everything else is
+`ages: ['4-5', '6-7']`. New toddler-level puzzles are planned. Keep overrides to settings you're sure of - the user tunes them.
 
 | Category | Puzzles |
 |---|---|
@@ -523,7 +523,7 @@ are planned. Keep overrides to settings you're sure of - the user tunes them.
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less |
-| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Picture Scramble, Odd One Out, Size Ordering *(preset)*, Chess |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Size Ordering *(preset)*, Chess |
 
 The puzzles in registry order:
 
@@ -534,7 +534,7 @@ The puzzles in registry order:
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
 | Pattern Sequence | `patternsequence` | 8×3 | both (min width 5) | shapes / colours, pattern families (AB·ABC, AAB·ABB·AABB, ABCD·ABAC, growing, mirror), filled shapes, gap position |
-| Matching | `matching` | 5×4 | both | worked example, pictures / words / letters (upper to lower case) / rhymes (shown as pictures, words or both) / homes (animal to where it lives), max word length, custom words, custom letters |
+| Matching | `matching` | 5×4 | both | worked example, pictures / words / letters (upper to lower case) / rhymes (shown as pictures, words or both) / homes (animal to where it lives) / halves (pictures cut down the middle; 2, 3 or one pair a row; any or different shapes), max word length, custom words, custom letters |
 | Picture Scramble | `picturescramble` | 7×7 | both | image URL |
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
@@ -554,7 +554,7 @@ The puzzles in registry order:
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
 
-Eight of these carry notes worth reading before editing them:
+Nine of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -575,6 +575,12 @@ Eight of these carry notes worth reading before editing them:
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
   `docs/weaving-maze-algorithm.md`.
+- **Matching (halves)** - pictures come from a hand-kept list,
+  `halves.ts`, not the emoji categories. `shape` marks pictures whose outline
+  alone tells them apart (for the "Different" setting, for black and white
+  printing); round faces and fruit are in only by colour. Pictures sharing a
+  `lookalike` key never share a page. The half is a fixed-width window on a
+  1.4em box, so the cut stays central for emoji drawn wider than 1em.
 - **Matching (homes)** - `habitats.ts` tags each animal with its home plus
   every other home a child could fairly pick (`alsoFits`), and the generator
   never shows an animal beside a second home it fits. That keeps every line

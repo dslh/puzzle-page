@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import {
   generateMatchingPuzzle,
+  type HalvesPairs,
   type MatchingMode,
   type RhymeDisplay,
 } from './generator';
@@ -49,11 +50,22 @@ export interface MatchingConfig {
   customLettersText?: string;
   /** Rhyme mode only: show pictures, words, or a picture captioned by its word. */
   rhymeDisplay?: RhymeDisplay;
+  /** Halves mode only: 2 or 3 pairs for the youngest, or one a row. */
+  halvesPairs?: HalvesPairs;
+  /**
+   * Halves mode only: use only pictures whose outline tells them apart, for
+   * black and white printing. Off, round faces and fruit are in too.
+   */
+  distinctShapes?: boolean;
   /** Draw the first pair's line as a dashed guide. Defaults to true. */
   workedExample?: boolean;
 }
 
+/** On-paper size of a grid cell in CSS px (19mm). */
+const CELL_PX = (19 / 25.4) * 96;
+
 export default function Matching({
+  gridWidth = 5,
   gridHeight = 4,
   seed,
   config,
@@ -64,6 +76,8 @@ export default function Matching({
   const customLettersText = config?.customLettersText ?? '';
   const rhymeDisplay = config?.rhymeDisplay ?? 'pictures';
   const workedExample = config?.workedExample ?? true;
+  const halvesPairs = config?.halvesPairs ?? 'rows';
+  const distinctShapes = config?.distinctShapes ?? false;
 
   const puzzle = useMemo(() => {
     const basePuzzle = generateMatchingPuzzle(
@@ -73,7 +87,9 @@ export default function Matching({
       maxWordLength,
       customWordsText,
       customLettersText,
-      rhymeDisplay
+      rhymeDisplay,
+      halvesPairs,
+      distinctShapes
     );
 
     // Shuffle the right column for display
@@ -92,18 +108,45 @@ export default function Matching({
       shuffledRight,
       firstMatchIndex,
     };
-  }, [seed, gridHeight, mode, maxWordLength, customWordsText, customLettersText, rhymeDisplay]);
+  }, [
+    seed,
+    gridHeight,
+    mode,
+    maxWordLength,
+    customWordsText,
+    customLettersText,
+    rhymeDisplay,
+    halvesPairs,
+    distinctShapes,
+  ]);
 
   const isWordMode = puzzle.mode === 'word';
   const isLetterMode = puzzle.mode === 'letter';
   const isRhymeMode = puzzle.mode === 'rhyme';
   const isHomesMode = puzzle.mode === 'homes';
+  const isHalvesMode = puzzle.mode === 'halves';
   // Rhyme words need room on both sides, not just the left as in word mode.
   const isRhymeWide = isRhymeMode && rhymeDisplay !== 'pictures';
   const leftClass = isWordMode ? styles.word : isLetterMode ? styles.letter : styles.emoji;
   const rightClass = isLetterMode
     ? styles.letter
-    : `${styles.emoji} ${isWordMode || isRhymeMode || isHomesMode ? '' : styles.silhouette}`;
+    : `${styles.emoji} ${isWordMode || isRhymeMode || isHomesMode || isHalvesMode ? '' : styles.silhouette}`;
+
+  // Halves grow into the room that fewer pairs leave, but a half (0.7em
+  // wide, see the CSS) must still fit its 20% column.
+  const halfSize = Math.round(
+    Math.min(
+      (gridHeight * CELL_PX) / Math.max(puzzle.pairs.length, 1) * 0.65,
+      ((gridWidth * CELL_PX * 0.2) - 16) / 0.7,
+      96
+    )
+  );
+
+  const renderHalf = (symbol: string, side: 'left' | 'right') => (
+    <span className={styles.half} style={{ fontSize: halfSize }}>
+      <span className={side === 'left' ? styles.halfLeft : styles.halfRight}>{symbol}</span>
+    </span>
+  );
 
   const renderCell = (symbol: string, className: string, word?: string) => {
     if (!isRhymeMode) return <span className={className}>{symbol}</span>;
@@ -128,8 +171,10 @@ export default function Matching({
           }`}
         >
           {puzzle.pairs.map((pair, index) => (
-            <div key={index} className={styles.item}>
-              {renderCell(pair.left, leftClass, pair.leftWord)}
+            <div key={index} className={`${styles.item} ${isHalvesMode ? styles.leftHalfItem : ''}`}>
+              {isHalvesMode
+                ? renderHalf(pair.left, 'left')
+                : renderCell(pair.left, leftClass, pair.leftWord)}
             </div>
           ))}
         </div>
@@ -160,8 +205,10 @@ export default function Matching({
           }`}
         >
           {puzzle.shuffledRight.map((item, index) => (
-            <div key={index} className={styles.item}>
-              {renderCell(item.symbol, rightClass, item.word)}
+            <div key={index} className={`${styles.item} ${isHalvesMode ? styles.rightHalfItem : ''}`}>
+              {isHalvesMode
+                ? renderHalf(item.symbol, 'right')
+                : renderCell(item.symbol, rightClass, item.word)}
             </div>
           ))}
         </div>

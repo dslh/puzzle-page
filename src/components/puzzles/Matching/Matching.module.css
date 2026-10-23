@@ -124,6 +124,42 @@
   color: #222;
 }
 
+/* Halves mode: the picture in a 1.4em box, then a 0.7em window on one side
+   of it. Wider than the em because emoji fonts draw a little past it (Apple's
+   about 1.25em), and the cut must still fall down the middle. Clipped only
+   sideways, so the line height can be tight without cropping top and bottom.
+   Each cut edge sits against the gap, facing its partner across it. */
+.half {
+  display: inline-block;
+  width: 0.7em;
+  overflow-x: clip;
+  line-height: 1;
+}
+
+.halfLeft,
+.halfRight {
+  display: flex;
+  justify-content: center;
+  width: 1.4em;
+}
+
+.halfRight {
+  margin-left: -0.7em;
+}
+
+.leftHalfItem,
+.rightHalfItem {
+  padding: 4px;
+}
+
+.leftHalfItem {
+  justify-content: flex-end;
+}
+
+.rightHalfItem {
+  justify-content: flex-start;
+}
+
 @media print {
   .container {
     break-inside: avoid;

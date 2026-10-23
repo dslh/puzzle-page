@@ -75,8 +75,67 @@ export default function MatchingConfigBar({ value, onChange }: ConfigBarProps) {
           >
             Homes
           </button>
+          <button
+            type="button"
+            className={`${styles.button} ${mode === 'halves' ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, mode: 'halves' })}
+            title="Join each half picture to its other half"
+          >
+            Halves
+          </button>
         </div>
       </div>
+
+      {mode === 'halves' && (
+        <div className={styles.configGroup}>
+          <span className={styles.label}>Pairs:</span>
+          <div className={styles.buttonBar}>
+            {(
+              [
+                [2, '2', 'Two big pairs'],
+                [3, '3', 'Three big pairs'],
+                ['rows', 'Fill', 'One pair a row'],
+              ] as const
+            ).map(([pairs, label, title]) => (
+              <button
+                key={pairs}
+                type="button"
+                className={`${styles.button} ${
+                  (value.halvesPairs ?? 'rows') === pairs ? styles.selected : ''
+                }`}
+                onClick={() => onChange({ ...value, halvesPairs: pairs })}
+                title={title}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {mode === 'halves' && (
+        <div className={styles.configGroup}>
+          <span className={styles.label}>Shapes:</span>
+          <div className={styles.buttonBar}>
+            <button
+              type="button"
+              className={`${styles.button} ${!value.distinctShapes ? styles.selected : ''}`}
+              onClick={() => onChange({ ...value, distinctShapes: false })}
+              title="Any pictures - some are told apart by colour"
+            >
+              Any
+            </button>
+            <button
+              type="button"
+              className={`${styles.button} ${value.distinctShapes ? styles.selected : ''}`}
+              onClick={() => onChange({ ...value, distinctShapes: true })}
+              title="Only pictures with different outlines - for black and white printing"
+            >
+              Different
+            </button>
+          </div>
+        </div>
+      )}
 
       {mode === 'rhyme' && (
         <div className={`${styles.configGroup} ${styles.stackedGroup}`}>

@@ -1,7 +1,11 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
 import { HOMES, HOME_ANIMALS, type HomeAnimal, type HomeId } from './habitats';
+import { HALF_PICTURES } from './halves';
 
-export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme' | 'homes';
+export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme' | 'homes' | 'halves';
+
+/** Halves mode only: how many pairs, or one a row. */
+export type HalvesPairs = 2 | 3 | 'rows';
 
 /** Rhyme mode only: what each side shows. */
 export type RhymeDisplay = 'pictures' | 'words' | 'both';
@@ -10,7 +14,7 @@ export interface MatchingPair {
   /**
    * Left column: an emoji in silhouette mode, the word itself in word mode,
    * an upper case letter in letter mode, an emoji in rhyme mode, an animal
-   * in homes mode.
+   * in homes mode, an emoji to be drawn as its left half in halves mode.
    */
   left: string;
   /**
@@ -172,6 +176,26 @@ function rhymeGroups(display: RhymeDisplay): WordEntry[][] {
 }
 
 /**
+ * Pictures for halves mode, at most one from each look-alike group so no
+ * half could fairly join two others. With "Different" on, only pictures whose
+ * outline tells them apart.
+ */
+function pickHalfPairs(random: SeededRandom, numPairs: number, distinctShapes: boolean): MatchingPair[] {
+  const groups = new Set<string>();
+  const picked: MatchingPair[] = [];
+  const pool = HALF_PICTURES.filter(p => !distinctShapes || p.shape);
+  for (const picture of random.shuffle(pool)) {
+    if (picked.length >= numPairs) break;
+    if (picture.lookalike) {
+      if (groups.has(picture.lookalike)) continue;
+      groups.add(picture.lookalike);
+    }
+    picked.push({ left: picture.emoji, right: picture.emoji });
+  }
+  return picked;
+}
+
+/**
  * One animal per home, chosen so that no animal on the page also fits another
  * home on the page - see `alsoFits` in `habitats.ts`. Greedy over a shuffled
  * list of homes, so with ten homes and rows to spare a puzzle may come up a
@@ -206,12 +230,19 @@ export function generateMatchingPuzzle(
   maxWordLength: number = 4,
   customWordsText: string = '',
   customLettersText: string = '',
-  rhymeDisplay: RhymeDisplay = 'pictures'
+  rhymeDisplay: RhymeDisplay = 'pictures',
+  halvesPairs: HalvesPairs = 'rows',
+  distinctShapes: boolean = false
 ): MatchingPuzzle {
   const random = new SeededRandom(seed);
 
   // One pair per row
   const numPairs = gridHeight;
+
+  if (mode === 'halves') {
+    const count = halvesPairs === 'rows' ? numPairs : Math.min(halvesPairs, numPairs);
+    return { pairs: pickHalfPairs(random, count, distinctShapes), category: 'Halves', mode };
+  }
 
   if (mode === 'rhyme') {
     // One rime group per pair, so no left-hand word rhymes with more than

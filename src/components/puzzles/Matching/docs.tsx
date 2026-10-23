@@ -5,21 +5,22 @@ const docs: PuzzleDoc<MatchingConfig> = {
   summary: (
     <>
       Two columns. Draw a line from each thing on the left to its partner on the right:
-      its shadow, its word, its small letter, a rhyme, or where it lives.
+      its shadow, its word, its small letter, a rhyme, where it lives, or its other
+      half.
     </>
   ),
 
   ages: (
     <>
-      2–7. <em>Pictures</em> (shadows) suits 2–4. <em>Words</em>, <em>Letters</em>,{' '}
-      <em>Rhymes</em> and <em>Homes</em> suit 4–7.
+      2–7. <em>Pictures</em> (shadows) suits 2–4, and <em>Halves</em> 3–5.{' '}
+      <em>Words</em>, <em>Letters</em>, <em>Rhymes</em> and <em>Homes</em> suit 4–7.
     </>
   ),
   time: <>2–5 minutes</>,
   needs: <>A pencil or crayon</>,
   reading: (
     <>
-      None for pictures, rhymes or homes. Words needs them to read the words; Letters
+      None for pictures, rhymes, homes or halves. Words needs them to read the words; Letters
       needs letter names or sounds.
     </>
   ),
@@ -49,6 +50,7 @@ const docs: PuzzleDoc<MatchingConfig> = {
     'Matching capitals to small letters',
     'Reading short words',
     'Hearing rhymes',
+    'Seeing a whole from its parts',
   ],
   whyItMatters: (
     <p>
@@ -113,6 +115,61 @@ const docs: PuzzleDoc<MatchingConfig> = {
             </p>
           ),
           example: { config: { mode: 'homes' } },
+        },
+        {
+          label: 'Halves',
+          description: (
+            <p>
+              Pictures cut down the middle: left halves on the left, right halves on the
+              right. Pictures that look alike when halved never share a page.
+            </p>
+          ),
+          example: { config: { mode: 'halves' } },
+        },
+      ],
+    },
+    halvesPairs: {
+      label: 'Pairs (Halves only)',
+      description: <p>How many pictures. Fewer pairs are drawn bigger.</p>,
+      options: [
+        {
+          label: '2',
+          description: <p>Two big pictures. Set for 2–3.</p>,
+          example: { config: { mode: 'halves', halvesPairs: 2 } },
+        },
+        {
+          label: '3',
+          description: <p>Three big pictures.</p>,
+          example: { config: { mode: 'halves', halvesPairs: 3 } },
+        },
+        {
+          label: 'Fill',
+          description: <p>One pair a row, like the other modes. Default.</p>,
+        },
+      ],
+    },
+    distinctShapes: {
+      label: 'Shapes (Halves only)',
+      description: <p>Which pictures can come up.</p>,
+      options: [
+        {
+          label: 'Any',
+          description: (
+            <p>
+              Round faces and fruit too, told apart mostly by colour. Easiest in colour.
+              Default.
+            </p>
+          ),
+        },
+        {
+          label: 'Different',
+          description: (
+            <p>
+              Only pictures with different outlines, such as a giraffe and a rocket. Use
+              this if you print in black and white.
+            </p>
+          ),
+          example: { config: { mode: 'halves', distinctShapes: true } },
         },
       ],
     },
@@ -180,13 +237,15 @@ const docs: PuzzleDoc<MatchingConfig> = {
   size: (
     <p>
       Height sets the number of pairs: one per row, from 4 up to 14. Width only spaces
-      the columns. Homes stops at 6–8 pairs whatever the height.
+      the columns. Homes stops at 6–8 pairs whatever the height. Halves can be set to 2
+      or 3 pairs, which grow to fill the space.
     </p>
   ),
 
   easier: [
     'For 2–3: they point to the match and you draw the line, or they trace yours.',
     'Keep it 4 rows tall and leave First pair on.',
+    'For Halves, set Pairs to 2.',
     'Name each picture together before they start.',
   ],
   harder: [
@@ -204,6 +263,10 @@ const docs: PuzzleDoc<MatchingConfig> = {
       meaning: <>Normal while letters are new. Trace the shape with a finger together.</>,
     },
     {
+      sign: 'A half joined to one the same colour',
+      meaning: <>Normal at first. Cover one side with your hand and ask what the picture is.</>,
+    },
+    {
       sign: 'A rhyme matched by first sound (“cat” to “car”)',
       meaning: <>Say both slowly and ask if the ends sound the same.</>,
     },
@@ -211,12 +274,14 @@ const docs: PuzzleDoc<MatchingConfig> = {
   beyondThePage: [
     'Shadow games: hold toys in front of a torch and guess each one.',
     'Pair socks or shoes from a pile.',
+    'Cut an old picture or card in half and put it back together.',
   ],
 
   atSchool: (
     <>
       Rhyme, letter names and reading simple words are Reception phonics; matching capitals
-      to small letters comes in Reception and Year 1.
+      to small letters comes in Reception and Year 1. Halves touches on shape and
+      symmetry in EYFS maths.
     </>
   ),
 };
