@@ -25,7 +25,8 @@ export type PuzzleType = 'maze'
                        | 'directions'
                        | 'secretcode'
                        | 'prewriting'
-                       | 'dotmarker';
+                       | 'dotmarker'
+                       | 'missingnumbers';
 
 export interface PlacedPuzzle {
   id: string;

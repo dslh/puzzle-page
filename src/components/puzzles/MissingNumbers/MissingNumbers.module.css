@@ -1,0 +1,69 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.tracks {
+  flex-direction: column;
+}
+
+.track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.square {
+  display: flex;
+  flex-direction: column;
+  border-top: 1.5px solid #333;
+  border-left: 1.5px solid #333;
+}
+
+.squareRow {
+  display: flex;
+}
+
+/*
+ * A grid cell less a margin, so a three-figure number fits. Boxes touch, as
+ * on a number track, each drawing its own right and bottom edge.
+ */
+.box {
+  width: 17mm;
+  height: 17mm;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-right: 1.5px solid #333;
+  border-bottom: 1.5px solid #333;
+  background: white;
+  font-size: 7mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #222;
+}
+
+.track .box {
+  border-top: 1.5px solid #333;
+}
+
+.track .box:first-child {
+  border-left: 1.5px solid #333;
+}
+
+/* Print-specific styles */
+@media print {
+  .container,
+  .track {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

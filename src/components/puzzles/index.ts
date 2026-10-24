@@ -18,6 +18,7 @@ import { puzzleDefinition as letterFormation } from './LetterFormation/definitio
 import { puzzleDefinition as sums } from './Sums/definition';
 import { puzzleDefinition as takeAway } from './TakeAway/definition';
 import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
+import { puzzleDefinition as missingNumbers } from './MissingNumbers/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
 import { puzzleDefinition as secretCode } from './SecretCode/definition';
@@ -55,6 +56,7 @@ export const PUZZLE_DEFINITIONS = [
   secretCode,
   preWriting,
   dotMarker,
+  missingNumbers,
 ] as const;
 
 export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];
