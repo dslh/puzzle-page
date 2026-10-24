@@ -1,5 +1,5 @@
 // Category definition with emojis
-interface Category {
+export interface Category {
   name: string;
   items: string[];
   /**
@@ -46,7 +46,7 @@ class SeededRandom {
 
 // Predefined categories with emoji items. No emoji appears in two
 // categories, and each has at least four, the most a row takes from one.
-const CATEGORIES: Category[] = [
+export const CATEGORIES: Category[] = [
   {
     name: 'Animals',
     items: ['🐶', '🐱', '🐭', '🐰', '🐼', '🐨', '🦊', '🐸', '🐷', '🐵', '🦁', '🐯'],
@@ -201,7 +201,7 @@ const CATEGORIES: Category[] = [
 
 const ITEMS_PER_GROUP = 4;
 
-function clash(a: Category, b: Category): boolean {
+export function clash(a: Category, b: Category): boolean {
   return a.families.some(family => b.families.includes(family));
 }
 

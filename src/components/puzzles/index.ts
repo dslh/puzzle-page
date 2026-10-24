@@ -8,6 +8,7 @@ import { puzzleDefinition as pictureScramble } from './PictureScramble/definitio
 import { puzzleDefinition as wordSearch } from './WordSearch/definition';
 import { puzzleDefinition as laserMaze } from './LaserMaze/definition';
 import { puzzleDefinition as oddOneOut } from './OddOneOut/definition';
+import { puzzleDefinition as whichIsTheSame } from './WhichIsTheSame/definition';
 import { puzzleDefinition as counting } from './Counting/definition';
 import { puzzleDefinition as ordering } from './Ordering/definition';
 import { puzzleDefinition as chess } from './Chess/definition';
@@ -41,6 +42,7 @@ export const PUZZLE_DEFINITIONS = [
   wordSearch,
   laserMaze,
   oddOneOut,
+  whichIsTheSame,
   counting,
   ordering,
   chess,

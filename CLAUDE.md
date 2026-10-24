@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 26 puzzle types - see **Existing Puzzles** below.
+There are currently 27 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -512,9 +512,9 @@ the band. "All" uses the base only. Switching age resets every sidebar entry to
 its new starting config; puzzles already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Eleven entries suit 2–3 (Maze,
+needs overrides; the other bands carry them. Twelve entries suit 2–3 (Maze,
 Roads, Pre-Writing Patterns, Dot Marker, Pattern Sequence, Matching shadows, Match the
-Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair); everything else is
+Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which Is the Same?); everything else is
 `ages: ['4-5', '6-7']`. New toddler-level puzzles are planned. Keep overrides to settings you're sure of - the user tunes them.
 
 | Category | Puzzles |
@@ -523,7 +523,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair); every
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
-| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Size Ordering *(preset)*, Chess |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess |
 
 The puzzles in registry order:
 
@@ -539,6 +539,7 @@ The puzzles in registry order:
 | Word Search | `wordsearch` | 5×6 | both | directions, word count, limited letters, custom words |
 | Laser Maze | `lasermaze` | 5×5 | both | - |
 | Odd One Out | `oddoneout` | 5×5 | fixed | odd one out / pair (all different but two), grid size |
+| Which Is the Same? | `whichisthesame` | 6×6 | both (min width 4) | level (easy / medium / hard / mixed), 3 / 4 / 5 choices, flipped |
 | Counting | `counting` | 4×3 | both | - |
 | Ordering | `ordering` | 4×3 | both | numbers / emoji |
 | Chess Puzzle | `chess` | 5×5 | fixed | difficulty, mate / capture |
@@ -556,7 +557,7 @@ The puzzles in registry order:
 | Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none) |
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 
-Ten of these carry notes worth reading before editing them:
+Eleven of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -573,6 +574,14 @@ Ten of these carry notes worth reading before editing them:
   left), so a seed still gives the same maze - keep that order. Curvy walls are
   a drawing option only (`curves.ts`): the same walls, joined into runs and
   drawn as corner-cutting curves, on any grid shape.
+- **Which Is the Same?** - one picture in a box, a row of choices, exactly
+  one the same. Easy and medium draw on Which Doesn't Belong?'s `CATEGORIES`
+  (other families / the same category); hard on the hand-kept `LOOKALIKES`
+  groups in `lookalikes.ts`. Flipped adds the target mirrored (and upside
+  down from 4 choices), so only `FACING` pictures can be targets. Both lists
+  were checked by eye in Noto Color Emoji: leave out anything whose mirror
+  looks the same (front-facing faces) or is another emoji (moons, 🌛/🌜).
+  Rows fill the height; width sets the picture size.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
