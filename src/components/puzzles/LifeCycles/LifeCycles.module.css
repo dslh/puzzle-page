@@ -1,0 +1,87 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-sizing: border-box;
+}
+
+.down {
+  flex-direction: column;
+}
+
+.row {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2mm;
+}
+
+.art {
+  overflow: visible;
+}
+
+.emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1.5px solid #333;
+  border-radius: 1.5mm;
+  background: white;
+  font-size: 5.5mm;
+  font-weight: 600;
+  line-height: 1;
+  color: #888;
+}
+
+.circle {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.placed,
+.blank {
+  position: absolute;
+}
+
+.blank {
+  box-sizing: border-box;
+  border: 1.5px dashed #888;
+  border-radius: 50%;
+  background: white;
+}
+
+/* Print-specific styles */
+@media print {
+  .container,
+  .row,
+  .circle {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

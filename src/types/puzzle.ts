@@ -27,7 +27,8 @@ export type PuzzleType = 'maze'
                        | 'secretcode'
                        | 'prewriting'
                        | 'dotmarker'
-                       | 'missingnumbers';
+                       | 'missingnumbers'
+                       | 'lifecycles';
 
 export interface PlacedPuzzle {
   id: string;
@@ -76,6 +77,7 @@ export const PUZZLE_CATEGORIES = [
   { id: 'reading', label: 'Reading & Phonics' },
   { id: 'writing', label: 'Writing' },
   { id: 'numbers', label: 'Numbers' },
+  { id: 'science', label: 'Science & Nature' },
   { id: 'thinking', label: 'Thinking & Logic' },
 ] as const;
 

@@ -73,6 +73,7 @@
 [data-category='reading'] { --crayon: #c4473a; }
 [data-category='writing'] { --crayon: #7b56a8; }
 [data-category='numbers'] { --crayon: #d9822b; }
+[data-category='science'] { --crayon: #6d9b2a; }
 [data-category='thinking'] { --crayon: #2b8a72; }
 
 * {

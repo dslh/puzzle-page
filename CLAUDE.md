@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 27 puzzle types - see **Existing Puzzles** below.
+There are currently 28 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -523,6 +523,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
+| Science & Nature | Life Cycles |
 | Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess |
 
 The puzzles in registry order:
@@ -556,8 +557,9 @@ The puzzles in registry order:
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
 | Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none) |
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
+| Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
 
-Eleven of these carry notes worth reading before editing them:
+Twelve of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -657,6 +659,17 @@ Eleven of these carry notes worth reading before editing them:
   offset only by whole or half spacings so symmetric shapes stay symmetric.
   The picture goes at the sampled spot furthest from every edge dot. Letters
   and numbers aren't star-shaped and need their own dot paths (GitHub #24).
+
+- **Life Cycles** - stages are emoji where Noto has a clear one, and our own
+  drawings (`art.tsx`) where it doesn't: frogspawn to frog, butterfly eggs and
+  chrysalis, ladybird eggs, larva and pupa, sunflower seeds and bud. They copy
+  Noto's flat style - fills only, no outlines, Noto's own colours, a 128 box -
+  and are shown zoomed in a little (`ART_VIEW`) to match the emoji's size.
+  Draw new ones the same way and check them beside the emoji. Noto's 🧒, 🧑
+  and 🧓 look alike, so People uses 👶 👧 👩 👵. A jumble never reads round
+  the cycle from any start, since a cycle has no end. Picking one cycle shows
+  it once, as big as the puzzle allows; Mixed gives a row (two cells) or
+  circle (a square) each.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather
