@@ -94,3 +94,31 @@
   background: var(--paper);
 }
 
+
+/* Ten shapes need the whole width, so their label sits above two rows. */
+.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.stacked .buttonBar {
+  flex: none;
+}
+
+/* A stalk or trunk, filled so the join to the shape hides behind it. */
+.iconExtra {
+  fill: var(--paper);
+}
+
+.selected .iconExtra {
+  fill: var(--pencil);
+}
+
+.icon polygon:last-child {
+  fill: var(--paper);
+}
+
+.selected .icon polygon:last-child {
+  fill: var(--pencil);
+}

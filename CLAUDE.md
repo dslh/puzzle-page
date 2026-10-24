@@ -553,7 +553,7 @@ The puzzles in registry order:
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
-| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | circle / heart / star / square / triangle, small / big dots, edge / filled, picture |
+| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture |
 
 Ten of these carry notes worth reading before editing them:
 
@@ -631,10 +631,15 @@ Ten of these carry notes worth reading before editing them:
   a point. Rows follow `PATTERNS` order, which is the order children usually
   manage the shapes. Start and end pictures come from Maze's `themes.ts`.
 
-- **Dot Marker** - circle, heart and star are Maze's `OUTLINES`; square and
-  triangle are its own. Any vertex turning more than 25° is a corner and gets
-  a dot, and the stretch between corners is shared out evenly by length, so
-  the gaps stay even on the pointy shapes. Filled adds a honeycomb inside,
+- **Dot Marker** - circle, heart and star are Maze's `OUTLINES`; the rest
+  are its own, the round ones built from overlapping circles (`lobes`). Any
+  vertex turning more than 25° is a corner and gets a dot, and the stretch
+  between corners is shared out evenly by length, so the gaps stay even on
+  the pointy shapes. Corners closer than a dot's width are thinned by
+  `withoutOverlaps`, keeping points over dips and sharper over blunter. Parts
+  too thin for dots (a stalk, a trunk) are `shapeExtras`, drawn as plain
+  outline for colouring. A picture shape needs every feature about two dots
+  across at the default size. Filled adds a honeycomb inside,
   offset only by whole or half spacings so symmetric shapes stay symmetric.
   The picture goes at the sampled spot furthest from every edge dot. Letters
   and numbers aren't star-shaped and need their own dot paths (GitHub #24).

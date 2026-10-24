@@ -52,7 +52,7 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
   settings: {
     shape: {
       label: 'Shape',
-      description: <p>The shape the dots go round. Heart is the default.</p>,
+      description: <p>The shape the dots go round: plain shapes on the top row, pictures below. Heart is the default.</p>,
       options: [
         { label: 'Circle', description: <p>No corners. The easiest to follow round.</p>, example: { config: { shape: 'circle' } } },
         { label: 'Heart', description: <p>Default. A dot at the point and the dip.</p> },
@@ -63,13 +63,31 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
           description: <p>Three corners. Takes less space, so fewer dots.</p>,
           example: { config: { shape: 'triangle' } },
         },
+        { label: 'House', description: <p>A box with a pointed roof.</p>, example: { config: { shape: 'house' } } },
+        {
+          label: 'Fish',
+          description: <p>Wider than it is tall, so give it a wide puzzle.</p>,
+          example: { config: { shape: 'fish' }, width: 8, height: 5 },
+        },
+        { label: 'Pumpkin', description: <p>Three round lobes and a stalk.</p>, example: { config: { shape: 'pumpkin' } } },
+        { label: 'Tree', description: <p>A fir tree with two tiers of branches.</p>, example: { config: { shape: 'tree' } } },
+        {
+          label: 'Cloud',
+          description: <p>Four bumps on a flat bottom. Also best in a wide puzzle.</p>,
+          example: { config: { shape: 'cloud' }, width: 8, height: 5 },
+        },
       ],
     },
     size: {
       label: 'Dots',
       description: <p>How big each circle is.</p>,
       options: [
-        { label: 'Small', description: <p>About 15mm. More dots, closer aim.</p>, example: { config: { size: 'small' } } },
+        {
+          label: 'Small',
+          description: <p>About 12mm. For small round stickers, or colouring in with a crayon.</p>,
+          example: { config: { size: 'small' } },
+        },
+        { label: 'Medium', description: <p>About 15mm. More dots, closer aim.</p>, example: { config: { size: 'medium' } } },
         { label: 'Big', description: <p>About 20mm, the size of a dot marker’s dab. Default.</p> },
       ],
     },
@@ -81,7 +99,7 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
         {
           label: 'Filled',
           description: <p>Dots all over the inside too, and a smaller picture. More to do, and more to count.</p>,
-          example: { config: { fill: 'filled', size: 'small' } },
+          example: { config: { fill: 'filled', size: 'medium' } },
         },
       ],
     },

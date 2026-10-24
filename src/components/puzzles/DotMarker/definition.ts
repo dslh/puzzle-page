@@ -11,7 +11,7 @@ export const puzzleDefinition: PuzzleDefinition<DotMarkerConfig> = {
   ages: ['2-3', '4-5'],
   ageConfig: {
     // Steadier hands: smaller dots, and more of them
-    '4-5': { size: 'small', fill: 'filled' },
+    '4-5': { size: 'medium', fill: 'filled' },
   },
   component: DotMarker,
   docs: () => import('./docs'),

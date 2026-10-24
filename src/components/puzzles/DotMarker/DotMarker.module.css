@@ -14,9 +14,19 @@
 /* All strokes are in mm: the SVG's units are millimetres. Everything is
    thick, since a dot marker covers anything thin. */
 
-/* The shape, joining the dots; mostly hidden once they're dabbed. */
+/* The shape, joining the dots; mostly hidden once they're dabbed. Filled
+   white to hide where a stalk or trunk tucks underneath. */
 .outline {
-  fill: none;
+  fill: #fff;
+  stroke: #333;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+/* A stalk or trunk: the same line, filled white so the join to the shape
+   hides behind it. */
+.extra {
+  fill: #fff;
   stroke: #333;
   stroke-width: 1.6;
   stroke-linejoin: round;
@@ -35,6 +45,7 @@
   }
 
   .outline,
+  .extra,
   .dot {
     stroke: #000;
   }

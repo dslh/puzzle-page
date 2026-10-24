@@ -2,20 +2,39 @@ import { CELL_SIZE_MM } from '../../../types/puzzle';
 import { OUTLINES } from '../Maze/concentric';
 import type { Point } from '../Maze/grids';
 
-export type DotShape = 'circle' | 'heart' | 'star' | 'square' | 'triangle';
-export type DotSize = 'small' | 'big';
+export type DotShape =
+  | 'circle'
+  | 'heart'
+  | 'star'
+  | 'square'
+  | 'triangle'
+  | 'house'
+  | 'fish'
+  | 'pumpkin'
+  | 'tree'
+  | 'cloud';
+export type DotSize = 'small' | 'medium' | 'big';
 export type DotFill = 'outline' | 'filled';
 
-export const SHAPES: { id: DotShape; label: string }[] = [
+/** Plain shapes first, then pictures; the config bar gives each group a row. */
+export const SHAPES: { id: DotShape; label: string; picture?: boolean }[] = [
   { id: 'circle', label: 'Circle' },
   { id: 'heart', label: 'Heart' },
   { id: 'star', label: 'Star' },
   { id: 'square', label: 'Square' },
   { id: 'triangle', label: 'Triangle' },
+  { id: 'house', label: 'House', picture: true },
+  { id: 'fish', label: 'Fish', picture: true },
+  { id: 'pumpkin', label: 'Pumpkin', picture: true },
+  { id: 'tree', label: 'Tree', picture: true },
+  { id: 'cloud', label: 'Cloud', picture: true },
 ];
 
-/** Dot diameters in mm: a dot marker's dab is about 15-20mm across. */
-const DOT_DIAMETER: Record<DotSize, number> = { small: 15, big: 20 };
+/**
+ * Dot diameters in mm. A dot marker's dab is about 15-20mm across; round
+ * stickers come in about 13mm and 19mm.
+ */
+const DOT_DIAMETER: Record<DotSize, number> = { small: 12, medium: 15, big: 20 };
 /** Aim for dots this far apart, centre to centre, as a multiple of their diameter. */
 const SPACING = 1.3;
 /** Never closer than this, so no two dots touch. */
@@ -35,6 +54,8 @@ export interface DotMarkerPuzzle {
   height: number;
   /** The shape's outline, through the outline dots' centres. */
   outline: Point[];
+  /** Parts drawn without dots, such as a pumpkin's stalk. */
+  extras: Point[][];
   dots: Point[];
   radius: number;
   picture?: { emoji: string; at: Point; size: number };
@@ -60,15 +81,178 @@ function polygon(sides: number): Point[] {
   });
 }
 
-/** Each shape's corners, going round in order, y down. */
+interface Circle {
+  x: number;
+  y: number;
+  r: number;
+}
+
+const DEG = Math.PI / 180;
+
+/**
+ * Points round a circle, clockwise on screen (y down) from one angle to
+ * another, close enough together that none of them counts as a corner.
+ */
+function arc(c: Circle, from: number, to: number, withEnd = true): Point[] {
+  while (to < from) to += 2 * Math.PI;
+  const steps = Math.max(1, Math.ceil((to - from) / (5 * DEG)));
+  const points: Point[] = [];
+  for (let i = 0; i <= (withEnd ? steps : steps - 1); i++) {
+    const a = from + ((to - from) * i) / steps;
+    points.push({ x: c.x + c.r * Math.cos(a), y: c.y + c.r * Math.sin(a) });
+  }
+  return points;
+}
+
+const angleOn = (c: Circle, p: Point) => Math.atan2(p.y - c.y, p.x - c.x);
+
+/** Where two overlapping circles cross, the upper point (smaller y). */
+function upperMeet(a: Circle, b: Circle): Point {
+  const d = dist(a, b);
+  const along = (d * d + a.r * a.r - b.r * b.r) / (2 * d);
+  const across = Math.sqrt(a.r * a.r - along * along);
+  const ux = (b.x - a.x) / d;
+  const uy = (b.y - a.y) / d;
+  const mid = { x: a.x + ux * along, y: a.y + uy * along };
+  const p1 = { x: mid.x - uy * across, y: mid.y + ux * across };
+  const p2 = { x: mid.x + uy * across, y: mid.y - ux * across };
+  return p1.y < p2.y ? p1 : p2;
+}
+
+/**
+ * Round lobes in a row, left to right over the top: the outline of
+ * overlapping circles, with a dip wherever two meet. Starts on the first
+ * circle at `from` and ends on the last at `to`.
+ */
+function lobes(circles: Circle[], from: number, to: number): Point[] {
+  const meets = circles.slice(1).map((c, i) => upperMeet(circles[i], c));
+  return circles.flatMap((c, i) =>
+    arc(
+      c,
+      i === 0 ? from : angleOn(c, meets[i - 1]),
+      i === circles.length - 1 ? to : angleOn(c, meets[i]),
+      i === circles.length - 1,
+    ),
+  );
+}
+
+const mirrorX = (points: Point[]) => points.map(p => ({ x: -p.x, y: p.y }));
+
+/** A house: a box with a pointed roof. */
+function house(): Point[] {
+  return [
+    { x: 0, y: -1 },
+    { x: 0.85, y: -0.2 },
+    { x: 0.85, y: 0.9 },
+    { x: -0.85, y: 0.9 },
+    { x: -0.85, y: -0.2 },
+  ];
+}
+
+/** A fish swimming left: an oval body and a forked tail. */
+function fish(): Point[] {
+  const body = { x: -0.3, y: 0, rx: 0.75, ry: 0.5 };
+  const join = 35 * DEG;
+  const points: Point[] = [];
+  // From where the tail joins underneath, forward round the nose and back over the top
+  const steps = 60;
+  for (let i = 0; i <= steps; i++) {
+    const a = -join - ((2 * Math.PI - 2 * join) * i) / steps;
+    points.push({ x: body.x + body.rx * Math.cos(a), y: body.y - body.ry * Math.sin(a) });
+  }
+  points.push({ x: 1.05, y: -0.55 }, { x: 0.7, y: 0 }, { x: 1.05, y: 0.55 });
+  return points;
+}
+
+/** A pumpkin: three round lobes, dipping where they meet. Its stalk is an extra. */
+function pumpkin(): Point[] {
+  const circles = [
+    { x: -0.5, y: 0, r: 0.55 },
+    { x: 0, y: 0, r: 0.62 },
+    { x: 0.5, y: 0, r: 0.55 },
+  ];
+  // The bottom is the top turned over
+  const top = lobes(circles, Math.PI, 0);
+  const bottom = top
+    .slice(1, -1)
+    .map(p => ({ x: p.x, y: -p.y }))
+    .reverse();
+  return [...top, ...bottom];
+}
+
+/** A fir tree: two tiers of branches. Its trunk is an extra. */
+function tree(): Point[] {
+  const right = [
+    { x: 0.6, y: -0.15 },
+    { x: 0.1, y: -0.15 },
+    { x: 0.95, y: 0.55 },
+  ];
+  return [{ x: 0, y: -1 }, ...right, ...mirrorX(right).reverse()];
+}
+
+/** A cloud: four bumps on top of a flat bottom. Wide, like a real one. */
+function cloud(): Point[] {
+  return lobes(
+    [
+      { x: -0.8, y: 0.16, r: 0.36 },
+      { x: -0.3, y: -0.12, r: 0.48 },
+      { x: 0.32, y: -0.1, r: 0.46 },
+      { x: 0.8, y: 0.16, r: 0.36 },
+    ],
+    Math.PI / 2,
+    Math.PI / 2,
+  );
+}
+
+/** Each shape's outline, going round in order, y down. Any size: it is fitted to the puzzle. */
 export function shapeVertices(shape: DotShape): Point[] {
   switch (shape) {
     case 'square':
       return polygon(4);
     case 'triangle':
       return polygon(3);
+    case 'house':
+      return house();
+    case 'fish':
+      return fish();
+    case 'pumpkin':
+      return pumpkin();
+    case 'tree':
+      return tree();
+    case 'cloud':
+      return cloud();
     default:
       return OUTLINES[shape].vertices;
+  }
+}
+
+/**
+ * Parts of a picture too thin to carry dots: drawn in the same thick line,
+ * behind the dots, for colouring in. Each one tucks under the outline so the
+ * join is hidden.
+ */
+export function shapeExtras(shape: DotShape): Point[][] {
+  switch (shape) {
+    case 'pumpkin':
+      return [
+        [
+          { x: -0.1, y: -0.55 },
+          { x: -0.05, y: -1.0 },
+          { x: 0.17, y: -1.0 },
+          { x: 0.1, y: -0.55 },
+        ],
+      ];
+    case 'tree':
+      return [
+        [
+          { x: -0.2, y: 0.5 },
+          { x: 0.2, y: 0.5 },
+          { x: 0.2, y: 1.05 },
+          { x: -0.2, y: 1.05 },
+        ],
+      ];
+    default:
+      return [];
   }
 }
 
@@ -119,7 +303,17 @@ function outlineDots(outline: Point[], spacing: number, min: number): Point[] {
     return Array.from({ length: gaps }, (_, i) => pointAlong(loop, (length * i) / gaps));
   }
 
-  const dots: Point[] = [];
+  // Which way round the outline goes, to tell points from dips
+  const turning = Math.sign(
+    outline.reduce((sum, a, i) => {
+      const b = outline[(i + 1) % n];
+      return sum + a.x * b.y - b.x * a.y;
+    }, 0),
+  );
+
+  // Each dot carries how much it matters: points before dips, sharper first,
+  // and 0 between corners
+  const dots: { at: Point; sharpness: number }[] = [];
   corners.forEach((start, k) => {
     const end = corners[(k + 1) % corners.length];
     const run: Point[] = [];
@@ -129,9 +323,32 @@ function outlineDots(outline: Point[], spacing: number, min: number): Point[] {
     }
     const length = pathLength(run);
     const gaps = gapsFor(length, spacing, min);
-    for (let i = 0; i < gaps; i++) dots.push(pointAlong(run, (length * i) / gaps));
+    const [prev, p, next] = [outline[(start + n - 1) % n], outline[start], outline[(start + 1) % n]];
+    const cross = (p.x - prev.x) * (next.y - p.y) - (p.y - prev.y) * (next.x - p.x);
+    const sharpness = turnAt(prev, p, next) + (Math.sign(cross) === turning ? Math.PI : 0);
+    for (let i = 0; i < gaps; i++) dots.push({ at: pointAlong(run, (length * i) / gaps), sharpness: i ? 0 : sharpness });
   });
-  return dots;
+  return withoutOverlaps(dots, min);
+}
+
+/**
+ * Drop any dot that would touch one already kept. Two corners can be closer
+ * than a dot's width (a fish's tail beside its body, the tiers of a tree), and
+ * so can two stretches of outline that come back near each other. Points go
+ * before dips and sharper corners first, so the dots that show the shape are
+ * the ones kept.
+ */
+function withoutOverlaps(dots: { at: Point; sharpness: number }[], min: number): Point[] {
+  const kept: Point[] = [];
+  const order = dots.map((_, i) => i).sort((a, b) => dots[b].sharpness - dots[a].sharpness);
+  const keep = new Set<number>();
+  for (const i of order) {
+    if (kept.every(p => dist(p, dots[i].at) >= min)) {
+      kept.push(dots[i].at);
+      keep.add(i);
+    }
+  }
+  return dots.filter((_, i) => keep.has(i)).map(d => d.at);
 }
 
 function inside(p: Point, poly: Point[]): boolean {
@@ -234,16 +451,20 @@ export function generateDotMarker(
   const radius = diameter / 2;
   const spacing = diameter * SPACING;
 
-  // Fit the outline's centreline so the dots on it, not the line, touch the margin
+  // Fit the outline's centreline so the dots on it, not the line, touch the
+  // margin. The extras count too, with the same room to spare.
   const unit = shapeVertices(shape);
-  const xs = unit.map(p => p.x);
-  const ys = unit.map(p => p.y);
+  const unitExtras = shapeExtras(shape);
+  const xs = [unit, ...unitExtras].flat().map(p => p.x);
+  const ys = [unit, ...unitExtras].flat().map(p => p.y);
   const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
   const room = 2 * (MARGIN + radius);
   const scale = Math.max(0.1, Math.min((width - room) / (maxX - minX), (height - room) / (maxY - minY)));
   const ox = width / 2 - ((minX + maxX) / 2) * scale;
   const oy = height / 2 - ((minY + maxY) / 2) * scale;
-  const outline = unit.map(p => ({ x: ox + p.x * scale, y: oy + p.y * scale }));
+  const place = (p: Point) => ({ x: ox + p.x * scale, y: oy + p.y * scale });
+  const outline = unit.map(place);
+  const extras = unitExtras.map(extra => extra.map(place));
 
   const dots = outlineDots(outline, spacing, diameter * MIN_SPACING);
 
@@ -266,5 +487,5 @@ export function generateDotMarker(
     dots.push(...interiorDots(outline, spacing, keepOut));
   }
 
-  return { width, height, outline, dots, radius, picture };
+  return { width, height, outline, extras, dots, radius, picture };
 }

@@ -1,5 +1,5 @@
 import type { DotMarkerConfig } from './index';
-import { SHAPES, shapeVertices, type DotShape } from './generator';
+import { SHAPES, shapeExtras, shapeVertices, type DotShape } from './generator';
 import styles from './DotMarkerConfigBar.module.css';
 
 interface ConfigBarProps {
@@ -8,7 +8,8 @@ interface ConfigBarProps {
 }
 
 const SIZES = [
-  { id: 'small', label: 'Small', title: 'Dots about 15mm across' },
+  { id: 'small', label: 'Small', title: 'Dots about 12mm across, for small stickers or a crayon' },
+  { id: 'medium', label: 'Medium', title: 'Dots about 15mm across' },
   { id: 'big', label: 'Big', title: 'Dots about 20mm across, for a chunky marker' },
 ] as const;
 
@@ -18,10 +19,22 @@ const FILLS = [
 ] as const;
 
 function ShapeIcon({ shape }: { shape: DotShape }) {
-  const points = shapeVertices(shape).map(p => `${(p.x * 6.5).toFixed(1)},${(p.y * 6.5).toFixed(1)}`).join(' ');
+  // Fit each outline's box into the icon, centred
+  const vertices = shapeVertices(shape);
+  const extras = shapeExtras(shape);
+  const xs = [vertices, ...extras].flat().map(p => p.x);
+  const ys = [vertices, ...extras].flat().map(p => p.y);
+  const scale = 13 / Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
+  const cy = (Math.max(...ys) + Math.min(...ys)) / 2;
+  const toPoints = (points: { x: number; y: number }[]) =>
+    points.map(p => `${((p.x - cx) * scale).toFixed(1)},${((p.y - cy) * scale).toFixed(1)}`).join(' ');
   return (
     <svg className={styles.icon} viewBox="-8 -8 16 16" aria-hidden="true">
-      <polygon points={points} />
+      {extras.map((extra, i) => (
+        <polygon key={i} points={toPoints(extra)} className={styles.iconExtra} />
+      ))}
+      <polygon points={toPoints(vertices)} />
     </svg>
   );
 }
@@ -29,23 +42,26 @@ function ShapeIcon({ shape }: { shape: DotShape }) {
 export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) {
   return (
     <div className={styles.configContainer}>
-      <div className={styles.configGroup}>
+      <div className={`${styles.configGroup} ${styles.stacked}`}>
         <span className={styles.label}>Shape:</span>
-        <div className={styles.buttonBar}>
-          {SHAPES.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              className={`${styles.button} ${styles.iconButton} ${value.shape === s.id ? styles.selected : ''}`}
-              onClick={() => onChange({ ...value, shape: s.id })}
-              title={s.label}
-              aria-label={s.label}
-              aria-pressed={value.shape === s.id}
-            >
-              <ShapeIcon shape={s.id} />
-            </button>
-          ))}
-        </div>
+        {/* Plain shapes on one row, pictures on the next */}
+        {[false, true].map(pictures => (
+          <div key={String(pictures)} className={styles.buttonBar}>
+            {SHAPES.filter(s => !s.picture === !pictures).map(s => (
+              <button
+                key={s.id}
+                type="button"
+                className={`${styles.button} ${styles.iconButton} ${value.shape === s.id ? styles.selected : ''}`}
+                onClick={() => onChange({ ...value, shape: s.id })}
+                title={s.label}
+                aria-label={s.label}
+                aria-pressed={value.shape === s.id}
+              >
+                <ShapeIcon shape={s.id} />
+              </button>
+            ))}
+          </div>
+        ))}
       </div>
 
       <div className={styles.configGroup}>

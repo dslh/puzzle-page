@@ -23,7 +23,7 @@ export default function DotMarker({ gridWidth, gridHeight, seed, config }: Puzzl
     [gridWidth, gridHeight, seed, shape, size, fill, picture],
   );
 
-  const outline = puzzle.outline.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+  const toPoints = (points: { x: number; y: number }[]) => points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
 
   return (
     <div className={styles.container}>
@@ -32,7 +32,10 @@ export default function DotMarker({ gridWidth, gridHeight, seed, config }: Puzzl
         viewBox={`0 0 ${puzzle.width} ${puzzle.height}`}
         preserveAspectRatio="xMidYMid meet"
       >
-        <polygon points={outline} className={styles.outline} />
+        {puzzle.extras.map((extra, i) => (
+          <polygon key={i} points={toPoints(extra)} className={styles.extra} />
+        ))}
+        <polygon points={toPoints(puzzle.outline)} className={styles.outline} />
         {puzzle.dots.map((d, i) => (
           <circle key={i} cx={d.x} cy={d.y} r={puzzle.radius} className={styles.dot} />
         ))}
