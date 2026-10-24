@@ -122,3 +122,16 @@
 .selected .icon polygon:last-child {
   fill: var(--pencil);
 }
+
+.select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  cursor: pointer;
+}

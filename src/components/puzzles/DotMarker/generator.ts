@@ -49,7 +49,26 @@ const MARGIN = 2;
 const INTERIOR_CLEARANCE = 0.8;
 
 /** Something to talk about in the middle. */
-const PICTURES = ['🐟', '🐱', '🐶', '🐰', '🐻', '🐸', '🐥', '🦋', '🐞', '🐢', '🐝', '🐧', '🦊', '🐷', '🐮'];
+export const PICTURES = [
+  { emoji: '🐟', label: 'Fish' },
+  { emoji: '🐱', label: 'Cat' },
+  { emoji: '🐶', label: 'Dog' },
+  { emoji: '🐰', label: 'Rabbit' },
+  { emoji: '🐻', label: 'Bear' },
+  { emoji: '🐸', label: 'Frog' },
+  { emoji: '🐥', label: 'Chick' },
+  { emoji: '🦋', label: 'Butterfly' },
+  { emoji: '🐞', label: 'Ladybird' },
+  { emoji: '🐢', label: 'Tortoise' },
+  { emoji: '🐝', label: 'Bee' },
+  { emoji: '🐧', label: 'Penguin' },
+  { emoji: '🦊', label: 'Fox' },
+  { emoji: '🐷', label: 'Pig' },
+  { emoji: '🐮', label: 'Cow' },
+];
+
+/** One of the pictures' emoji, a random one, or none. */
+export type DotPicture = 'random' | 'none' | string;
 
 export interface DotMarkerPuzzle {
   width: number;
@@ -505,7 +524,7 @@ export function generateDotMarker(
   shape: DotShape,
   size: DotSize,
   fill: DotFill,
-  withPicture: boolean,
+  pictureChoice: DotPicture,
 ): DotMarkerPuzzle {
   const width = gridWidth * CELL_SIZE_MM;
   const height = gridHeight * CELL_SIZE_MM;
@@ -531,7 +550,7 @@ export function generateDotMarker(
   const dots = outlineDots(outline, spacing, diameter * MIN_SPACING, diameter * CLEAR_SPACING);
 
   let picture: DotMarkerPuzzle['picture'];
-  if (withPicture) {
+  if (pictureChoice !== 'none') {
     const { at, clearance } = roomiestSpot(outline, dots);
     // As big as the hole in the middle allows, short of the dots round it
     const hole = clearance - radius - 2;
@@ -540,7 +559,9 @@ export function generateDotMarker(
     const pictureSize = Math.min(hole * 1.5, cap);
     if (pictureSize >= 8) {
       const rng = new SeededRandom(seed);
-      picture = { emoji: PICTURES[Math.floor(rng.next() * PICTURES.length)], at, size: pictureSize };
+      const emoji =
+        pictureChoice === 'random' ? PICTURES[Math.floor(rng.next() * PICTURES.length)].emoji : pictureChoice;
+      picture = { emoji, at, size: pictureSize };
     }
   }
 

@@ -1,5 +1,5 @@
 import type { DotMarkerConfig } from './index';
-import { SHAPES, shapeExtras, shapeVertices, type DotShape } from './generator';
+import { PICTURES, SHAPES, shapeExtras, shapeVertices, type DotShape } from './generator';
 import styles from './DotMarkerConfigBar.module.css';
 
 interface ConfigBarProps {
@@ -100,19 +100,20 @@ export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) 
 
       <div className={styles.configGroup}>
         <span className={styles.label}>Picture:</span>
-        <div className={styles.buttonBar}>
-          {([true, false] as const).map(on => (
-            <button
-              key={String(on)}
-              type="button"
-              className={`${styles.button} ${value.picture === on ? styles.selected : ''}`}
-              onClick={() => onChange({ ...value, picture: on })}
-              title={on ? 'A picture in the middle to talk about' : 'Just the dots'}
-            >
-              {on ? 'On' : 'Off'}
-            </button>
+        <select
+          className={styles.select}
+          value={value.picture}
+          onChange={e => onChange({ ...value, picture: e.target.value })}
+          title="A picture in the middle to talk about"
+        >
+          <option value="random">Random</option>
+          {PICTURES.map(p => (
+            <option key={p.emoji} value={p.emoji}>
+              {p.emoji} {p.label}
+            </option>
           ))}
-        </div>
+          <option value="none">None</option>
+        </select>
       </div>
     </div>
   );

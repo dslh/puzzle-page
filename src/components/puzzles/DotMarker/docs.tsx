@@ -107,13 +107,18 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
       label: 'Picture',
       description: (
         <p>
-          A picture in the middle, chosen at random. “Show another” picks a new one. It is
-          left out if the shape is too small to hold it.
+          An animal in the middle, to talk about. It is left out if the shape is too small to
+          hold it.
         </p>
       ),
       options: [
-        { label: 'On', description: <p>Something to talk about. Default.</p> },
-        { label: 'Off', description: <p>Just the dots.</p>, example: { config: { picture: false } } },
+        { label: 'Random', description: <p>A different animal each time. “Show another” picks a new one. Default.</p> },
+        {
+          label: 'An animal',
+          description: <p>Pick one from the list: one they love, or one to match the shape, like a fish in a fish.</p>,
+          example: { config: { picture: '🐟', shape: 'fish' }, width: 8, height: 5 },
+        },
+        { label: 'None', description: <p>Just the dots.</p>, example: { config: { picture: 'none' } } },
       ],
     },
   },

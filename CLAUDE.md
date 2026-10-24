@@ -553,7 +553,7 @@ The puzzles in registry order:
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
-| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture |
+| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none) |
 
 Ten of these carry notes worth reading before editing them:
 

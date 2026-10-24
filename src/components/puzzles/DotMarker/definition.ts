@@ -22,7 +22,7 @@ export const puzzleDefinition: PuzzleDefinition<DotMarkerConfig> = {
     shape: 'heart',
     size: 'big',
     fill: 'outline',
-    picture: true,
+    picture: 'random',
   },
   resizable: {
     width: true,

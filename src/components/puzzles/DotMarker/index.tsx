@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { PuzzleProps } from '../../../types/puzzle';
-import { generateDotMarker, type DotFill, type DotShape, type DotSize } from './generator';
+import { generateDotMarker, type DotFill, type DotPicture, type DotShape, type DotSize } from './generator';
 import styles from './DotMarker.module.css';
 
 export interface DotMarkerConfig {
@@ -8,15 +8,15 @@ export interface DotMarkerConfig {
   size: DotSize;
   /** Dots round the edge only, or filling the inside too. */
   fill: DotFill;
-  /** A picture in the middle, to talk about. */
-  picture: boolean;
+  /** A picture in the middle, to talk about: an emoji, 'random' or 'none'. */
+  picture: DotPicture;
 }
 
 export default function DotMarker({ gridWidth, gridHeight, seed, config }: PuzzleProps<DotMarkerConfig>) {
   const shape = config?.shape ?? 'heart';
   const size = config?.size ?? 'big';
   const fill = config?.fill ?? 'outline';
-  const picture = config?.picture ?? true;
+  const picture = config?.picture ?? 'random';
 
   const puzzle = useMemo(
     () => generateDotMarker(gridWidth, gridHeight, seed, shape, size, fill, picture),
