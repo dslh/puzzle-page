@@ -54,6 +54,8 @@ export default function OddOneOut({ gridWidth, gridHeight, seed, config }: Puzzl
         style={{
           gridTemplateColumns: `repeat(${size}, ${cellSizeMm}mm)`,
           gridTemplateRows: `repeat(${size}, ${cellSizeMm}mm)`,
+          // Pictures fill half a cell, leaving room for the jiggle
+          fontSize: `${cellSizeMm * 0.5}mm`,
         }}
       >
         {puzzle.grid.map((row, rowIndex) =>
