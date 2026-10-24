@@ -635,8 +635,12 @@ Ten of these carry notes worth reading before editing them:
   are its own, the round ones built from overlapping circles (`lobes`). Any
   vertex turning more than 25° is a corner and gets a dot, and the stretch
   between corners is shared out evenly by length, so the gaps stay even on
-  the pointy shapes. Corners closer than a dot's width are thinned by
-  `withoutOverlaps`, keeping points over dips and sharper over blunter. Parts
+  the pointy shapes. Clashes are settled in order: corners first
+  (`withoutOverlaps` keeps points over dips, sharper over blunter), and a
+  stretch runs evenly past a corner that lost its dot; then a stretch whose
+  dot touches the next stretch's, round a sharp corner, loses a dot and is
+  re-spaced; last, dots where the outline folds back on itself are dropped.
+  Every drop is made in mirror pairs, so symmetric shapes stay symmetric. Parts
   too thin for dots (a stalk, a trunk) are `shapeExtras`, drawn as plain
   outline for colouring. A picture shape needs every feature about two dots
   across at the default size. Filled adds a honeycomb inside,

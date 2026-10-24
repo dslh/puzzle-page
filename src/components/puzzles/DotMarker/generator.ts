@@ -37,8 +37,10 @@ export const SHAPES: { id: DotShape; label: string; picture?: boolean }[] = [
 const DOT_DIAMETER: Record<DotSize, number> = { small: 12, medium: 15, big: 20 };
 /** Aim for dots this far apart, centre to centre, as a multiple of their diameter. */
 const SPACING = 1.3;
-/** Never closer than this, so no two dots touch. */
+/** Plan for dots no closer than this along the outline... */
 const MIN_SPACING = 1.1;
+/** ...and never let any two get closer than this, anywhere, so none touch. */
+const CLEAR_SPACING = 1.05;
 /** A vertex that turns more than this is a corner, and gets a dot of its own. */
 const CORNER_TURN = (25 * Math.PI) / 180;
 /** Clear space round the edge of the puzzle, in mm. */
@@ -289,18 +291,21 @@ const gapsFor = (length: number, spacing: number, min: number) =>
  * corners is shared out evenly. A shape with no corners (a circle) starts at
  * the top.
  */
-function outlineDots(outline: Point[], spacing: number, min: number): Point[] {
+function outlineDots(outline: Point[], spacing: number, min: number, clear: number): Point[] {
   const n = outline.length;
   const corners = outline
     .map((p, i) => (turnAt(outline[(i + n - 1) % n], p, outline[(i + 1) % n]) > CORNER_TURN ? i : -1))
     .filter(i => i >= 0);
 
   if (corners.length === 0) {
-    const top = outline.reduce((best, p, i) => (p.y < outline[best].y ? i : best), 0);
+    const top = outline.reduce((best, p, i) => (p.y < outline[best].y - 1e-9 ? i : best), 0);
     const loop = [...outline.slice(top), ...outline.slice(0, top + 1)];
     const length = pathLength(loop);
     const gaps = Math.max(3, gapsFor(length, spacing, min));
-    return Array.from({ length: gaps }, (_, i) => pointAlong(loop, (length * i) / gaps));
+    // When the top is a flat side rather than a corner, start halfway along it,
+    // so the dots sit evenly either side of the middle
+    const flat = Math.abs(loop[1].y - loop[0].y) < 1e-9 ? dist(loop[0], loop[1]) / 2 : 0;
+    return Array.from({ length: gaps }, (_, i) => pointAlong(loop, (flat + (length * i) / gaps) % length));
   }
 
   // Which way round the outline goes, to tell points from dips
@@ -311,44 +316,101 @@ function outlineDots(outline: Point[], spacing: number, min: number): Point[] {
     }, 0),
   );
 
-  // Each dot carries how much it matters: points before dips, sharper first,
-  // and 0 between corners
-  const dots: { at: Point; sharpness: number }[] = [];
-  corners.forEach((start, k) => {
-    const end = corners[(k + 1) % corners.length];
-    const run: Point[] = [];
-    for (let i = start; ; i = (i + 1) % n) {
-      run.push(outline[i]);
-      if (i === end && run.length > 1) break;
-    }
-    const length = pathLength(run);
-    const gaps = gapsFor(length, spacing, min);
-    const [prev, p, next] = [outline[(start + n - 1) % n], outline[start], outline[(start + 1) % n]];
+  // Each corner's dot carries how much it matters: points before dips, sharper
+  // first. Where two corners are too close for both, the one that matters
+  // more keeps its dot.
+  const sharpness = corners.map(c => {
+    const [prev, p, next] = [outline[(c + n - 1) % n], outline[c], outline[(c + 1) % n]];
     const cross = (p.x - prev.x) * (next.y - p.y) - (p.y - prev.y) * (next.x - p.x);
-    const sharpness = turnAt(prev, p, next) + (Math.sign(cross) === turning ? Math.PI : 0);
-    for (let i = 0; i < gaps; i++) dots.push({ at: pointAlong(run, (length * i) / gaps), sharpness: i ? 0 : sharpness });
+    return turnAt(prev, p, next) + (Math.sign(cross) === turning ? Math.PI : 0);
   });
-  return withoutOverlaps(dots, min);
+  const kept = withoutOverlaps(
+    corners.map((c, k) => ({ at: outline[c], sharpness: sharpness[k] })),
+    clear,
+  ).map(k => corners[k]);
+
+  // The stretches between the corners that kept their dots. A corner that lost
+  // its dot is just part of a stretch, so the dots run evenly past it.
+  const runs = kept.map((start, k) => {
+    const end = kept[(k + 1) % kept.length];
+    const points: Point[] = [];
+    for (let i = start; ; i = (i + 1) % n) {
+      points.push(outline[i]);
+      if (i === end && points.length > 1) break;
+    }
+    const length = pathLength(points);
+    return { points, length, gaps: gapsFor(length, spacing, min) };
+  });
+
+  const place = () =>
+    runs.flatMap((run, r) =>
+      Array.from({ length: run.gaps }, (_, i) => ({
+        at: pointAlong(run.points, (run.length * i) / run.gaps),
+        run: r,
+        corner: i === 0,
+      })),
+    );
+
+  // A dot between corners that touches one in the next stretch, round a sharp
+  // corner, means its stretch has a dot too many: take one off and space the
+  // rest out again, so the gaps stay even. Every crowded stretch goes down
+  // together, so a mirror image's two sides stay alike.
+  const neighbours = (a: number, b: number) => a !== b && [1, runs.length - 1].includes((a - b + runs.length) % runs.length);
+  let dots = place();
+  for (;;) {
+    const crowded = new Set<number>();
+    dots.forEach((a, i) =>
+      dots.slice(i + 1).forEach(b => {
+        if (dist(a.at, b.at) >= clear || !neighbours(a.run, b.run)) return;
+        for (const d of [a, b]) if (!d.corner && runs[d.run].gaps > 1) crowded.add(d.run);
+      }),
+    );
+    if (crowded.size === 0) break;
+    crowded.forEach(r => runs[r].gaps--);
+    dots = place();
+  }
+  // Anything still touching is where the outline folds back near itself, at
+  // a notch; spacing out can't help there, so the dot is dropped
+  return withoutOverlaps(dots.map(d => ({ at: d.at, sharpness: d.corner ? 1 : 0 })), clear).map(i => dots[i].at);
 }
 
 /**
- * Drop any dot that would touch one already kept. Two corners can be closer
- * than a dot's width (a fish's tail beside its body, the tiers of a tree), and
- * so can two stretches of outline that come back near each other. Points go
- * before dips and sharper corners first, so the dots that show the shape are
- * the ones kept.
+ * Which dots to keep so none touch, as indexes in order: the ones that matter
+ * most go first, and each is kept only if it is clear of those already kept.
+ * A dot and its mirror image, when the shape has one, are kept or dropped
+ * together.
  */
-function withoutOverlaps(dots: { at: Point; sharpness: number }[], min: number): Point[] {
+function withoutOverlaps(dots: { at: Point; sharpness: number }[], min: number): number[] {
+  const partner = mirrorPartners(dots.map(d => d.at));
   const kept: Point[] = [];
-  const order = dots.map((_, i) => i).sort((a, b) => dots[b].sharpness - dots[a].sharpness);
   const keep = new Set<number>();
+  const order = dots.map((_, i) => i).sort((a, b) => dots[b].sharpness - dots[a].sharpness);
   for (const i of order) {
-    if (kept.every(p => dist(p, dots[i].at) >= min)) {
-      kept.push(dots[i].at);
-      keep.add(i);
+    if (keep.has(i)) continue;
+    const pair = [...new Set([i, partner[i]])].map(j => dots[j].at);
+    const clear = pair.every(p => kept.every(k => dist(p, k) >= min)) && (pair.length === 1 || dist(pair[0], pair[1]) >= min);
+    if (clear) {
+      kept.push(...pair);
+      keep.add(i).add(partner[i]);
     }
   }
-  return dots.filter((_, i) => keep.has(i)).map(d => d.at);
+  return dots.map((_, i) => i).filter(i => keep.has(i));
+}
+
+/**
+ * Each dot's mirror image across the middle, upright or sideways, if every dot
+ * has one; otherwise each dot is its own.
+ */
+function mirrorPartners(points: Point[]): number[] {
+  const xs = points.map(p => p.x);
+  const ys = points.map(p => p.y);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  for (const flip of [(p: Point) => ({ x: 2 * cx - p.x, y: p.y }), (p: Point) => ({ x: p.x, y: 2 * cy - p.y })]) {
+    const partners = points.map(p => points.findIndex(q => dist(q, flip(p)) < 0.5));
+    if (partners.every(j => j >= 0)) return partners;
+  }
+  return points.map((_, i) => i);
 }
 
 function inside(p: Point, poly: Point[]): boolean {
@@ -466,7 +528,7 @@ export function generateDotMarker(
   const outline = unit.map(place);
   const extras = unitExtras.map(extra => extra.map(place));
 
-  const dots = outlineDots(outline, spacing, diameter * MIN_SPACING);
+  const dots = outlineDots(outline, spacing, diameter * MIN_SPACING, diameter * CLEAR_SPACING);
 
   let picture: DotMarkerPuzzle['picture'];
   if (withPicture) {
