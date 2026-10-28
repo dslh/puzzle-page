@@ -5,7 +5,7 @@ import MazeConfigBar from './MazeConfigBar';
 
 export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
   type: 'maze',
-  label: 'Maze (4×4)',
+  label: 'Maze',
   icon: '🧩',
   category: 'mazes',
   ageConfig: {
