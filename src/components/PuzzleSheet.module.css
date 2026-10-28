@@ -15,6 +15,22 @@
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
   font-family: var(--ui-font);
   color: var(--ink);
+  animation: rise 0.3s var(--ease-out);
+}
+
+/* Comes up from the bottom edge, to read as the selected puzzle's tray */
+@keyframes rise {
+  from { transform: translateY(100%); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation-name: fade;
+  }
 }
 
 .head {

@@ -135,6 +135,22 @@
   padding: 2px 0 10px 10px;
   border-left: 3px solid var(--crayon);
   margin-left: 1px;
+  animation: unfold 0.22s var(--ease-out);
+}
+
+/* A category opening: its entries drop out from under the header */
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puzzleList {
+    animation-name: fade;
+  }
 }
 
 .puzzleItem {
@@ -248,12 +264,14 @@
     box-shadow: 6px 0 24px rgba(0, 0, 0, 0.3);
     transform: translateX(-105%);
     visibility: hidden;
-    transition: transform 0.2s, visibility 0.2s;
+    transition: transform 0.18s var(--ease-in), visibility 0.18s;
   }
 
   .sidebar.open {
     transform: none;
     visibility: visible;
+    transition-duration: 0.32s;
+    transition-timing-function: var(--ease-out);
   }
 
   .closeButton {

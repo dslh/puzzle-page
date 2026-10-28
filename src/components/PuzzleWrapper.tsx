@@ -19,9 +19,15 @@ interface PuzzleWrapperProps {
   moving?: boolean;
   selected?: boolean;
   onSelect?: (id: string | null) => void;
+  /** Added after the page first drew: laid onto the sheet rather than just appearing. */
+  animateIn?: boolean;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect }: PuzzleWrapperProps) {
+// Must match --ease-out in index.css
+const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect, animateIn }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
   const entry = getSidebarEntry(puzzle.entry, puzzle.type);
@@ -31,6 +37,52 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
   useEffect(() => {
     if (selected) wrapperRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [selected]);
+
+  useEffect(() => {
+    if (!animateIn) return;
+    wrapperRef.current?.animate(
+      reducedMotion()
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: 'scale(0.96)' }, { opacity: 1, transform: 'none' }],
+      { duration: 260, easing: EASE_OUT },
+    );
+    // Once, when the puzzle arrives
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A new seed is drawn in over the old puzzle, left to right, behind a
+  // pencil line - the reroll is the page's signature move, so it gets the
+  // one authored sweep. With reduced motion it simply fades in.
+  const contentRef = useRef<HTMLDivElement>(null);
+  const lastSeed = useRef(puzzle.seed);
+  useEffect(() => {
+    if (lastSeed.current === puzzle.seed) return;
+    lastSeed.current = puzzle.seed;
+    const content = contentRef.current;
+    if (!content) return;
+    if (reducedMotion()) {
+      content.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+      return;
+    }
+    // A gentler curve than EASE_OUT, so the sweep is seen crossing
+    const timing = { duration: 520, easing: 'cubic-bezier(0.33, 1, 0.68, 1)' };
+    content.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], timing);
+    wrapperRef.current?.animate(
+      [
+        { transform: 'translateX(-100%)', opacity: 1 },
+        { transform: 'translateX(-15%)', opacity: 1, offset: 0.85 },
+        { transform: 'none', opacity: 0 },
+      ],
+      { ...timing, pseudoElement: '::after' },
+    );
+  }, [puzzle.seed]);
+
+  const handleReroll = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!reducedMotion()) {
+      e.currentTarget.animate([{ rotate: '0turn' }, { rotate: '1turn' }], { duration: 420, easing: EASE_OUT });
+    }
+    onReroll?.(puzzle.id);
+  };
 
   // With a mouse, a puzzle moves by its drag handle
   const handleHandlePointerDown = (e: ReactPointerEvent) => {
@@ -177,7 +229,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         {onReroll && (
           <button
             className={styles.rerollButton}
-            onClick={() => onReroll(puzzle.id)}
+            onClick={handleReroll}
             title="Re-roll puzzle"
           >
             🎲
@@ -216,7 +268,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         </div>
       )}
 
-      <div className={styles.content}>{renderPuzzle()}</div>
+      <div ref={contentRef} className={styles.content}>{renderPuzzle()}</div>
 
       {/* Resize handles */}
       {resizable && onResize && (

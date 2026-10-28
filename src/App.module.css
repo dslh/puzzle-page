@@ -136,6 +136,26 @@
   color: var(--ink);
 }
 
+/* The undo message comes in under the eye, so the change it names is noticed */
+.undoNotice {
+  display: inline-block;
+  animation: noticeIn 0.24s var(--ease-out);
+}
+
+@keyframes noticeIn {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .undoNotice {
+    animation-name: fade;
+  }
+}
+
 .pageArea {
   display: contents;
 }
@@ -232,6 +252,7 @@
     inset: 0;
     z-index: 250;
     background: rgba(0, 0, 0, 0.35);
+    animation: fade 0.3s var(--ease-out);
   }
 }
 

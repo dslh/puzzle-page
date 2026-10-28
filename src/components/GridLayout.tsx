@@ -58,6 +58,13 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
   const gridRef = useRef<HTMLDivElement>(null);
   const { dragConfig, setDragConfig } = useDragConfig();
 
+  // Puzzles already there when the page first draws just appear; any added
+  // after that are laid onto the sheet
+  const drawn = useRef(false);
+  useEffect(() => {
+    drawn.current = true;
+  }, []);
+
   // Shrink the sheet to fit a narrow screen. Applied with CSS zoom on screen
   // only, so the printed page keeps its exact mm sizes.
   const containerRef = useRef<HTMLDivElement>(null);
@@ -241,6 +248,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
             moving={puzzle.id === move?.id}
             selected={puzzle.id === selectedId}
             onSelect={onSelect}
+            animateIn={drawn.current}
           />
         ))}
 

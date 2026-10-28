@@ -18,6 +18,29 @@
   background: rgba(23, 41, 35, 0.6);
 }
 
+/* Laid over the mat: the sheet lifts in as the mat dims behind it */
+.dialog[open] {
+  animation: lift 0.32s var(--ease-out);
+}
+
+.dialog[open]::backdrop {
+  animation: fade 0.32s var(--ease-out);
+}
+
+@keyframes lift {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation-name: fade;
+  }
+}
+
 .sheet {
   padding: 28px 40px 40px;
   border-top: 8px solid var(--crayon);

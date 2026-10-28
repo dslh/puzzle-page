@@ -62,6 +62,9 @@
   --pencil-edge: #c99a0c;
   --danger: #c43d32;
   --radius: 6px;
+  /* Arrivals decelerate into place; exits leave quicker than they came */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-font: 'Atkinson Hyperlegible Next', 'Noto Color Emoji', system-ui, sans-serif;
   --hand-font: 'Playpen Sans', 'Noto Color Emoji', sans-serif;
 }
@@ -87,9 +90,12 @@
   outline-offset: 2px;
 }
 
+/* Reduced motion: nothing slides, grows or spins, but fades and colour
+   changes stay, so a state change still reads as one. Each module swaps its
+   own entrance animations for a fade. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    transition: none !important;
+    transition-property: opacity, color, background-color, border-color, visibility !important;
   }
 }
 

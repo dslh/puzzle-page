@@ -210,12 +210,12 @@ function App() {
             )}
             <span className={styles.puzzleCount} role="status">
               {undo ? (
-                <>
+                <span key={undo} className={styles.undoNotice}>
                   {undo}.{' '}
                   <button type="button" className={styles.undoButton} onClick={undoLast}>
                     Undo
                   </button>
-                </>
+                </span>
               ) : showingPages ? `Pages printed for ${child.name}` : status}
             </span>
             {!showingPages && (
