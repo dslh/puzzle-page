@@ -5,6 +5,7 @@ import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
 import { collides, newPlacedPuzzle } from '../utils/placement';
 import { trackPointerDrag } from '../utils/pointerDrag';
+import { EXIT_MS } from '../utils/motion';
 import { useDragConfig } from '../contexts/DragConfigContext';
 import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
@@ -64,6 +65,26 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
   useEffect(() => {
     drawn.current = true;
   }, []);
+
+  // Puzzles just removed (one, or the whole page), still drawn while they
+  // fade out. The page itself has already dropped them, so Undo, Print and
+  // saving never wait on the animation. One that comes back (Undo) is drawn
+  // from the page again, and lands with the usual entrance.
+  const [leaving, setLeaving] = useState<PlacedPuzzle[]>([]);
+  const [lastPuzzles, setLastPuzzles] = useState(puzzles);
+  if (puzzles !== lastPuzzles) {
+    setLastPuzzles(puzzles);
+    const ids = new Set(puzzles.map(p => p.id));
+    const gone = lastPuzzles.filter(p => !ids.has(p.id));
+    if (gone.length > 0 || leaving.some(p => ids.has(p.id))) {
+      setLeaving([...leaving.filter(p => !ids.has(p.id)), ...gone]);
+    }
+  }
+  useEffect(() => {
+    if (leaving.length === 0) return;
+    const timer = setTimeout(() => setLeaving([]), EXIT_MS + 50);
+    return () => clearTimeout(timer);
+  }, [leaving]);
 
   // Shrink the sheet to fit a narrow screen. Applied with CSS zoom on screen
   // only, so the printed page keeps its exact mm sizes.
@@ -231,7 +252,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       >
         {renderGridCells()}
 
-        {puzzles.length === 0 && !dragData && emptyPrompt && (
+        {puzzles.length === 0 && leaving.length === 0 && !dragData && emptyPrompt && (
           <div className={styles.empty}>{emptyPrompt}</div>
         )}
 
@@ -250,6 +271,10 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
             onSelect={onSelect}
             animateIn={drawn.current}
           />
+        ))}
+
+        {leaving.map(puzzle => (
+          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} leaving />
         ))}
 
         {/* Drag preview */}

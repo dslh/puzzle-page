@@ -5,6 +5,7 @@ import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
 import HelpButton from './help/HelpButton';
 import { trackPointerDrag } from '../utils/pointerDrag';
+import { EASE_IN, EASE_OUT, EXIT_MS, reducedMotion } from '../utils/motion';
 import styles from './PuzzleWrapper.module.css';
 
 interface PuzzleWrapperProps {
@@ -21,13 +22,11 @@ interface PuzzleWrapperProps {
   onSelect?: (id: string | null) => void;
   /** Added after the page first drew: laid onto the sheet rather than just appearing. */
   animateIn?: boolean;
+  /** Just removed: GridLayout draws it a moment longer while it fades out. */
+  leaving?: boolean;
 }
 
-// Must match --ease-out in index.css
-const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect, animateIn }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
   const entry = getSidebarEntry(puzzle.entry, puzzle.type);
@@ -49,6 +48,18 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     // Once, when the puzzle arrives
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // The entrance played backwards, quicker, and held at the end until
+  // GridLayout lets the puzzle go
+  useEffect(() => {
+    if (!leaving) return;
+    wrapperRef.current?.animate(
+      reducedMotion()
+        ? [{ opacity: 1 }, { opacity: 0 }]
+        : [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(0.96)' }],
+      { duration: EXIT_MS, easing: EASE_IN, fill: 'forwards' },
+    );
+  }, [leaving]);
 
   // A new seed is drawn in over the old puzzle, left to right, behind a
   // pencil line - the reroll is the page's signature move, so it gets the
@@ -191,7 +202,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
   return (
     <div
       ref={wrapperRef}
-      className={`${styles.wrapper} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''}`}
+      className={`${styles.wrapper} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''} ${leaving ? styles.leaving : ''}`}
       onPointerDown={handlePointerDown}
       onClick={onSelect && ((e) => {
         // Keep the page behind from clearing the selection again
