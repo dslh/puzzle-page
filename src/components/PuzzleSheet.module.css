@@ -27,9 +27,26 @@
   from { opacity: 0; }
 }
 
+/* And back down, quicker, when nothing is selected. 0.2s is SHEET_EXIT_MS. */
+.sheet.closing {
+  animation: sink 0.2s var(--ease-in) forwards;
+}
+
+@keyframes sink {
+  to { transform: translateY(100%); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sheet {
     animation-name: fade;
+  }
+
+  .sheet.closing {
+    animation-name: fadeOut;
   }
 }
 

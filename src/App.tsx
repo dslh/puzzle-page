@@ -10,6 +10,7 @@ import { activeChild, activeSlot, copyPage, newSeed, recordPrint, updateSlot, ty
 import { useStore } from './profiles/useStore';
 import { collides, findFreeSpot, newPlacedPuzzle } from './utils/placement';
 import { useCompactLayout } from './utils/useCompactLayout';
+import { SHEET_EXIT_MS } from './utils/motion';
 import styles from './App.module.css';
 
 const puzzleLabel = (puzzle: PlacedPuzzle) =>
@@ -30,6 +31,21 @@ function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const selectedPuzzle = compact && !showingPages ? puzzles.find(p => p.id === selectedId) : undefined;
+
+  // The sheet is drawn a moment longer once nothing is selected, while it
+  // slides back down
+  const [closingPuzzle, setClosingPuzzle] = useState<PlacedPuzzle | null>(null);
+  const [lastSelected, setLastSelected] = useState(selectedPuzzle);
+  if (selectedPuzzle !== lastSelected) {
+    setLastSelected(selectedPuzzle);
+    setClosingPuzzle(selectedPuzzle ? null : lastSelected ?? null);
+  }
+  useEffect(() => {
+    if (!closingPuzzle) return;
+    const timer = setTimeout(() => setClosingPuzzle(null), SHEET_EXIT_MS + 50);
+    return () => clearTimeout(timer);
+  }, [closingPuzzle]);
+  const sheetPuzzle = selectedPuzzle ?? closingPuzzle;
 
   // A short message in the toolbar, e.g. when a tapped puzzle has no room
   const [notice, setNotice] = useState<string | null>(null);
@@ -263,9 +279,10 @@ function App() {
             />
           </div>
         </main>
-        {selectedPuzzle && (
+        {sheetPuzzle && (
           <PuzzleSheet
-            puzzle={selectedPuzzle}
+            puzzle={sheetPuzzle}
+            closing={!selectedPuzzle}
             onReroll={handleRerollPuzzle}
             onRemove={handleRemovePuzzle}
             onConfigChange={handleConfigChange}

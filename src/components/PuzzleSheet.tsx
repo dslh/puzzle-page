@@ -9,6 +9,8 @@ interface PuzzleSheetProps {
   onRemove: (id: string) => void;
   onConfigChange: (id: string, config: unknown) => void;
   onClose: () => void;
+  /** Nothing is selected any more: the sheet slides away, and can't be used. */
+  closing?: boolean;
 }
 
 /**
@@ -16,7 +18,7 @@ interface PuzzleSheetProps {
  * touch screens and narrow windows, where the on-puzzle hover controls are
  * either unreachable or shrunk with the sheet.
  */
-export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange, onClose }: PuzzleSheetProps) {
+export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange, onClose, closing }: PuzzleSheetProps) {
   const definition = getPuzzleDefinition(puzzle.type);
   if (!definition) return null;
 
@@ -32,7 +34,11 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
   }> | undefined;
 
   return (
-    <section className={styles.sheet} aria-label={`${label} settings`}>
+    <section
+      className={`${styles.sheet} ${closing ? styles.closing : ''}`}
+      aria-label={`${label} settings`}
+      inert={closing}
+    >
       <div className={styles.head}>
         <span className={styles.icon} aria-hidden="true">{icon}</span>
         <h2 className={styles.title}>{label}</h2>
