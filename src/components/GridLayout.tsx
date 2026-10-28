@@ -3,7 +3,7 @@ import type { DragEvent, PointerEvent as ReactPointerEvent, ReactNode } from 're
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
-import { collides, newPlacedPuzzle } from '../utils/placement';
+import { collides, fitAtCell, newPlacedPuzzle } from '../utils/placement';
 import { trackPointerDrag } from '../utils/pointerDrag';
 import { EXIT_MS } from '../utils/motion';
 import { useDragConfig } from '../contexts/DragConfigContext';
@@ -165,12 +165,17 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
     setDragData(null);
   };
 
+  // Where a puzzle dragged in from the sidebar would land: over the cell
+  // under the pointer, shrunk if need be to fit the space there
+  const dropSpot = dragOver && dragData
+    ? fitAtCell(puzzles, dragOver, dragData.width, dragData.height,
+      getPuzzleDefinition(dragData.type)?.resizable)
+    : null;
+
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
-    if (!dragOver || !dragData) return;
-
-    if (!checkCollision(dragOver.x, dragOver.y, dragData.width, dragData.height)) {
+    if (dropSpot && dragData) {
       const definition = getPuzzleDefinition(dragData.type);
 
       // Get config from context if available, otherwise use definition default
@@ -178,7 +183,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       const config = fromSidebar ? fromSidebar.config : definition?.defaultConfig;
 
       onAddPuzzle(newPlacedPuzzle(
-        dragData.type, dragOver.x, dragOver.y, dragData.width, dragData.height, config,
+        dragData.type, dropSpot.x, dropSpot.y, dropSpot.width, dropSpot.height, config,
         fromSidebar?.entryKey,
       ));
     }
@@ -190,9 +195,9 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
 
   const ghost: Ghost | null = move
     ? { ...move, excludeId: move.id }
-    : dragOver && dragData
+    : dropSpot ?? (dragOver && dragData
       ? { ...dragOver, width: dragData.width, height: dragData.height }
-      : null;
+      : null);
   const ghostCollides = ghost !== null
     && checkCollision(ghost.x, ghost.y, ghost.width, ghost.height, ghost.excludeId);
 

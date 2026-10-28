@@ -121,7 +121,9 @@ CSS. There:
 
 - The sidebar is a drawer, opened from the toolbar's **+ Puzzles**.
 - Puzzles are added with **+**, which `findFreeSpot` places reading the page
-  like a book (the + also works on desktop). No room shows a toolbar notice.
+  like a book (the + also works on desktop). If the default size fits
+  nowhere, it shrinks to fit (see **Shrink to fit**). No room even at the
+  minimum shows a toolbar notice.
 - Tapping a puzzle selects it (`App.selectedId`), and its help, reroll, remove
   and config bar open in `PuzzleSheet`. Tapping the empty page deselects.
 - The selected puzzle moves by dragging the puzzle itself, and resizes by
@@ -404,13 +406,24 @@ const config = dragConfig?.puzzleType === dragData.type
   : definition?.defaultConfig;
 ```
 
+### Shrink to fit
+
+A new puzzle, added with + or dragged in, takes its default size if there's
+room, else the biggest size down to its `resizable` minimums that fits
+(`fitSizes` in `src/utils/placement.ts`: biggest area first, then closest to
+the default's shape). It never grows past the default, and fixed-size puzzles
+never shrink. + tries the default everywhere before shrinking, and says in
+the toolbar when it shrank. A drop (`fitAtCell`) covers the cell under the
+pointer, nudged up and left as little as it can; the green outline shows the
+size it will land at.
+
 ### Collision Detection
 
 AABB (axis-aligned bounding box), in one helper: `collides` in
 `src/utils/placement.ts`. It bounds-checks against `GRID_COLS`/`GRID_ROWS` and
 takes an `excludeId` so a puzzle being moved or resized doesn't collide with
-itself. Callers: `GridLayout` (drop validation and the green/red highlight
-during `dragover`), `App.handleResizePuzzle`, and `findFreeSpot` (tap to add).
+itself. Callers: `GridLayout` (the green/red highlight while dragging),
+`App.handleResizePuzzle`, and `findFreeSpot` / `fitAtCell` (tap to add, drops).
 
 ```typescript
 // Check if two rectangles overlap
@@ -573,7 +586,7 @@ The puzzles in registry order:
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze (4×4) | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, straight / curvy walls, start/finish pair |
+| Maze | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, straight / curvy walls, start/finish pair |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |

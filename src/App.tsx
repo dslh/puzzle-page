@@ -73,16 +73,17 @@ function App() {
   };
 
   const handleAddFromSidebar = (entry: SidebarEntry, config: unknown): boolean => {
-    const { type, defaultWidth, defaultHeight } = entry.definition;
-    const spot = findFreeSpot(puzzles, defaultWidth, defaultHeight);
+    const { type, defaultWidth, defaultHeight, resizable } = entry.definition;
+    const spot = findFreeSpot(puzzles, defaultWidth, defaultHeight, resizable);
     if (!spot) {
       setNotice(`No room for ${entry.label} - remove or shrink a puzzle first`);
       setDrawerOpen(false);
       return false;
     }
-    const puzzle = newPlacedPuzzle(type, spot.x, spot.y, defaultWidth, defaultHeight, config, entry.key);
+    const puzzle = newPlacedPuzzle(type, spot.x, spot.y, spot.width, spot.height, config, entry.key);
     setPage(page => [...page, puzzle]);
-    setNotice(null);
+    const shrunk = spot.width !== defaultWidth || spot.height !== defaultHeight;
+    setNotice(shrunk ? `Added ${entry.label} at ${spot.width}×${spot.height} to fit` : null);
     setDrawerOpen(false);
     setView('page');
     if (compact) setSelectedId(puzzle.id);
