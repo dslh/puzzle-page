@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { DragEvent, PointerEvent as ReactPointerEvent } from 'react';
+import type { DragEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
@@ -19,6 +19,8 @@ interface GridLayoutProps {
   onConfigChange?: (id: string, config: unknown) => void;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
+  /** Shown on the sheet while it has no puzzles; not printed */
+  emptyPrompt?: ReactNode;
 }
 
 // The sheet's width on screen at 100%: CSS's 96px to the inch
@@ -49,7 +51,7 @@ interface Ghost {
   excludeId?: string;
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange, selectedId, onSelect }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange, selectedId, onSelect, emptyPrompt }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
   const [move, setMove] = useState<MoveState | null>(null);
@@ -144,12 +146,12 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       const definition = getPuzzleDefinition(dragData.type);
 
       // Get config from context if available, otherwise use definition default
-      const config = dragConfig?.puzzleType === dragData.type
-        ? dragConfig.config
-        : definition?.defaultConfig;
+      const fromSidebar = dragConfig?.puzzleType === dragData.type ? dragConfig : null;
+      const config = fromSidebar ? fromSidebar.config : definition?.defaultConfig;
 
       onAddPuzzle(newPlacedPuzzle(
         dragData.type, dragOver.x, dragOver.y, dragData.width, dragData.height, config,
+        fromSidebar?.entryKey,
       ));
     }
 
@@ -221,6 +223,10 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         } as React.CSSProperties}
       >
         {renderGridCells()}
+
+        {puzzles.length === 0 && !dragData && emptyPrompt && (
+          <div className={styles.empty}>{emptyPrompt}</div>
+        )}
 
         {/* Render placed puzzles */}
         {puzzles.map(puzzle => (

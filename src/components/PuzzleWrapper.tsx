@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
-import { getPuzzleDefinition } from './puzzles';
+import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
 import HelpButton from './help/HelpButton';
 import { trackPointerDrag } from '../utils/pointerDrag';
 import styles from './PuzzleWrapper.module.css';
@@ -24,6 +24,7 @@ interface PuzzleWrapperProps {
 export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
+  const entry = getSidebarEntry(puzzle.entry, puzzle.type);
 
   // Bring a newly selected puzzle into view, e.g. one just added from the drawer
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -165,10 +166,10 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
             className={styles.helpButton}
             subject={{
               definition: puzzleDef,
-              label: puzzleDef.label,
-              icon: puzzleDef.icon,
-              category: puzzleDef.category,
-              ages: puzzleDef.ages,
+              label: entry?.label ?? puzzleDef.label,
+              icon: entry?.icon ?? puzzleDef.icon,
+              category: entry?.category ?? puzzleDef.category,
+              ages: entry?.ages ?? puzzleDef.ages,
               config: puzzle.config ?? puzzleDef.defaultConfig,
             }}
           />

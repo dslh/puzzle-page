@@ -4,6 +4,7 @@ import type { PuzzleType } from '../types/puzzle';
 
 interface DragConfig {
   puzzleType: PuzzleType;
+  entryKey: string;
   config: unknown;
 }
 

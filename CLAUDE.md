@@ -67,7 +67,9 @@ This enables:
 
 Simple React hooks pattern - no Redux or external state library:
 
-- **Single source of truth**: `App.tsx` maintains `PlacedPuzzle[]` array
+- **Single source of truth**: `useStore` (`src/profiles/useStore.ts`) holds
+  the whole `Store`, used by `App.tsx` - see **Profiles and saving** below.
+  The page on the desk is the active child's (or Anyone's) `page`
 - **Props drilling**: App → GridLayout/Sidebar → PuzzleWrapper → Puzzle Component
 - **One Context**: `src/contexts/DragConfigContext.tsx` carries a puzzle's config
   from the sidebar to the drop target during a drag. It exists because
@@ -80,19 +82,26 @@ Simple React hooks pattern - no Redux or external state library:
   - `onRerollPuzzle` - Regenerate with new seed
   - `onUpdatePuzzle` - Move existing puzzle
   - `onResizePuzzle` - Change dimensions (with collision check)
-  - `onConfigChange` - Update puzzle configuration
+  - `onConfigChange` - Update puzzle configuration (and the child's learned
+    setting for that sidebar entry)
 
 ### Component Hierarchy
 
 ```
 App (state holder)
 └── DragConfigProvider
-    ├── Sidebar (age switch; collapsible categories; one entry per definition + preset;
+    ├── Sidebar (collapsible categories; one entry per definition + preset;
     │   │        a drawer on narrow screens)
+    │   ├── ProfilePicker (Who is it for?: a chip per child + Anyone; Anyone keeps the age switch)
+    │   ├── favourites section, "Not yet" section (a child only)
     │   ├── + button (puts the puzzle in the first free space)
-    │   └── Config UI (when puzzle.configComponent exists)
-    ├── desk (green mat: toolbar with + Puzzles (narrow only) / count / Clear page / Print)
-    │   └── GridLayout (drag/drop target + collision detection; zooms the sheet to fit)
+    │   ├── Settings disclosure (config UI, Back to age settings, Not yet)
+    │   └── Backup (save / load a JSON backup file)
+    ├── desk (green mat: toolbar with + Puzzles (narrow only) / This page · Printed (a child)
+    │   │      / status or Undo / Clear page / Print)
+    │   ├── PageHistory (Printed view: PagePreview thumbnails, ratings, Print again ...)
+    │   └── GridLayout (drag/drop target + collision detection; zooms the sheet to fit;
+    │                   empty prompt while the page has no puzzles)
             ├── Grid cells (19mm × 19mm visual grid)
             ├── PuzzleWrapper (for each PlacedPuzzle)
             │   ├── Drag handle (mouse; pointer events)
@@ -454,6 +463,37 @@ The app's own controls use Atkinson Hyperlegible Next (`--ui-font`); the
 puzzles keep Playpen Sans (`--hand-font`, set on `body`). The global `button`
 rules are wrapped in `:where()` so a module's `.button` always wins.
 
+## Profiles and saving
+
+Everything is kept in this browser only (`localStorage`, key
+`puzzle-page:store`), saved on every change; no accounts or server.
+`src/profiles/store.ts` holds the types and pure helpers, `useStore` the state.
+
+- **`Store`**: `children` (one `Child` each), `activeId` (null = Anyone) and
+  `anyone`. Each has an age, a `page` in progress and learned `settings`; a
+  child also has `favourites` and `notYet` (sidebar entry keys) and a
+  `history` of `SavedPage`s, newest first, capped at 200.
+- **Learned settings** are keyed by sidebar entry: whatever was last set, in
+  the sidebar or on a placed puzzle, is where that entry starts next time
+  for that child. Merged over the starting config, so new config fields
+  still default. "Back to age … settings" deletes the key.
+- **`PlacedPuzzle.entry`** records which sidebar entry a puzzle came from, so
+  presets keep their own name, help and learned settings once placed. The
+  sidebar drag passes it through `DragConfigContext` (`entryKey`).
+- **Printing** a child's page adds it to their history (`recordPrint`); a
+  page with the same puzzles in the same places just moves to the top,
+  keeping its ratings. Print again rebuilds from seeds, so a generator
+  change can alter an old page.
+- **Ratings** (too easy / about right / too hard) are per puzzle per saved
+  page; the sidebar notes the latest easy/hard one for each entry. Nothing
+  changes settings automatically.
+- **Undo** (toolbar, 8s) restores the whole store from before the last change
+  made with an undo message: remove, reroll, clear, replace page, delete a
+  child or a printed page, load a backup. There are no confirm dialogs.
+- **Loading** (from storage or a backup) goes through `parseStore`, which
+  drops unknown puzzle types and bad positions. Bump `version` and migrate
+  there if the shape changes. The old `puzzle-page:age` key seeds Anyone's age.
+
 ## Technology Stack
 
 - **React 19.2.0** + **TypeScript 5.9.3** (strict mode)
@@ -461,7 +501,8 @@ rules are wrapped in `:where()` so a module's `.button` always wins.
 - **CSS Modules** (scoped styling)
 - **ESLint** (TypeScript + React plugins)
 - No testing framework
-- No state management library (React hooks + one Context for drag config)
+- No state management library (React hooks + one Context for drag config);
+  profiles and pages persist to `localStorage`
 - No routing (single page app)
 - Deployed as a static nginx image - see `Dockerfile`, `nginx.conf`, `fly.toml`
 
@@ -499,8 +540,8 @@ Categories start collapsed; each header shows how many entries it holds.
 
 ### Age switch
 
-The sidebar has an age switch: All / 2–3 / 4–5 / 6–7 (`AGE_BANDS`), remembered
-in `localStorage`. A definition or preset can give:
+The age comes from the chosen child's profile, or for Anyone from the age
+switch: All / 2–3 / 4–5 / 6–7 (`AGE_BANDS`). A definition or preset can give:
 
 - `ages` - the bands it is listed under. Absent means every band. A preset
   without its own `ages` inherits the puzzle's.
@@ -508,8 +549,10 @@ in `localStorage`. A definition or preset can give:
 
 `startingConfig` in the registry layers them: `defaultConfig`, the puzzle's
 `ageConfig` for the band, the preset's `config`, the preset's `ageConfig` for
-the band. "All" uses the base only. Switching age resets every sidebar entry to
-its new starting config; puzzles already on the page are untouched.
+the band. "All" uses the base only. A child's learned settings (below) go over
+the starting config. Switching Anyone's age resets every entry to its new
+starting config; changing a child's age keeps what they've learned. Puzzles
+already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
 needs overrides; the other bands carry them. Twelve entries suit 2–3 (Maze,

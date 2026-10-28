@@ -1,0 +1,14 @@
+.sheet {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--paper);
+  pointer-events: none;
+}
+
+.puzzle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

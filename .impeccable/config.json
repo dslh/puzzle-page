@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/components/Sidebar.module.css"
+        ],
+        "createdAt": "2026-10-28T21:02:26.864Z",
+        "reason": "Claude triage: .puzzleList left rule marks which entries belong to an open category (a tree indent in the category's crayon), not a card accent; predates this session and the critique's detector pass rated it a false positive"
+      }
+    ]
+  }
+}

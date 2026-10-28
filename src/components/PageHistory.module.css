@@ -1,0 +1,220 @@
+.history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 190mm;
+  max-width: 100%;
+  padding: 0 0 10mm;
+  font-family: var(--ui-font);
+  color: var(--ink);
+}
+
+.pages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each printed page as a small sheet on the mat, with its notes beside it */
+.page {
+  display: flex;
+  gap: 18px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.preview {
+  flex-shrink: 0;
+  align-self: flex-start;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.puzzles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.puzzle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.puzzleName {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ratings {
+  display: flex;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.rating {
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+}
+
+.rating:last-child {
+  border-right: none;
+}
+
+.rating:hover:not(.selected) {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.rating.selected,
+.rating.selected:hover {
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.primary,
+.secondary {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.primary {
+  border-color: var(--pencil-edge);
+  background: var(--pencil);
+}
+
+.primary:hover {
+  border-color: var(--ink);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.secondary {
+  border: 1.5px solid var(--line);
+}
+
+.secondary:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.remove {
+  margin-left: auto;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--danger);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.remove:hover {
+  background: none;
+  color: var(--danger);
+}
+
+.more {
+  padding: 8px 18px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: var(--paper);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.more:hover {
+  border-color: var(--paper);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--paper);
+}
+
+.empty {
+  max-width: 46ch;
+  margin: 12mm auto;
+  padding: 0 16px;
+  font-family: var(--ui-font);
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--paper);
+}
+
+@media (max-width: 900px) {
+  .history {
+    padding: 0 12px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    flex-direction: column;
+  }
+
+  .preview {
+    align-self: center;
+  }
+}
+
+.more:focus-visible,
+.empty :focus-visible {
+  outline-color: var(--paper);
+}
+
+@media print {
+  .history,
+  .empty {
+    display: none !important;
+  }
+}

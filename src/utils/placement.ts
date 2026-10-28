@@ -47,6 +47,7 @@ export function newPlacedPuzzle(
   width: number,
   height: number,
   config: unknown,
+  entry?: string,
 ): PlacedPuzzle {
   return {
     id: `${type}-${Date.now()}-${Math.random()}`,
@@ -57,5 +58,6 @@ export function newPlacedPuzzle(
     width,
     height,
     config,
+    entry,
   };
 }

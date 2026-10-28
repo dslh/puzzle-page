@@ -1,0 +1,225 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.heading,
+.ageLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* A child's name with their age band, like a name label on a folder */
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.chip:hover:not(.selected) {
+  border-color: var(--ink-soft);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.chip.selected,
+.chip.selected:hover {
+  background: var(--pencil);
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}
+
+.name {
+  max-width: 12ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.age {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+
+.chip.selected .age {
+  color: var(--ink);
+}
+
+.add {
+  border-style: dashed;
+  color: var(--ink-soft);
+}
+
+.childLine,
+.note {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.note {
+  font-size: 13px;
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  background: none;
+  color: var(--ink);
+  text-decoration-thickness: 2px;
+}
+
+.ageSwitch,
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ageButtons {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--hover);
+}
+
+.ageButton {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  transition: background-color 0.15s;
+}
+
+.ageButton:hover:not(.selected) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ageButton.selected,
+.ageButton.selected:hover {
+  background: var(--pencil);
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.input {
+  padding: 8px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.save,
+.cancel {
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.save {
+  border-color: var(--pencil-edge);
+  background: var(--pencil);
+}
+
+.save:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--pencil);
+  color: var(--ink);
+}
+
+.save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel {
+  border: 2px solid var(--line);
+}
+
+.cancel:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.delete {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--danger);
+}
+
+.delete:hover {
+  color: var(--danger);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

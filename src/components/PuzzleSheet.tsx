@@ -1,5 +1,5 @@
 import type { PlacedPuzzle } from '../types/puzzle';
-import { getPuzzleDefinition } from './puzzles';
+import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
 import HelpButton from './help/HelpButton';
 import styles from './PuzzleSheet.module.css';
 
@@ -21,6 +21,10 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
   if (!definition) return null;
 
   const config = puzzle.config ?? definition.defaultConfig;
+  // Named as it was in the sidebar, e.g. Word Matching rather than Matching
+  const entry = getSidebarEntry(puzzle.entry, puzzle.type);
+  const label = entry?.label ?? definition.label;
+  const icon = entry?.icon ?? definition.icon;
   // Cast needed: registry aggregates heterogeneous puzzle types
   const ConfigComponent = definition.configComponent as React.ComponentType<{
     value: unknown;
@@ -28,10 +32,10 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
   }> | undefined;
 
   return (
-    <section className={styles.sheet} aria-label={`${definition.label} settings`}>
+    <section className={styles.sheet} aria-label={`${label} settings`}>
       <div className={styles.head}>
-        <span className={styles.icon} aria-hidden="true">{definition.icon}</span>
-        <h2 className={styles.title}>{definition.label}</h2>
+        <span className={styles.icon} aria-hidden="true">{icon}</span>
+        <h2 className={styles.title}>{label}</h2>
         <button type="button" className={styles.done} onClick={onClose}>
           Done
         </button>
@@ -39,10 +43,10 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
       <div className={styles.actions}>
         <HelpButton
           className={styles.roundButton}
-          subject={{
+          subject={entry ? { ...entry, config } : {
             definition,
-            label: definition.label,
-            icon: definition.icon,
+            label,
+            icon,
             category: definition.category,
             ages: definition.ages,
             config,

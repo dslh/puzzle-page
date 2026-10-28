@@ -48,53 +48,6 @@
   letter-spacing: -0.01em;
 }
 
-.ageSwitch {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.ageLabel {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
-
-.ageButtons {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: calc(var(--radius) + 4px);
-  background: var(--hover);
-}
-
-.ageButton {
-  flex: 1;
-  padding: 8px 4px;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  border: 2px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.ageButton:hover:not(.selected) {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.ageButton.selected {
-  background: var(--pencil);
-  border-color: var(--pencil-edge);
-  color: var(--ink);
-}
-
 .instructions {
   margin: 0 0 4px;
   font-size: 14px;
@@ -328,5 +281,158 @@
 @media print {
   .sidebar {
     display: none !important;
+  }
+}
+
+.listHeading {
+  margin: 6px 0 -6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+/* Favourites always show, so their heading isn't a toggle */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 10px 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.note {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.starButton {
+  width: 26px;
+  height: 26px;
+  padding: 3px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.starButton svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.starButton:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.starred svg,
+.starred:hover svg {
+  fill: var(--pencil);
+  stroke: var(--pencil-edge);
+}
+
+.settingsToggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0 -2px 34px;
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.settingsToggle:hover {
+  background: none;
+  color: var(--ink);
+}
+
+.changed {
+  font-weight: 600;
+}
+
+.chevron.small {
+  width: 10px;
+  margin-left: 2px;
+  font-size: 16px;
+}
+
+.settingsFoot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  background: none;
+  color: var(--ink);
+  text-decoration-thickness: 2px;
+}
+
+.resting {
+  cursor: auto;
+}
+
+.resting .icon,
+.resting .label {
+  opacity: 0.7;
+}
+
+.bringBack {
+  padding: 5px 10px;
+  border: 1.5px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bringBack:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (hover: none) {
+  .starButton {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .settingsToggle {
+    padding: 8px 0;
   }
 }

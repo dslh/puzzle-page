@@ -75,6 +75,8 @@
 [data-category='numbers'] { --crayon: #d9822b; }
 [data-category='science'] { --crayon: #6d9b2a; }
 [data-category='thinking'] { --crayon: #2b8a72; }
+[data-category='favourites'] { --crayon: var(--pencil-edge); }
+[data-category='notyet'] { --crayon: var(--ink-soft); }
 
 * {
   box-sizing: border-box;

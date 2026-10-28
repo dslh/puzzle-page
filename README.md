@@ -17,8 +17,11 @@ Live at https://puzzle-page.fly.dev
   fresh one without disturbing the rest of the page.
 - **Print-ready**: laid out in millimetres for A4, with the sidebar and controls
   hidden when printing.
-- **No backend**: a static frontend with no accounts and no persistence. The
-  page is gone when you reload, so print it first.
+- **A profile per child**: their age, favourites, puzzles that aren't right
+  yet, the settings you last used, and every page printed for them, ready to
+  print again or rate (too easy / about right / too hard).
+- **No backend**: a static frontend with no accounts. Pages and profiles are
+  kept in your browser, with a backup file to save or move them.
 
 ## Puzzles
 

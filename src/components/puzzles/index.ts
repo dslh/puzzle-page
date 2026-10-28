@@ -127,3 +127,9 @@ export function startingConfig(entry: SidebarEntry, age: AgeSetting): unknown {
 export function getPuzzleDefinition(type: string) {
   return PUZZLE_DEFINITIONS.find(def => def.type === type);
 }
+
+/** The sidebar entry a placed puzzle came from, or the puzzle's own entry. */
+export function getSidebarEntry(key: string | undefined, type: string): SidebarEntry | undefined {
+  return SIDEBAR_ENTRIES.find(entry => entry.key === key)
+    ?? SIDEBAR_ENTRIES.find(entry => entry.key === type);
+}
