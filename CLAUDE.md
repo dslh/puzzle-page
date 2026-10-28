@@ -105,12 +105,13 @@ App (state holder)
             ├── Grid cells (19mm × 19mm visual grid)
             ├── PuzzleWrapper (for each PlacedPuzzle)
             │   ├── Drag handle (mouse; pointer events)
-            │   ├── Reroll/delete buttons
-            │   ├── Config UI (hover, when puzzle.configComponent exists)
+            │   ├── Help/reroll/delete buttons (mouse: hover, selected or focused)
             │   ├── Resize handles (when puzzle.resizable; big tabs on touch)
             │   └── Dynamic puzzle component
             └── Drag preview (while dragging in or moving)
-    └── PuzzleSheet (compact layout: the selected puzzle's controls, along the bottom)
+    ├── dock (wide mouse windows: the selected puzzle's PuzzleSheet, on the right)
+    ├── PuzzleSheet (otherwise: the selected puzzle's controls, along the bottom)
+    └── Undo toast (foot of the desk, until the next change)
 ```
 
 ### Mobile / compact layout
@@ -125,14 +126,32 @@ CSS. There:
   nowhere, it shrinks to fit (see **Shrink to fit**). No room even at the
   minimum shows a toolbar notice.
 - Tapping a puzzle selects it (`App.selectedId`), and its help, reroll, remove
-  and config bar open in `PuzzleSheet`. Tapping the empty page deselects.
+  and config bar open in `PuzzleSheet` along the bottom. Tapping the empty
+  page deselects.
 - The selected puzzle moves by dragging the puzzle itself, and resizes by
   tabs on its right and bottom edges. Only the selected one takes a drag
   (`touch-action: none`), so a swipe across the rest still scrolls the page.
 
-The on-puzzle hover controls only appear under `(hover: hover)` and are hidden
-under `(hover: none)`. Dragging a new puzzle in from the sidebar is still HTML5
-drag and drop, so mouse-only; on touch, + covers it.
+The on-puzzle quick controls (help, reroll, remove, drag handle, resize bars)
+only appear under `(hover: hover)`, on the puzzle hovered, selected or
+focused, and are hidden under `(hover: none)`. Dragging a new puzzle in from
+the sidebar is still HTML5 drag and drop, so mouse-only; on touch, + covers it.
+
+### Selecting a puzzle (every layout)
+
+Clicking or tapping a puzzle selects it, and so does adding one (+ or a
+drop), which also shows where it landed. A selected puzzle's settings are
+never drawn over it. With a mouse in a window at least 1400px wide
+(`useDockedPanel`, `DOCK_QUERY`) they sit in a panel docked on the right, the
+sidebar's twin; narrower, they open in the bottom sheet as on a phone.
+
+Each puzzle is one tab stop (`role="group"`, labelled with its name, size
+and position; its own buttons are `tabIndex={-1}`). On a focused puzzle,
+Enter opens its controls and moves focus into them, arrows move it a cell
+(hopping over puzzles in the way), Shift+arrows resize it, Escape closes.
+Escape or Done in the controls puts focus back on the puzzle.
+`GridLayout.handleKeyStep` does the moves and reads each result out through
+a hidden live region.
 
 On screen the sheet is shrunk to fit with CSS `zoom` (`--sheet-scale`, set by
 a `ResizeObserver` in `GridLayout`), under `@media screen` so print keeps exact
@@ -336,9 +355,8 @@ export const puzzleDefinition: PuzzleDefinition<YourPuzzleConfig> = {
 };
 ```
 
-The config UI will automatically:
-- Appear on hover over placed puzzles (centered over puzzle)
-- Be available in sidebar if you add state management there (see `Sidebar.tsx` for Sudoku example)
+The config UI will automatically appear in the sidebar's Settings and in the
+selected puzzle's controls (the docked panel or the bottom sheet).
 
 ## Key Patterns & Conventions
 
@@ -500,8 +518,9 @@ Everything is kept in this browser only (`localStorage`, key
 - **Ratings** (too easy / about right / too hard) are per puzzle per saved
   page; the sidebar notes the latest easy/hard one for each entry. Nothing
   changes settings automatically.
-- **Undo** (toolbar, 8s) restores the whole store from before the last change
-  made with an undo message: remove, reroll, clear, replace page, delete a
+- **Undo** (a paper toast at the foot of the desk, until the next change or
+  dismissed - never on a timer) restores the whole store from before the
+  last change made with an undo message: remove, reroll, clear, replace page, delete a
   child or a printed page, load a backup. There are no confirm dialogs.
 - **Loading** (from storage or a backup) goes through `parseStore`, which
   drops unknown puzzle types and bad positions. Bump `version` and migrate

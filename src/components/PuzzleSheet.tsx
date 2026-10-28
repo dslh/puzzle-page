@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
 import HelpButton from './help/HelpButton';
@@ -11,14 +12,22 @@ interface PuzzleSheetProps {
   onClose: () => void;
   /** Nothing is selected any more: the sheet slides away, and can't be used. */
   closing?: boolean;
+  /** In the panel docked beside the sheet, rather than along the bottom. */
+  docked?: boolean;
+  /** Chosen from the keyboard: focus moves into the controls. */
+  takeFocus?: boolean;
 }
 
 /**
- * The selected puzzle's controls, along the bottom of the screen. Used on
- * touch screens and narrow windows, where the on-puzzle hover controls are
- * either unreachable or shrunk with the sheet.
+ * The selected puzzle's controls: in a panel docked beside the sheet in wide
+ * windows, else along the bottom of the screen.
  */
-export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange, onClose, closing }: PuzzleSheetProps) {
+export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange, onClose, closing, docked, takeFocus }: PuzzleSheetProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (takeFocus) titleRef.current?.focus();
+  }, [takeFocus, puzzle.id]);
+
   const definition = getPuzzleDefinition(puzzle.type);
   if (!definition) return null;
 
@@ -35,13 +44,17 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
 
   return (
     <section
-      className={`${styles.sheet} ${closing ? styles.closing : ''}`}
+      className={`${docked ? styles.docked : styles.sheet} ${closing ? styles.closing : ''}`}
       aria-label={`${label} settings`}
       inert={closing}
+      data-puzzle-controls
+      onKeyDown={e => {
+        if (e.key === 'Escape') onClose();
+      }}
     >
       <div className={styles.head}>
         <span className={styles.icon} aria-hidden="true">{icon}</span>
-        <h2 className={styles.title}>{label}</h2>
+        <h2 ref={titleRef} className={styles.title} tabIndex={-1}>{label}</h2>
         <button type="button" className={styles.done} onClick={onClose}>
           Done
         </button>
@@ -65,10 +78,15 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
           Remove
         </button>
       </div>
-      <p className={styles.hint}>
+      <p className={`${styles.hint} ${styles.touchHint}`}>
         {definition.resizable
           ? 'Drag the puzzle to move it. Drag the dark tabs on its edges to change its size.'
           : 'Drag the puzzle to move it.'}
+      </p>
+      <p className={`${styles.hint} ${styles.mouseHint}`}>
+        {definition.resizable
+          ? 'Drag the puzzle to move it, or the dark tabs on its edges to change its size. Arrow keys move it too, and Shift with an arrow changes its size.'
+          : 'Drag the puzzle to move it. Arrow keys move it too.'}
       </p>
       {ConfigComponent && config !== undefined && (
         <div className={styles.config}>

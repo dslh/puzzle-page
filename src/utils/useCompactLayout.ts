@@ -8,12 +8,29 @@ import { useSyncExternalStore } from 'react';
  */
 export const COMPACT_QUERY = '(hover: none), (max-width: 900px)';
 
-function subscribe(onChange: () => void) {
-  const query = window.matchMedia(COMPACT_QUERY);
-  query.addEventListener('change', onChange);
-  return () => query.removeEventListener('change', onChange);
+/**
+ * Wide windows with a mouse: the selected puzzle's controls sit in a panel
+ * docked on the right, beside the sheet. Wide enough that the sheet keeps
+ * its full size alongside the sidebar and the panel. Narrower, they open in
+ * the bottom sheet as on a phone.
+ */
+export const DOCK_QUERY = '(hover: hover) and (min-width: 1400px)';
+
+function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    onChange => {
+      const list = window.matchMedia(query);
+      list.addEventListener('change', onChange);
+      return () => list.removeEventListener('change', onChange);
+    },
+    () => window.matchMedia(query).matches,
+  );
 }
 
 export function useCompactLayout(): boolean {
-  return useSyncExternalStore(subscribe, () => window.matchMedia(COMPACT_QUERY).matches);
+  return useMediaQuery(COMPACT_QUERY);
+}
+
+export function useDockedPanel(): boolean {
+  return useMediaQuery(DOCK_QUERY);
 }

@@ -9,7 +9,7 @@ import type { PlacedPuzzle } from './types/puzzle';
 import { activeChild, activeSlot, copyPage, newSeed, recordPrint, updateSlot, type SavedPage } from './profiles/store';
 import { useStore } from './profiles/useStore';
 import { collides, findFreeSpot, newPlacedPuzzle } from './utils/placement';
-import { useCompactLayout } from './utils/useCompactLayout';
+import { useCompactLayout, useDockedPanel } from './utils/useCompactLayout';
 import { SHEET_EXIT_MS } from './utils/motion';
 import { fileAway } from './utils/fileAway';
 import styles from './App.module.css';
@@ -18,28 +18,47 @@ const puzzleLabel = (puzzle: PlacedPuzzle) =>
   getSidebarEntry(puzzle.entry, puzzle.type)?.label ?? 'the puzzle';
 
 function App() {
-  const { store, change, undo, undoLast, canSave } = useStore();
+  const { store, change, undo, undoLast, dismissUndo, canSave } = useStore();
   const child = activeChild(store);
   const puzzles = activeSlot(store).page;
   const compact = useCompactLayout();
+  const docked = useDockedPanel();
 
   // The page being made, or (for a child) the pages printed for them before
   const [view, setView] = useState<'page' | 'pages'>('page');
   const showingPages = view === 'pages' && child !== undefined;
 
-  // Compact layout only: the puzzle whose controls are in the bottom sheet,
-  // and whether the sidebar drawer is out.
+  // The puzzle whose controls are open - docked beside the sheet in wide
+  // windows, else in the bottom sheet - and whether it was chosen from the
+  // keyboard, so its controls take the focus. And (compact layout) whether
+  // the sidebar drawer is out.
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedByKey, setSelectedByKey] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const selectedPuzzle = compact && !showingPages ? puzzles.find(p => p.id === selectedId) : undefined;
+  const selectedPuzzle = !showingPages ? puzzles.find(p => p.id === selectedId) : undefined;
 
-  // The sheet is drawn a moment longer once nothing is selected, while it
-  // slides back down
+  const select = (id: string | null, fromKeyboard = false) => {
+    setSelectedId(id);
+    setSelectedByKey(fromKeyboard);
+  };
+
+  // Done or Escape in the controls: focus goes back to the puzzle, if it was
+  // in them, so the keyboard carries on from where it was
+  const closeControls = () => {
+    const id = selectedId;
+    select(null);
+    if (document.activeElement?.closest('[data-puzzle-controls]')) {
+      document.querySelector<HTMLElement>(`[data-puzzle-id="${id}"]`)?.focus();
+    }
+  };
+
+  // The bottom sheet is drawn a moment longer once nothing is selected, while
+  // it slides back down
   const [closingPuzzle, setClosingPuzzle] = useState<PlacedPuzzle | null>(null);
   const [lastSelected, setLastSelected] = useState(selectedPuzzle);
   if (selectedPuzzle !== lastSelected) {
     setLastSelected(selectedPuzzle);
-    setClosingPuzzle(selectedPuzzle ? null : lastSelected ?? null);
+    setClosingPuzzle(selectedPuzzle || docked ? null : lastSelected ?? null);
   }
   useEffect(() => {
     if (!closingPuzzle) return;
@@ -69,8 +88,11 @@ function App() {
     change(s => updateSlot(s, slot => ({ page: page(slot.page) })), undoMessage);
   };
 
+  // Dropped from the sidebar. Selected, so its controls open and it's seen
+  // where it landed.
   const handleAddPuzzle = (puzzle: PlacedPuzzle) => {
     setPage(page => [...page, puzzle]);
+    select(puzzle.id);
   };
 
   const handleAddFromSidebar = (entry: SidebarEntry, config: unknown): boolean => {
@@ -87,7 +109,7 @@ function App() {
     setNotice(shrunk ? `Added ${entry.label} at ${spot.width}×${spot.height} to fit` : null);
     setDrawerOpen(false);
     setView('page');
-    if (compact) setSelectedId(puzzle.id);
+    select(puzzle.id);
     return true;
   };
 
@@ -153,7 +175,7 @@ function App() {
       },
       puzzles.length > 0 ? 'Replaced your page' : undefined,
     );
-    setSelectedId(null);
+    select(null);
     setView('page');
     if (print) setPrintPending(true);
   };
@@ -194,7 +216,7 @@ function App() {
           store={store}
           onChange={(next, undoMessage) => {
             change(next, undoMessage);
-            setSelectedId(null);
+            select(null);
           }}
           canSave={canSave}
           onAdd={handleAddFromSidebar}
@@ -204,7 +226,7 @@ function App() {
         {drawerOpen && (
           <div className={styles.backdrop} onClick={() => setDrawerOpen(false)} aria-hidden="true" />
         )}
-        <main className={`${styles.desk} ${selectedPuzzle ? styles.withSheet : ''}`}>
+        <main className={`${styles.desk} ${selectedPuzzle && !docked ? styles.withSheet : ''}`}>
           <div className={styles.toolbar}>
             <button
               type="button"
@@ -229,21 +251,14 @@ function App() {
                   type="button"
                   className={showingPages ? styles.selected : ''}
                   aria-pressed={showingPages}
-                  onClick={() => { setView('pages'); setSelectedId(null); }}
+                  onClick={() => { setView('pages'); select(null); }}
                 >
                   Printed <span className={styles.viewCount}>{child.history.length}</span>
                 </button>
               </div>
             )}
             <span className={styles.puzzleCount} role="status">
-              {undo ? (
-                <span key={undo} className={styles.undoNotice}>
-                  {undo}.{' '}
-                  <button type="button" className={styles.undoButton} onClick={undoLast}>
-                    Undo
-                  </button>
-                </span>
-              ) : showingPages ? `Pages printed for ${child.name}` : status}
+              {showingPages ? `Pages printed for ${child.name}` : status}
             </span>
             {!showingPages && (
               <>
@@ -283,23 +298,58 @@ function App() {
               onRerollPuzzle={handleRerollPuzzle}
               onUpdatePuzzle={handleUpdatePuzzle}
               onResizePuzzle={handleResizePuzzle}
-              onConfigChange={handleConfigChange}
               selectedId={selectedPuzzle?.id}
-              onSelect={compact ? setSelectedId : undefined}
+              onSelect={select}
               emptyPrompt={emptyPrompt}
             />
           </div>
         </main>
-        {sheetPuzzle && (
+        {docked && !showingPages && (
+          <aside className={styles.dock} aria-label="Selected puzzle">
+            {selectedPuzzle ? (
+              <PuzzleSheet
+                key={selectedPuzzle.id}
+                puzzle={selectedPuzzle}
+                docked
+                takeFocus={selectedByKey}
+                onReroll={handleRerollPuzzle}
+                onRemove={handleRemovePuzzle}
+                onConfigChange={handleConfigChange}
+                onClose={closeControls}
+              />
+            ) : (
+              <p className={styles.dockHint}>
+                {puzzles.length > 0
+                  ? 'Click a puzzle on the page to change its settings, get a new one or remove it.'
+                  : 'A puzzle’s settings show here once it’s on the page.'}
+              </p>
+            )}
+          </aside>
+        )}
+        {!docked && sheetPuzzle && (
           <PuzzleSheet
             puzzle={sheetPuzzle}
             closing={!selectedPuzzle}
+            takeFocus={selectedByKey}
             onReroll={handleRerollPuzzle}
             onRemove={handleRemovePuzzle}
             onConfigChange={handleConfigChange}
-            onClose={() => setSelectedId(null)}
+            onClose={closeControls}
           />
         )}
+        <div className={`${styles.undoBar} ${docked && !showingPages ? styles.besideDock : ''}`} role="status">
+          {undo && (
+            <div key={undo} className={styles.undoToast}>
+              <span>{undo}.</span>
+              <button type="button" className={styles.undoButton} onClick={undoLast}>
+                Undo
+              </button>
+              <button type="button" className={styles.dismissButton} onClick={dismissUndo} aria-label="Dismiss">
+                ×
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </DragConfigProvider>
   );

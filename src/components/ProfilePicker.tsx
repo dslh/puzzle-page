@@ -54,12 +54,16 @@ export default function ProfilePicker({ store, onChange }: ProfilePickerProps) {
   };
 
   const handleDelete = (id: string) => {
-    const name = store.children.find(c => c.id === id)?.name ?? 'child';
+    const child = store.children.find(c => c.id === id);
+    const name = child?.name ?? 'child';
+    const printed = child?.history.length ?? 0;
     onChange({
       ...store,
       activeId: store.activeId === id ? null : store.activeId,
       children: store.children.filter(c => c.id !== id),
-    }, `Deleted ${name} and their pages`);
+    }, printed > 0
+      ? `Deleted ${name} and ${printed} printed page${printed === 1 ? '' : 's'}`
+      : `Deleted ${name}`);
     setEditing(null);
   };
 

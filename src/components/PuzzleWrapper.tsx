@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
@@ -8,28 +8,39 @@ import { trackPointerDrag } from '../utils/pointerDrag';
 import { EASE_IN, EASE_OUT, EXIT_MS, reducedMotion } from '../utils/motion';
 import styles from './PuzzleWrapper.module.css';
 
+// Arrow keys as a step in cells: [across, down]
+const ARROW_STEPS: Record<string, [number, number]> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+};
+
 interface PuzzleWrapperProps {
   puzzle: PlacedPuzzle;
   onRemove?: (id: string) => void;
   onReroll?: (id: string) => void;
   onResize?: (id: string, width: number, height: number) => void;
-  onConfigChange?: (id: string, config: unknown) => void;
   /** Starts moving this puzzle; GridLayout follows the pointer from here. */
   onMoveStart?: (puzzle: PlacedPuzzle, e: ReactPointerEvent) => void;
+  /** An arrow key on the focused puzzle: moves it a cell, or with Shift resizes it. */
+  onKeyStep?: (puzzle: PlacedPuzzle, dx: number, dy: number, resize: boolean) => void;
   /** Being moved: drawn faintly where it was until it lands. */
   moving?: boolean;
   selected?: boolean;
-  onSelect?: (id: string | null) => void;
+  /** `fromKeyboard`: chosen with Enter, so its controls take the focus. */
+  onSelect?: (id: string | null, fromKeyboard?: boolean) => void;
   /** Added after the page first drew: laid onto the sheet rather than just appearing. */
   animateIn?: boolean;
   /** Just removed: GridLayout draws it a moment longer while it fades out. */
   leaving?: boolean;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onConfigChange, onMoveStart, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onMoveStart, onKeyStep, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
   const entry = getSidebarEntry(puzzle.entry, puzzle.type);
+  const label = entry?.label ?? puzzleDef?.label ?? 'Puzzle';
 
   // Bring a newly selected puzzle into view, e.g. one just added from the drawer
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -103,12 +114,30 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     onMoveStart(puzzle, e);
   };
 
-  // In the compact layout, the selected puzzle moves by dragging the puzzle
-  // itself. Only the selected one, so a swipe across the others still
-  // scrolls the page.
+  // The selected puzzle also moves by dragging the puzzle itself. Only the
+  // selected one, so on a touch screen a swipe across the others still
+  // scrolls the page. Events from the help dialog, portalled out of here,
+  // still bubble through React, so they are let go.
   const handlePointerDown = (e: ReactPointerEvent) => {
     if (e.button !== 0 || !selected || !onMoveStart) return;
+    if (!e.currentTarget.contains(e.target as Node)) return;
     onMoveStart(puzzle, e);
+  };
+
+  // The puzzle is one stop in the tab order. Enter opens its controls, the
+  // arrows move it, and Shift with an arrow changes its size.
+  const handleKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.target !== e.currentTarget) return;
+    const step = ARROW_STEPS[e.key];
+    if (step && onKeyStep) {
+      e.preventDefault();
+      onKeyStep(puzzle, step[0], step[1], e.shiftKey);
+    } else if ((e.key === 'Enter' || e.key === ' ') && onSelect) {
+      e.preventDefault();
+      onSelect(puzzle.id, true);
+    } else if (e.key === 'Escape' && selected && onSelect) {
+      onSelect(null);
+    }
   };
 
   const handleResizeStart = (e: ReactPointerEvent, direction: 'right' | 'bottom' | 'corner') => {
@@ -203,11 +232,17 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
     <div
       ref={wrapperRef}
       className={`${styles.wrapper} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''} ${leaving ? styles.leaving : ''}`}
+      data-puzzle-id={leaving ? undefined : puzzle.id}
+      tabIndex={leaving ? undefined : 0}
+      role="group"
+      aria-roledescription="puzzle"
+      aria-label={`${label}, ${puzzle.width} by ${puzzle.height}, row ${puzzle.y + 1}, column ${puzzle.x + 1}`}
       onPointerDown={handlePointerDown}
+      onKeyDown={leaving ? undefined : handleKeyDown}
       onClick={onSelect && ((e) => {
         // Keep the page behind from clearing the selection again
         e.stopPropagation();
-        onSelect(puzzle.id);
+        if (e.currentTarget.contains(e.target as Node)) onSelect(puzzle.id);
       })}
       style={{
         left: `${puzzle.x * CELL_SIZE_MM}mm`,
@@ -219,7 +254,8 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       <div
         className={styles.dragHandle}
         onPointerDown={handleHandlePointerDown}
-        title="Drag to reposition"
+        title="Drag to move"
+        aria-hidden="true"
       >
         ⋮⋮
       </div>
@@ -227,9 +263,10 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         {puzzleDef && (
           <HelpButton
             className={styles.helpButton}
+            tabIndex={-1}
             subject={{
               definition: puzzleDef,
-              label: entry?.label ?? puzzleDef.label,
+              label,
               icon: entry?.icon ?? puzzleDef.icon,
               category: entry?.category ?? puzzleDef.category,
               ages: entry?.ages ?? puzzleDef.ages,
@@ -239,45 +276,29 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         )}
         {onReroll && (
           <button
+            type="button"
             className={styles.rerollButton}
             onClick={handleReroll}
-            title="Re-roll puzzle"
+            tabIndex={-1}
+            title={`New ${label}`}
+            aria-label={`New ${label}`}
           >
             🎲
           </button>
         )}
         {onRemove && (
           <button
+            type="button"
             className={styles.deleteButton}
             onClick={() => onRemove(puzzle.id)}
-            title="Remove puzzle"
+            tabIndex={-1}
+            title={`Remove ${label}`}
+            aria-label={`Remove ${label}`}
           >
             ×
           </button>
         )}
       </div>
-
-      {/* Config UI */}
-      {puzzleDef?.configComponent && onConfigChange && (
-        <div className={styles.configPanel}>
-          {(() => {
-            // Cast needed: registry aggregates heterogeneous puzzle types
-            const ConfigComponent = puzzleDef.configComponent as React.ComponentType<{
-              value: unknown;
-              onChange: (config: unknown) => void;
-            }>;
-            const currentConfig = puzzle.config ?? puzzleDef.defaultConfig;
-            return (
-              <ConfigComponent
-                value={currentConfig}
-                onChange={(newConfig) => {
-                  onConfigChange(puzzle.id, newConfig);
-                }}
-              />
-            );
-          })()}
-        </div>
-      )}
 
       <div ref={contentRef} className={styles.content}>{renderPuzzle()}</div>
 

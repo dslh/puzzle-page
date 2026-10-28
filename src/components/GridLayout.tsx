@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DragEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
-import { getPuzzleDefinition } from './puzzles';
+import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
 import { collides, fitAtCell, newPlacedPuzzle } from '../utils/placement';
 import { trackPointerDrag } from '../utils/pointerDrag';
 import { EXIT_MS } from '../utils/motion';
@@ -17,9 +17,8 @@ interface GridLayoutProps {
   onRerollPuzzle?: (id: string) => void;
   onUpdatePuzzle?: (id: string, x: number, y: number) => void;
   onResizePuzzle?: (id: string, width: number, height: number) => void;
-  onConfigChange?: (id: string, config: unknown) => void;
   selectedId?: string | null;
-  onSelect?: (id: string | null) => void;
+  onSelect?: (id: string | null, fromKeyboard?: boolean) => void;
   /** Shown on the sheet while it has no puzzles; not printed */
   emptyPrompt?: ReactNode;
 }
@@ -52,7 +51,7 @@ interface Ghost {
   excludeId?: string;
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, onConfigChange, selectedId, onSelect, emptyPrompt }: GridLayoutProps) {
+export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, selectedId, onSelect, emptyPrompt }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
   const [move, setMove] = useState<MoveState | null>(null);
@@ -139,6 +138,53 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         setMove(null);
       },
     });
+  };
+
+  // What an arrow key did, read out by screen readers. The count makes a
+  // repeated message new, so it is read again.
+  const [announcement, setAnnouncement] = useState({ text: '', count: 0 });
+  const announce = (text: string) => setAnnouncement(a => ({ text, count: a.count + 1 }));
+
+  // An arrow key on a focused puzzle. A move hops over any puzzle in the way
+  // to the next free spot; a resize grows or shrinks by a cell, if it fits.
+  const handleKeyStep = (puzzle: PlacedPuzzle, dx: number, dy: number, resize: boolean) => {
+    const label = getSidebarEntry(puzzle.entry, puzzle.type)?.label ?? 'The puzzle';
+    const way = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
+
+    if (!resize) {
+      if (!onUpdatePuzzle) return;
+      for (let step = 1; ; step++) {
+        const x = puzzle.x + dx * step;
+        const y = puzzle.y + dy * step;
+        if (x < 0 || y < 0 || x + puzzle.width > GRID_COLS || y + puzzle.height > GRID_ROWS) {
+          announce(`No room to move ${label} ${way}`);
+          return;
+        }
+        if (!checkCollision(x, y, puzzle.width, puzzle.height, puzzle.id)) {
+          onUpdatePuzzle(puzzle.id, x, y);
+          announce(`${label} moved to row ${y + 1}, column ${x + 1}`);
+          return;
+        }
+      }
+    }
+
+    const resizable = getPuzzleDefinition(puzzle.type)?.resizable;
+    if (!onResizePuzzle || !resizable || (dx !== 0 && !resizable.width) || (dy !== 0 && !resizable.height)) {
+      announce(`${label} can't change size that way`);
+      return;
+    }
+    const width = puzzle.width + dx;
+    const height = puzzle.height + dy;
+    const change = dx > 0 ? 'wider' : dx < 0 ? 'narrower' : dy > 0 ? 'taller' : 'shorter';
+    if (width < (resizable.minWidth ?? 1) || width > (resizable.maxWidth ?? GRID_COLS)
+      || height < (resizable.minHeight ?? 1) || height > (resizable.maxHeight ?? GRID_ROWS)) {
+      announce(`${label} can't get any ${change}`);
+    } else if (checkCollision(puzzle.x, puzzle.y, width, height, puzzle.id)) {
+      announce(`No room to make ${label} ${change}`);
+    } else {
+      onResizePuzzle(puzzle.id, width, height);
+      announce(`${label} is now ${width} by ${height}`);
+    }
   };
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -270,8 +316,8 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
             onRemove={onRemovePuzzle}
             onReroll={onRerollPuzzle}
             onResize={onResizePuzzle}
-            onConfigChange={onConfigChange}
             onMoveStart={onUpdatePuzzle && handleMoveStart}
+            onKeyStep={handleKeyStep}
             moving={puzzle.id === move?.id}
             selected={puzzle.id === selectedId}
             onSelect={onSelect}
@@ -282,6 +328,10 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         {leaving.map(puzzle => (
           <PuzzleWrapper key={puzzle.id} puzzle={puzzle} leaving />
         ))}
+
+        <p className={styles.announcement} aria-live="polite">
+          <span key={announcement.count}>{announcement.text}</span>
+        </p>
 
         {/* Drag preview */}
         {ghost && (

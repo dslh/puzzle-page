@@ -6,19 +6,29 @@
   justify-content: center;
 }
 
-/* Only where there's a mouse to hover with. On a touch screen, tapping a
-   puzzle selects it and its controls open in App's bottom sheet instead. */
+/* Only where there's a mouse: the quick controls show on the puzzle under
+   it, the selected one and the focused one. Its settings are in the panel
+   App shows for the selected puzzle. On a touch screen there's only that. */
 @media (hover: hover) {
-  .wrapper:hover .deleteButton,
-  .wrapper:hover .rerollButton,
-  .wrapper:hover .helpButton,
-  .wrapper:hover .dragHandle,
-  .wrapper:hover .configPanel,
-  .wrapper:hover .resizeHandleRight,
-  .wrapper:hover .resizeHandleBottom,
-  .wrapper:hover .resizeHandleCorner {
+  .wrapper:is(:hover, .selected, :focus-within) :is(
+    .deleteButton, .rerollButton, .helpButton, .dragHandle,
+    .resizeHandleRight, .resizeHandleBottom, .resizeHandleCorner
+  ) {
     opacity: 1;
   }
+}
+
+/* Focused from the keyboard. Divided by the sheet's zoom, like the
+   selection outline; a selected puzzle keeps its pencil outline and gets an
+   ink ring outside it. */
+.wrapper:focus-visible {
+  outline: calc(2px / var(--sheet-scale, 1)) solid var(--ink);
+  outline-offset: calc(2px / var(--sheet-scale, 1));
+}
+
+.wrapper.selected:focus-visible {
+  outline: calc(4px / var(--sheet-scale, 1)) solid var(--pencil);
+  box-shadow: 0 0 0 calc(8px / var(--sheet-scale, 1)) var(--ink);
 }
 
 /* Touch: the selected puzzle moves by dragging it, and resizes by tabs on
@@ -27,7 +37,6 @@
 @media (hover: none) {
   .buttonGroup,
   .dragHandle,
-  .configPanel,
   .resizeHandleRight,
   .resizeHandleBottom,
   .resizeHandleCorner {
@@ -74,8 +83,15 @@
   border-radius: 2px;
   /* A drag on the selected puzzle moves it rather than scrolling the page */
   touch-action: none;
-  /* Scrolled into view clear of the bottom sheet (at most 55dvh tall) */
-  scroll-margin: calc(16px / var(--sheet-scale, 1)) 0 calc(58dvh / var(--sheet-scale, 1));
+  scroll-margin: calc(16px / var(--sheet-scale, 1));
+}
+
+/* Scrolled into view clear of the bottom sheet (at most 55dvh tall), where
+   there is one */
+@media not ((hover: hover) and (min-width: 1400px)) {
+  .wrapper.selected {
+    scroll-margin-bottom: calc(58dvh / var(--sheet-scale, 1));
+  }
 }
 
 /* The pencil line that leads a reroll across the puzzle (PuzzleWrapper
@@ -208,25 +224,6 @@
   transform: scale(1.1);
 }
 
-/* Config panel */
-.configPanel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: calc(var(--radius) + 2px);
-  padding: 8px;
-  opacity: 0;
-  transition: opacity 0.15s;
-  box-shadow: 0 2px 4px rgba(30, 42, 45, 0.12), 0 10px 28px rgba(30, 42, 45, 0.22);
-  font-family: var(--ui-font);
-  color: var(--ink);
-  z-index: 100;
-  pointer-events: auto;
-}
-
 /* Resize handles */
 .resizeHandleRight,
 .resizeHandleBottom,
@@ -301,7 +298,6 @@
 
   .buttonGroup,
   .dragHandle,
-  .configPanel,
   .resizeHandleRight,
   .resizeHandleBottom,
   .resizeHandleCorner {

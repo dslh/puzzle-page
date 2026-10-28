@@ -18,6 +18,25 @@
   animation: rise 0.3s var(--ease-out);
 }
 
+/* A mouse window too narrow for the docked panel: the sheet spans the desk,
+   leaving the sidebar clear */
+@media (hover: hover) and (min-width: 901px) {
+  .sheet {
+    left: 320px;
+  }
+}
+
+/* Docked beside the sheet in wide windows: part of the layout, under the
+   panel's own heading, so it simply fades in */
+.docked {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--ui-font);
+  color: var(--ink);
+  animation: fade 0.2s var(--ease-out);
+}
+
 /* Comes up from the bottom edge, to read as the selected puzzle's tray */
 @keyframes rise {
   from { transform: translateY(100%); }
@@ -63,6 +82,7 @@
 
 .title {
   flex: 1;
+  outline-offset: 4px;
   min-width: 0;
   margin: 0;
   font-size: 17px;
@@ -152,11 +172,34 @@
 .hint {
   margin: 0;
   font-size: 13px;
+  line-height: 1.4;
   color: var(--ink-soft);
+}
+
+/* Touch: dragging only. With a mouse, the arrow keys too. */
+@media (hover: hover) {
+  .touchHint {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .mouseHint {
+    display: none;
+  }
 }
 
 @media print {
   .sheet {
     display: none !important;
   }
+}
+
+/* The docked panel is narrower than a phone: the actions take their own
+   widths, so "New puzzle" stays on one line */
+.docked .action {
+  flex: auto;
+  padding: 8px;
+  font-size: 14px;
+  white-space: nowrap;
 }
