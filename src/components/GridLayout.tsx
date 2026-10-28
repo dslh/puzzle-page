@@ -249,6 +249,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
       <div
         ref={gridRef}
         className={styles.grid}
+        data-sheet
         style={{
           width: `${GRID_COLS * CELL_SIZE_MM}mm`,
           height: `${GRID_ROWS * CELL_SIZE_MM}mm`,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import GridLayout from './components/GridLayout';
 import PuzzleSheet from './components/PuzzleSheet';
@@ -11,6 +11,7 @@ import { useStore } from './profiles/useStore';
 import { collides, findFreeSpot, newPlacedPuzzle } from './utils/placement';
 import { useCompactLayout } from './utils/useCompactLayout';
 import { SHEET_EXIT_MS } from './utils/motion';
+import { fileAway } from './utils/fileAway';
 import styles from './App.module.css';
 
 const puzzleLabel = (puzzle: PlacedPuzzle) =>
@@ -126,9 +127,17 @@ function App() {
     })));
   };
 
+  // The Printed button, where a printed page is seen to go
+  const printedRef = useRef<HTMLButtonElement>(null);
+
   const handlePrint = () => {
     change(recordPrint);
     window.print();
+    // The print dialog has closed by now; show the page going into the history
+    if (child) {
+      fileAway(document.querySelector<HTMLElement>('[data-sheet]'), printedRef.current);
+      setNotice(`${child.name}’s page is kept in Printed`);
+    }
   };
 
   const handleClear = () => {
@@ -216,6 +225,7 @@ function App() {
                   This page
                 </button>
                 <button
+                  ref={printedRef}
                   type="button"
                   className={showingPages ? styles.selected : ''}
                   aria-pressed={showingPages}
