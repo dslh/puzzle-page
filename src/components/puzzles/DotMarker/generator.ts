@@ -1,6 +1,7 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
 import { OUTLINES } from '../Maze/concentric';
 import type { Point } from '../Maze/grids';
+import { SeededRandom } from '../../../utils/random';
 
 export type DotShape =
   | 'circle'
@@ -80,17 +81,6 @@ export interface DotMarkerPuzzle {
   dots: Point[];
   radius: number;
   picture?: { emoji: string; at: Point; size: number };
-}
-
-class SeededRandom {
-  private seed: number;
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
 }
 
 function polygon(sides: number): Point[] {

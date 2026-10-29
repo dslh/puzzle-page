@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 // Ordering puzzle data structures
 export interface OrderingItem {
   value: number;      // For sorting (the actual value/size)
@@ -8,42 +10,6 @@ export interface OrderingItem {
 export interface OrderingRow {
   items: OrderingItem[];  // Already shuffled for display
   emoji?: string;         // Which emoji (emoji mode only)
-}
-
-// Seeded random number generator for reproducible puzzles
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  nextIntRange(min: number, max: number): number {
-    return min + this.nextInt(max - min + 1);
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
-
-  pickUnique<T>(array: T[], count: number): T[] {
-    const shuffled = this.shuffle(array);
-    return shuffled.slice(0, count);
-  }
 }
 
 // Child-friendly emoji pool (simple, recognizable shapes)

@@ -1,18 +1,4 @@
-/**
- * Simple seeded random number generator
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-}
+import { SeededRandom } from '../../../utils/random';
 
 export interface SudokuCell {
   value: number; // 0-2 for 3x3, 0-3 for 4x4 index into symbol array

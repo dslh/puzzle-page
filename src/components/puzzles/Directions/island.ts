@@ -1,5 +1,6 @@
 import type { ArtName } from './art';
-import type { Point, SeededRandom } from './generator';
+import type { Point } from './generator';
+import type { SeededRandom } from '../../../utils/random';
 
 /*
  * The treasure island: which squares are sea, forest, mountain or a landmark,

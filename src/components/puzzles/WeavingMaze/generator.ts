@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 export interface WeavingCell {
   x: number;
   y: number;
@@ -28,19 +30,6 @@ export interface WeavingMaze {
 
 export type CrossingDensity = 'few' | 'medium' | 'many';
 export type Branchiness = 'low' | 'medium' | 'high';
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-}
 
 interface BridgeOpportunity {
   target: WeavingCell;

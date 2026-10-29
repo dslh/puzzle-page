@@ -1,6 +1,7 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
 import { traceCoast } from './coast';
 import { buildIsland, stampIsland, type Stamp } from './island';
+import { SeededRandom } from '../../../utils/random';
 
 // Directions puzzle data structures
 
@@ -108,41 +109,6 @@ const ALL_DIRECTIONS: Direction[] = ['up', 'right', 'down', 'left'];
 const isHorizontal = (dir: Direction) => dir === 'left' || dir === 'right';
 
 const OPPOSITE: Record<Direction, Direction> = { up: 'down', down: 'up', left: 'right', right: 'left' };
-
-// Seeded random number generator for reproducible puzzles
-export class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  nextIntRange(min: number, max: number): number {
-    return min + this.nextInt(max - min + 1);
-  }
-
-  pick<T>(arr: T[]): T {
-    return arr[this.nextInt(arr.length)];
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
-}
 
 const key = (p: Point) => `${p.x},${p.y}`;
 

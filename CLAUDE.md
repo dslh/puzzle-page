@@ -362,22 +362,23 @@ selected puzzle's controls (the docked panel or the bottom sheet).
 
 ### Seeded Random Generation
 
-All puzzles use **deterministic generation** via seed parameter:
+All puzzles use **deterministic generation** via seed parameter, with the
+shared `SeededRandom` in `src/utils/random.ts` (mulberry32). Never
+`Math.random` in a generator: it can't be seeded.
 
 ```typescript
-// Custom SeededRandom class (LCG algorithm)
-class SeededRandom {
-  private seed: number;
-  constructor(seed: number) { this.seed = seed; }
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-}
+import { SeededRandom } from '../../../utils/random';
 
 const rng = new SeededRandom(seed);
-const value = rng.next(); // 0-1 float
+rng.next();             // float in [0, 1)
+rng.nextInt(6);         // 0-5
+rng.nextIntRange(1, 6); // 1-6
+rng.pick(items);        // also nextFloat, shuffle (a copy), pickUnique
 ```
+
+It replaced an LCG (`% 233280`) copied into every generator. That had one
+233280-state cycle, so generators that throw away many tries made nearby
+seeds replay each other and rerolls repeat.
 
 This allows:
 - **Deterministic output**: Same seed always produces same puzzle
@@ -648,9 +649,7 @@ Fourteen of these carry notes worth reading before editing them:
   draws on the RNG - it takes its points from the maze's own sequence before
   carving starts. The ring shapes (circle, star, heart, ...) all come from
   `concentric.ts`, which takes any outline that is star-shaped about the origin;
-  a new ring shape is just an outline. Square mazes consume the RNG in the same
-  order as before the shapes were added (neighbours listed top, right, bottom,
-  left), so a seed still gives the same maze - keep that order. Curvy walls are
+  a new ring shape is just an outline. Curvy walls are
   a drawing option only (`curves.ts`): the same walls, joined into runs and
   drawn as corner-cutting curves, on any grid shape.
 - **Which Is the Same?** - one picture in a box, a row of choices, exactly
@@ -763,9 +762,8 @@ Fourteen of these carry notes worth reading before editing them:
   halves make one closed shape with one right answer. It is laid out as if
   the mirror runs down, in [out, along] dots, and turned for Across. Paths
   come from rejection sampling: the roomiest of three tries that reach far
-  enough and use the level's slants. That burns thousands of draws, so this
-  generator uses mulberry32, not the shared LCG, whose one 233280-long cycle
-  made nearby seeds repeat shapes. Dots are at least 10mm apart; past 6 out
+  enough and use the level's slants; it was the puzzle that showed up the old
+  LCG's repeats. Dots are at least 10mm apart; past 6 out
   and 13 along they spread instead of multiplying.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
@@ -819,9 +817,6 @@ sidebar entry's config (keyed by entry, so a puzzle listed twice keeps two
 configs) and renders `configComponent` generically. No
 per-puzzle code remains in the sidebar, and adding a configurable puzzle needs no
 core changes.
-
-The remaining known duplication is the `SeededRandom` LCG class, which is
-copy-pasted into most generators. It is deliberate for now.
 
 **Rule:** Duplication < Wrong Abstraction
 

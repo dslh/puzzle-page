@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 export type PatternStyle = 'colours' | 'shapes';
 
 /** Groups of rules the parent switches on and off together */
@@ -83,37 +85,6 @@ export interface PatternRow {
 }
 
 type FillRule = 'AB' | 'AAB' | 'ABB';
-
-// Seeded random number generator for reproducible puzzles
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  pick<T>(array: readonly T[]): T {
-    return array[this.nextInt(array.length)];
-  }
-
-  shuffle<T>(array: readonly T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
-}
 
 // Available colors (matching Sudoku colors)
 const COLORS = ['red', 'green', 'blue', 'yellow'];

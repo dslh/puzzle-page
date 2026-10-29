@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 export type ShapeLevel = 'easy' | 'medium' | 'hard';
 export type HelpLevel = 'dotted' | 'corners' | 'none';
 export type MirrorLine = 'vertical' | 'horizontal';
@@ -29,31 +31,6 @@ export interface DrawTheOtherHalfPuzzle {
   given: Point[];
   /** The same line mirrored: what the child draws. */
   answer: Point[];
-}
-
-/**
- * Mulberry32, not the LCG the other puzzles copy. Rejected tries here burn
- * thousands of draws, and the LCG's one cycle is only 233280 long, so
- * nearby seeds replayed each other's draws and rerolls kept repeating shapes.
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed >>> 0;
-  }
-
-  next(): number {
-    this.seed = (this.seed + 0x6d2b79f5) >>> 0;
-    let t = this.seed;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
 }
 
 /**

@@ -1,5 +1,6 @@
 import { ANIMAL_EMOJI, VEHICLE_EMOJI } from '../Counting/generator';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
+import { SeededRandom } from '../../../utils/random';
 
 // Take Away puzzle data structures
 
@@ -71,37 +72,6 @@ export function maxStartForWidth(gridWidth: number): number {
   let start = 2;
   while (rowWidthMm(start + 1) <= gridWidth * CELL_SIZE_MM) start++;
   return start;
-}
-
-// Seeded random number generator for reproducible puzzles
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  nextIntRange(min: number, max: number): number {
-    return min + this.nextInt(max - min + 1);
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
 }
 
 interface Sum {

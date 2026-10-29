@@ -1,5 +1,6 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
 import { MAZE_THEMES, type MazeTheme } from '../Maze/themes';
+import { SeededRandom } from '../../../utils/random';
 
 /**
  * In the order children usually manage them: down lines, then across,
@@ -89,23 +90,6 @@ export interface PreWritingPuzzle {
   roadWidth: number;
   /** Centre to centre, in mm. Closer on small patterns so tight curves still read. */
   dotSpacing: number;
-}
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
 }
 
 /** Sample spacing along a curve, in mm. Fine enough to print smooth. */

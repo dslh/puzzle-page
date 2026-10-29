@@ -1,4 +1,5 @@
 import { CYCLES, CYCLE_IDS, type Cycle, type CycleId, type Stage } from './cycles';
+import { SeededRandom } from '../../../utils/random';
 
 export type LifeCyclesTask = 'number' | 'missing';
 export type LifeCyclesChoice = 'mixed' | CycleId;
@@ -24,32 +25,6 @@ export interface MissingCircle {
 export type LifeCyclesPuzzle =
   | { task: 'number'; rows: NumberRow[] }
   | { task: 'missing'; circles: MissingCircle[]; across: boolean };
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
-}
 
 /** A row of jumbled stages needs about two grid cells: picture, then box. */
 const ROW_CELLS = 2;

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { LETTER_FORMS, NUMBER_FORMS, getLetterForm, type LetterForm } from './letterForms';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './LetterFormation.module.css';
+import { SeededRandom } from '../../../utils/random';
 
 /** Empty letter means "let the seed pick", so rerolling gives a new one. */
 export interface LetterFormationConfig {
@@ -39,23 +40,6 @@ const GLYPH_INSET_PX = 10;
 const ROW_TARGET_PX = 76;
 const ROW_MIN_PX = 56;
 const ROW_MAX_PX = 88;
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-}
 
 interface GlyphProps {
   form: LetterForm;

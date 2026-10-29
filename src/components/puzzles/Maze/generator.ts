@@ -1,4 +1,5 @@
 import { buildGrid, type GridCell, type GridShape, type Point } from './grids';
+import { SeededRandom } from '../../../utils/random';
 
 export interface Wall {
   from: Point;
@@ -19,22 +20,6 @@ export interface Maze {
 }
 
 export type Branchiness = 'low' | 'medium' | 'high';
-
-/**
- * Simple seeded random number generator
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-}
 
 function getBranchProbability(branchiness: Branchiness): number {
   switch (branchiness) {

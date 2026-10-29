@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
 export const ALL_DIRECTIONS: Direction[] = ['down', 'up', 'left', 'right'];
@@ -41,30 +43,6 @@ const EMOJI_THEMES: string[][] = [
   ['🦒', '🦓', '🦏', '🦛', '🐘', '🦘', '🦙', '🦌', '🐪', '🦣'],
   ['🎉', '🎊', '🎈', '🎁', '🎀', '🪅', '🎆', '🎇'],
 ];
-
-/**
- * Simple seeded random number generator (LCG algorithm)
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  pick<T>(arr: T[]): T {
-    return arr[this.nextInt(arr.length)];
-  }
-}
 
 /**
  * Get the direction needed to move from (x1, y1) to (x2, y2)

@@ -1,5 +1,6 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
 import { firstSoundLetter, isEligible } from '../InitialSounds/generator';
+import { SeededRandom } from '../../../utils/random';
 
 /**
  * Layout, in mm. The component draws with these same numbers, so the generator
@@ -102,32 +103,6 @@ export interface SecretCodePuzzle {
   slotsPerRow: number;
   /** Custom words left out for want of room, for an on-screen note. */
   skipped: string[];
-}
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
 }
 
 /**

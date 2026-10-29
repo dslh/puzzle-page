@@ -1,6 +1,7 @@
 import { WORD_LIST, type WordEntry } from '../WordSearch/wordList';
 import { HOMES, HOME_ANIMALS, type HomeAnimal, type HomeId } from './habitats';
 import { HALF_PICTURES } from './halves';
+import { SeededRandom } from '../../../utils/random';
 
 export type MatchingMode = 'silhouette' | 'word' | 'letter' | 'rhyme' | 'homes' | 'halves';
 
@@ -31,32 +32,6 @@ export interface MatchingPuzzle {
   pairs: MatchingPair[];
   category: string;
   mode: MatchingMode;
-}
-
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  shuffle<T>(array: T[]): T[] {
-    const result = [...array];
-    for (let i = result.length - 1; i > 0; i--) {
-      const j = this.nextInt(i + 1);
-      [result[i], result[j]] = [result[j], result[i]];
-    }
-    return result;
-  }
 }
 
 const MATCHING_CATEGORIES = [

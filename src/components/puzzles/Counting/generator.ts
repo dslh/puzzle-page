@@ -1,29 +1,9 @@
+import { SeededRandom } from '../../../utils/random';
+
 // Counting row data structure
 export interface CountingRow {
   emoji: string;
   count: number;
-}
-
-// Seeded random number generator for reproducible puzzles
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
-
-  nextIntRange(min: number, max: number): number {
-    return min + this.nextInt(max - min + 1);
-  }
 }
 
 // Child-friendly emoji, grouped so other puzzles can borrow the parts they want

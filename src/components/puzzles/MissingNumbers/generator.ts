@@ -1,3 +1,5 @@
+import { SeededRandom } from '../../../utils/random';
+
 export type MissingNumbersLayout = 'track' | 'square';
 export type MissingNumbersRange = 20 | 50 | 100;
 export type MissingNumbersStep = 1 | 2 | 5 | 10;
@@ -8,24 +10,6 @@ export type MissingNumbersGaps = 'few' | 'some' | 'lots';
 export interface NumberCell {
   value: number;
   blank: boolean;
-}
-
-// Seeded random number generator for reproducible puzzles
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-
-  nextInt(max: number): number {
-    return Math.floor(this.next() * max);
-  }
 }
 
 /** Share of the open boxes left blank, by setting. */

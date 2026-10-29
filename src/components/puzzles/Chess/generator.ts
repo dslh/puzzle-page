@@ -3,25 +3,10 @@ import {
   CAPTURE_EASY_PUZZLES, CAPTURE_MEDIUM_PUZZLES, CAPTURE_HARD_PUZZLES,
   type ChessPuzzle,
 } from './puzzleData';
+import { SeededRandom } from '../../../utils/random';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type PuzzleMode = 'mate' | 'capture' | 'both';
-
-/**
- * Simple seeded random number generator
- */
-class SeededRandom {
-  private seed: number;
-
-  constructor(seed: number) {
-    this.seed = seed;
-  }
-
-  next(): number {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return this.seed / 233280;
-  }
-}
 
 function getPuzzlePool(difficulty: Difficulty, mode: PuzzleMode): ChessPuzzle[] {
   const matePools = { easy: EASY_PUZZLES, medium: MEDIUM_PUZZLES, hard: HARD_PUZZLES };
