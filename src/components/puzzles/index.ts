@@ -81,6 +81,9 @@ export interface SidebarEntry {
   icon: string;
   category: PuzzleCategory;
   ages?: AgeBand[];
+  /** The size it is added at: the preset's, else the puzzle's. */
+  defaultWidth: number;
+  defaultHeight: number;
 }
 
 export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(definition => [
@@ -91,6 +94,8 @@ export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(defini
     icon: definition.icon,
     category: definition.category,
     ages: definition.ages,
+    defaultWidth: definition.defaultWidth,
+    defaultHeight: definition.defaultHeight,
   },
   ...(definition.presets ?? []).map((preset: PuzzlePreset<object>) => ({
     key: `${definition.type}:${preset.id}`,
@@ -100,6 +105,8 @@ export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(defini
     icon: preset.icon ?? definition.icon,
     category: preset.category,
     ages: preset.ages ?? definition.ages,
+    defaultWidth: preset.defaultWidth ?? definition.defaultWidth,
+    defaultHeight: preset.defaultHeight ?? definition.defaultHeight,
   })),
 ]);
 

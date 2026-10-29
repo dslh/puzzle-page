@@ -96,7 +96,8 @@ function App() {
   };
 
   const handleAddFromSidebar = (entry: SidebarEntry, config: unknown): boolean => {
-    const { type, defaultWidth, defaultHeight, resizable } = entry.definition;
+    const { defaultWidth, defaultHeight } = entry;
+    const { type, resizable } = entry.definition;
     const spot = findFreeSpot(puzzles, defaultWidth, defaultHeight, resizable);
     if (!spot) {
       setNotice(`No room for ${entry.label} - remove or shrink a puzzle first`);

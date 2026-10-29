@@ -4,8 +4,8 @@ import type { DotMarkerConfig } from './index';
 const docs: PuzzleDoc<DotMarkerConfig> = {
   summary: (
     <>
-      Big circles set round a simple shape. They dab each one with a dot marker, cover it
-      with a sticker, or colour it in.
+      Big circles set round a simple shape, or along the letters of their name. They dab
+      each one with a dot marker, cover it with a sticker, or colour it in.
     </>
   ),
 
@@ -23,6 +23,10 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
         between. A thick line joins them, so the shape still shows once the dots are covered.
       </p>
       <p>
+        Letters work the same way: a circle at each end, corner and crossing of every line,
+        and evenly spaced ones between.
+      </p>
+      <p>
         Each dab should land inside a circle. There is no order and no wrong answer: a dot
         that misses is still a dot.
       </p>
@@ -33,12 +37,13 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
     'What shape is this? It’s a heart! Can you put a dot in every circle?',
     'Who is in the middle? Let’s give them lots of dots.',
     'How many dots did you make? Let’s count them together.',
+    'This says your name! Let’s put a dot on every circle of your name.',
   ],
 
   skills: [
     'Hand–eye coordination',
     'Aiming and stopping',
-    'Naming shapes',
+    'Naming shapes, and knowing the letters of their name',
     'Counting, as a bonus',
   ],
   whyItMatters: (
@@ -52,7 +57,12 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
   settings: {
     shape: {
       label: 'Shape',
-      description: <p>The shape the dots go round: plain shapes on the top row, pictures below. Heart is the default.</p>,
+      description: (
+        <p>
+          The shape the dots go round: plain shapes on the top row, pictures below, then ABC
+          Letters. Heart is the default.
+        </p>
+      ),
       options: [
         { label: 'Circle', description: <p>No corners. The easiest to follow round.</p>, example: { config: { shape: 'circle' } } },
         { label: 'Heart', description: <p>Default. A dot at the point and the dip.</p> },
@@ -75,6 +85,16 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
           label: 'Cloud',
           description: <p>Four bumps on a flat bottom. Also best in a wide puzzle.</p>,
           example: { config: { shape: 'cloud' }, width: 8, height: 5 },
+        },
+        {
+          label: 'ABC Letters',
+          description: (
+            <p>
+              Dots along letters and numbers instead, typed in Letters. Where and Picture are
+              hidden: letters have no inside.
+            </p>
+          ),
+          example: { config: { shape: 'letters', text: 'SAM' }, width: 10, height: 6 },
         },
       ],
     },
@@ -121,12 +141,34 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
         { label: 'None', description: <p>Just the dots.</p>, example: { config: { picture: 'none' } } },
       ],
     },
+    text: {
+      label: 'Letters',
+      description: (
+        <>
+          <p>
+            With ABC Letters: what to dot, such as their name. Up to 12 capital letters and
+            numbers. Lower case is turned into capitals, and anything else is left out.
+          </p>
+          <p>
+            Leave it empty for one letter, picked at random. “Show another” picks a new one.
+          </p>
+        </>
+      ),
+    },
   },
   size: (
-    <p>
-      The shape grows to fill the puzzle, but the dots stay the same size. A bigger puzzle
-      just has more of them.
-    </p>
+    <>
+      <p>
+        The shape grows to fill the puzzle, but the dots stay the same size. A bigger puzzle
+        just has more of them.
+      </p>
+      <p>
+        Letters grow to fill the puzzle too, wrapping onto more rows if that makes them bigger.
+        If they would come out too small for the dots, the dots shrink instead. Dot Letters
+        starts at 10 by 10, room for a short name in big dots. Give a longer name the whole
+        page.
+      </p>
+    </>
   ),
 
   easier: [
@@ -137,6 +179,7 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
     'Dots Small, Where Filled.',
     'Ask for one colour on the edge and another inside.',
     'Count the dots before they start, then check at the end.',
+    'With letters, name each one as they finish it.',
   ],
   mistakes: [
     {
@@ -152,6 +195,10 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
       meaning: <>Normal. Point to an empty one and ask “does this one need a dot?”</>,
     },
     {
+      sign: 'Dots the letters in any order',
+      meaning: <>Fine. This isn’t writing yet. Run your finger along the line after, and say the letter.</>,
+    },
+    {
       sign: 'Counts the same dot twice',
       meaning: <>Very common. Go round the edge together from the top, touching each one.</>,
     },
@@ -164,8 +211,9 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
   atSchool: (
     <>
       Physical Development in the EYFS: hand–eye coordination and early control of a tool.
-      Naming the shape and counting the dots touch on Mathematics, but this puzzle doesn’t
-      teach them on its own.
+      Naming the shape and counting the dots touch on Mathematics. Spotting the letters of
+      their own name is an early step in Literacy. This puzzle doesn’t teach any of these on
+      its own.
     </>
   ),
 };

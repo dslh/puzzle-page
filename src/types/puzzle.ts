@@ -115,6 +115,8 @@ export interface PuzzlePreset<TConfig = unknown> {
   icon?: string;             // Defaults to the puzzle's icon
   category: PuzzleCategory;
   config: Partial<TConfig>;  // Merged over defaultConfig
+  defaultWidth?: number;     // Default to the puzzle's
+  defaultHeight?: number;
   ages?: AgeBand[];          // Defaults to the puzzle's ages
   ageConfig?: AgeConfig<TConfig>;
 }

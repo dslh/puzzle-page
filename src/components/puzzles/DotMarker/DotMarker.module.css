@@ -23,6 +23,15 @@
   stroke-linejoin: round;
 }
 
+/* A letter's strokes: the same thick line, open-ended. */
+.line {
+  fill: none;
+  stroke: #333;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* A stalk or trunk: the same line, filled white so the join to the shape
    hides behind it. */
 .extra {
@@ -45,6 +54,7 @@
   }
 
   .outline,
+  .line,
   .extra,
   .dot {
     stroke: #000;

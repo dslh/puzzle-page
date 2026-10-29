@@ -74,7 +74,8 @@ export default function Sidebar({ store, onChange, canSave, onAdd, open, onClose
   const { setDragConfig } = useDragConfig();
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, entry: SidebarEntry) => {
-    const { type, defaultWidth, defaultHeight } = entry.definition;
+    const { defaultWidth, defaultHeight } = entry;
+    const { type } = entry.definition;
     e.dataTransfer.effectAllowed = 'copy';
 
     // Simplified dataTransfer format - no config in string

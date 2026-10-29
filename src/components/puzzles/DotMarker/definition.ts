@@ -13,6 +13,18 @@ export const puzzleDefinition: PuzzleDefinition<DotMarkerConfig> = {
     // Steadier hands: smaller dots, and more of them
     '4-5': { size: 'medium', fill: 'filled' },
   },
+  presets: [
+    {
+      // A name or a letter they're learning: room for a short name in big dots
+      id: 'letters',
+      label: 'Dot Letters',
+      icon: '🔠',
+      category: 'writing',
+      config: { shape: 'letters' },
+      defaultWidth: 10,
+      defaultHeight: 10,
+    },
+  ],
   component: DotMarker,
   docs: () => import('./docs'),
   configComponent: DotMarkerConfigBar,
@@ -23,6 +35,7 @@ export const puzzleDefinition: PuzzleDefinition<DotMarkerConfig> = {
     size: 'big',
     fill: 'outline',
     picture: 'random',
+    text: '',
   },
   resizable: {
     width: true,

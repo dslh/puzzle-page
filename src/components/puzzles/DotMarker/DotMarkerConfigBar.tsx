@@ -1,5 +1,7 @@
+import { useId } from 'react';
 import type { DotMarkerConfig } from './index';
 import { PICTURES, SHAPES, shapeExtras, shapeVertices, type DotShape } from './generator';
+import { MAX_LETTERS, lettersIn } from './letters';
 import styles from './DotMarkerConfigBar.module.css';
 
 interface ConfigBarProps {
@@ -39,7 +41,19 @@ function ShapeIcon({ shape }: { shape: DotShape }) {
   );
 }
 
+/** What was typed but won't be drawn: anything but letters and digits, and letters past the limit. */
+function skippedFrom(text: string): string {
+  const typed = text.toUpperCase().replace(/\s+/g, '');
+  const kept = lettersIn(text).replace(/ /g, '');
+  const unknown = [...new Set(typed.split('').filter(c => !kept.includes(c) && !/[A-Z0-9]/.test(c)))].join(' ');
+  const cut = typed.replace(/[^A-Z0-9]/g, '').slice(kept.length);
+  return [unknown, cut && `"${cut}"`].filter(Boolean).join(', ');
+}
+
 export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) {
+  const textId = useId();
+  const letters = value.shape === 'letters';
+  const skipped = letters ? skippedFrom(value.text ?? '') : '';
   return (
     <div className={styles.configContainer}>
       <div className={`${styles.configGroup} ${styles.stacked}`}>
@@ -62,7 +76,40 @@ export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) 
             ))}
           </div>
         ))}
+        <div className={styles.buttonBar}>
+          <button
+            type="button"
+            className={`${styles.button} ${value.shape === 'letters' ? styles.selected : ''}`}
+            onClick={() => onChange({ ...value, shape: 'letters' })}
+            title="Letters and numbers, such as their name"
+            aria-pressed={value.shape === 'letters'}
+          >
+            ABC Letters
+          </button>
+        </div>
       </div>
+
+      {letters && (
+        <div className={`${styles.configGroup} ${styles.stacked}`}>
+          <label className={styles.label} htmlFor={textId}>
+            Letters:
+          </label>
+          <input
+            id={textId}
+            type="text"
+            className={styles.textInput}
+            placeholder="A name, or empty for any letter"
+            value={value.text}
+            maxLength={30}
+            onChange={e => onChange({ ...value, text: e.target.value })}
+          />
+          {skipped && (
+            <span className={styles.hint}>
+              Capitals and digits only, up to {MAX_LETTERS} letters. Left out: {skipped}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className={styles.configGroup}>
         <span className={styles.label}>Dots:</span>
@@ -81,40 +128,44 @@ export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) 
         </div>
       </div>
 
-      <div className={styles.configGroup}>
-        <span className={styles.label}>Where:</span>
-        <div className={styles.buttonBar}>
-          {FILLS.map(f => (
-            <button
-              key={f.id}
-              type="button"
-              className={`${styles.button} ${value.fill === f.id ? styles.selected : ''}`}
-              onClick={() => onChange({ ...value, fill: f.id })}
-              title={f.title}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {!letters && (
+        <>
+          <div className={styles.configGroup}>
+            <span className={styles.label}>Where:</span>
+            <div className={styles.buttonBar}>
+              {FILLS.map(f => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={`${styles.button} ${value.fill === f.id ? styles.selected : ''}`}
+                  onClick={() => onChange({ ...value, fill: f.id })}
+                  title={f.title}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className={styles.configGroup}>
-        <span className={styles.label}>Picture:</span>
-        <select
-          className={styles.select}
-          value={value.picture}
-          onChange={e => onChange({ ...value, picture: e.target.value })}
-          title="A picture in the middle to talk about"
-        >
-          <option value="random">Random</option>
-          {PICTURES.map(p => (
-            <option key={p.emoji} value={p.emoji}>
-              {p.emoji} {p.label}
-            </option>
-          ))}
-          <option value="none">None</option>
-        </select>
-      </div>
+          <div className={styles.configGroup}>
+            <span className={styles.label}>Picture:</span>
+            <select
+              className={styles.select}
+              value={value.picture}
+              onChange={e => onChange({ ...value, picture: e.target.value })}
+              title="A picture in the middle to talk about"
+            >
+              <option value="random">Random</option>
+              {PICTURES.map(p => (
+                <option key={p.emoji} value={p.emoji}>
+                  {p.emoji} {p.label}
+                </option>
+              ))}
+              <option value="none">None</option>
+            </select>
+          </div>
+        </>
+      )}
     </div>
   );
 }

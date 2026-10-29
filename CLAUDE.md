@@ -568,7 +568,8 @@ definition has a required `category`. A definition can also list `presets`:
 extra sidebar entries for the same puzzle under another name and category, whose
 `config` is merged over `defaultConfig`. `SIDEBAR_ENTRIES` in the registry
 flattens definitions and presets into what the sidebar draws. A preset only
-picks the starting config; the config bar still offers every option.
+picks the starting config (and, if it gives `defaultWidth`/`defaultHeight`, the
+size it is added at); the config bar still offers every option.
 Categories start collapsed; each header shows how many entries it holds.
 
 ### Age switch
@@ -588,8 +589,8 @@ starting config; changing a child's age keeps what they've learned. Puzzles
 already on the page are untouched.
 
 The base defaults are pitched at the main audience (about five), so 4–5 rarely
-needs overrides; the other bands carry them. Twelve entries suit 2–3 (Maze,
-Roads, Pre-Writing Patterns, Dot Marker, Pattern Sequence, Matching shadows, Match the
+needs overrides; the other bands carry them. Thirteen entries suit 2–3 (Maze,
+Roads, Pre-Writing Patterns, Dot Marker, Dot Letters, Pattern Sequence, Matching shadows, Match the
 Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which Is the Same?); everything else is
 `ages: ['4-5', '6-7']`. New toddler-level puzzles are planned. Keep overrides to settings you're sure of - the user tunes them.
 
@@ -597,7 +598,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 |---|---|
 | Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Roads *(preset)* |
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
-| Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker, Draw the Other Half |
+| Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker, Dot Letters *(preset)*, Draw the Other Half |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
 | Science & Nature | Life Cycles |
 | Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess, Who Goes Where? |
@@ -631,7 +632,7 @@ The puzzles in registry order:
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
-| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none) |
+| Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none); or ABC Letters, with letters to dot (a name; empty = a random letter) |
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 | Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
@@ -741,8 +742,20 @@ Fifteen of these carry notes worth reading before editing them:
   outline for colouring. A picture shape needs every feature about two dots
   across at the default size. Filled adds a honeycomb inside,
   offset only by whole or half spacings so symmetric shapes stay symmetric.
-  The picture goes at the sampled spot furthest from every edge dot. Letters
-  and numbers aren't star-shaped and need their own dot paths (GitHub #24).
+  The picture goes at the sampled spot furthest from every edge dot.
+  The spacing helpers both modes share live in `spacing.ts`.
+
+  ABC Letters (`letters.ts`, GitHub #28) dots Letter Formation's capitals and
+  digits, its stroke paths flattened to points. Strokes are open lines, so a
+  part already drawn - B's middle bar, 9 back down its own circle - is cut
+  out first, then every end, corner, crossing and join (an end landing on a
+  line, like E's middle bar) is a key point, merged where strokes meet. The
+  stretches between are shared out as for shapes, except that a stretch down
+  to one dot slides it away from a sharp corner rather than losing it, or A,
+  M and W lose their sides. Text is laid out by trying every way of cutting
+  it into rows for the biggest letters (breaking inside a word costs a
+  quarter, ties go to even rows); letters under 3.5 spacings tall shrink the
+  dots, down to Small. Lower case isn't offered yet.
 
 - **Life Cycles** - stages are emoji where Noto has a clear one, and our own
   drawings (`art.tsx`) where it doesn't: frogspawn to frog, butterfly eggs and

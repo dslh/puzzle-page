@@ -135,3 +135,26 @@
   background: var(--paper);
   cursor: pointer;
 }
+
+.textInput {
+  padding: 4px 8px;
+  font-size: 14px;
+  font-family: var(--ui-font);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+}

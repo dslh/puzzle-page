@@ -4,12 +4,15 @@ import { generateDotMarker, type DotFill, type DotPicture, type DotShape, type D
 import styles from './DotMarker.module.css';
 
 export interface DotMarkerConfig {
-  shape: DotShape;
+  /** A shape, or the letters of `text`. */
+  shape: DotShape | 'letters';
   size: DotSize;
   /** Dots round the edge only, or filling the inside too. */
   fill: DotFill;
   /** A picture in the middle, to talk about: an emoji, 'random' or 'none'. */
   picture: DotPicture;
+  /** Letters and digits to dot, such as a name. Empty: one letter, picked by the seed. */
+  text: string;
 }
 
 export default function DotMarker({ gridWidth, gridHeight, seed, config }: PuzzleProps<DotMarkerConfig>) {
@@ -17,10 +20,11 @@ export default function DotMarker({ gridWidth, gridHeight, seed, config }: Puzzl
   const size = config?.size ?? 'big';
   const fill = config?.fill ?? 'outline';
   const picture = config?.picture ?? 'random';
+  const text = config?.text ?? '';
 
   const puzzle = useMemo(
-    () => generateDotMarker(gridWidth, gridHeight, seed, shape, size, fill, picture),
-    [gridWidth, gridHeight, seed, shape, size, fill, picture],
+    () => generateDotMarker(gridWidth, gridHeight, seed, shape, size, fill, picture, text),
+    [gridWidth, gridHeight, seed, shape, size, fill, picture, text],
   );
 
   const toPoints = (points: { x: number; y: number }[]) => points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
@@ -35,7 +39,10 @@ export default function DotMarker({ gridWidth, gridHeight, seed, config }: Puzzl
         {puzzle.extras.map((extra, i) => (
           <polygon key={i} points={toPoints(extra)} className={styles.extra} />
         ))}
-        <polygon points={toPoints(puzzle.outline)} className={styles.outline} />
+        {puzzle.outline.length > 0 && <polygon points={toPoints(puzzle.outline)} className={styles.outline} />}
+        {puzzle.lines.map((line, i) => (
+          <polyline key={i} points={toPoints(line)} className={styles.line} />
+        ))}
         {puzzle.dots.map((d, i) => (
           <circle key={i} cx={d.x} cy={d.y} r={puzzle.radius} className={styles.dot} />
         ))}
