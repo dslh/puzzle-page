@@ -635,7 +635,7 @@ The puzzles in registry order:
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 | Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
-| Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | shape (easy / medium / hard), help (dotted / corners / none), mirror down / across |
+| Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | draw a shape / picture, level (easy / medium / hard), help (dotted / corners / none), mirror down / across |
 
 Fourteen of these carry notes worth reading before editing them:
 
@@ -756,15 +756,19 @@ Fourteen of these carry notes worth reading before editing them:
   how far each gets a child. Brute force over 3! or 4! arrangements; 4 houses
   on Medium is the slow case at about 5ms.
 
-- **Draw the Other Half** - mirror symmetry on a dot grid (GitHub #29; the
-  picture mode in the issue isn't built yet). The given half is a path from
+- **Draw the Other Half** - mirror symmetry on a dot grid (GitHub #29). The given half is a path from
   the mirror line, out, and back to it, never touching itself, so the two
   halves make one closed shape with one right answer. It is laid out as if
   the mirror runs down, in [out, along] dots, and turned for Across. Paths
   come from rejection sampling: the roomiest of three tries that reach far
   enough and use the level's slants; it was the puzzle that showed up the old
   LCG's repeats. Dots are at least 10mm apart; past 6 out
-  and 13 along they spread instead of multiplying.
+  and 13 along they spread instead of multiplying. Pictures (`pictures.ts`)
+  are hand-kept half-drawings in the same [out, along] dots, several lines
+  each, held to the levels' slant rules by eye. One is picked from the most
+  dots that fit (nearest level, easier first; Across only takes `sideways`
+  ones), then the dots spread to fill the puzzle; none fits below 4×4, so it
+  draws a shape. Check new ones whole, both halves, before adding them.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather

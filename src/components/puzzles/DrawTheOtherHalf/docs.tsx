@@ -4,8 +4,8 @@ import type { DrawTheOtherHalfConfig } from './index';
 const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
   summary: (
     <>
-      Half a shape on a dot grid, beside a dashed mirror line. They draw the other half so
-      the shape matches on both sides.
+      Half a shape or picture on a dot grid, beside a dashed mirror line. They draw the
+      other half so it matches on both sides.
     </>
   ),
 
@@ -22,6 +22,10 @@ const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
         The shape starts on the mirror line, goes out and comes back to it. They copy each
         line onto the other side, flipped, so the two halves make one closed shape. There is
         one right answer, and it never crosses itself.
+      </p>
+      <p>
+        A picture works the same way, but may have lines inside it too, like a window or an
+        eye. Every line runs from dot to dot, so there is still one right answer.
       </p>
       <p>
         The trick is counting. A corner three dots from the mirror line on one side is three
@@ -51,23 +55,45 @@ const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
   ),
 
   settings: {
+    subject: {
+      label: 'Draw',
+      description: <p>What the half is.</p>,
+      options: [
+        {
+          label: 'Shape',
+          description: <p>A made-up shape, new every time. Default.</p>,
+          example: { config: { subject: 'shape' } },
+        },
+        {
+          label: 'Picture',
+          description: (
+            <p>
+              A simple picture, such as a house, rocket, owl or cat. There are about five at
+              each level, so they come round again. Across uses only the ones that still look
+              right on their side.
+            </p>
+          ),
+          example: { config: { subject: 'picture' } },
+        },
+      ],
+    },
     level: {
-      label: 'Shape',
+      label: 'Level',
       description: <p>How many lines, how far out they go, and whether any slant.</p>,
       options: [
         {
           label: 'Easy',
-          description: <p>Four to six straight lines, no slants. Default.</p>,
+          description: <p>Straight lines only. A shape has four to six. Default.</p>,
           example: { config: { level: 'easy' } },
         },
         {
           label: 'Medium',
-          description: <p>Five to seven lines, with at least one slanting corner to corner.</p>,
+          description: <p>More lines, some slanting corner to corner.</p>,
           example: { config: { level: 'medium' } },
         },
         {
           label: 'Hard',
-          description: <p>Seven to ten lines, with more slants, some of them steep.</p>,
+          description: <p>Lots of lines, more slants, some of them steep.</p>,
           example: { config: { level: 'hard' } },
         },
       ],
@@ -110,18 +136,25 @@ const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
     },
   },
   size: (
-    <p>
-      A bigger puzzle gives more dots, so shapes reach further from the mirror line. Dots are
-      at least 1cm apart. Past about six dots each side, they spread out instead.
-    </p>
+    <>
+      <p>
+        A bigger puzzle gives more dots, so shapes reach further from the mirror line. Dots are
+        at least 1cm apart. Past about six dots each side, they spread out instead.
+      </p>
+      <p>
+        A picture spreads its dots to fill the puzzle. A small puzzle only fits the smaller
+        pictures, and may give an easier one than the level asks for. Below 4 by 4 squares,
+        or in a thin strip, no picture fits and you get a shape.
+      </p>
+    </>
   ),
 
   easier: [
-    'Shape Easy, Help Dotted.',
+    'Level Easy, Help Dotted.',
     'Hold a small mirror on the dashed line so they can see the answer.',
   ],
   harder: [
-    'Shape Hard, Help None, Mirror Across.',
+    'Level Hard, Help None, Mirror Across.',
     'Ask them to draw a half for you to finish.',
   ],
   mistakes: [

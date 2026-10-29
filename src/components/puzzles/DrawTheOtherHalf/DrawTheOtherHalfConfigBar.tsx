@@ -6,9 +6,14 @@ interface ConfigBarProps {
   onChange: (config: DrawTheOtherHalfConfig) => void;
 }
 
+const SUBJECTS = [
+  { id: 'shape', label: 'Shape', title: 'A new made-up shape every time' },
+  { id: 'picture', label: 'Picture', title: 'A house, a rocket, a cat and more' },
+] as const;
+
 const LEVELS = [
-  { id: 'easy', label: 'Easy', title: 'A few straight lines' },
-  { id: 'medium', label: 'Medium', title: 'More lines, one or two slanting' },
+  { id: 'easy', label: 'Easy', title: 'Straight lines only' },
+  { id: 'medium', label: 'Medium', title: 'More lines, some slanting' },
   { id: 'hard', label: 'Hard', title: 'Lots of lines, more slanting, some steep' },
 ] as const;
 
@@ -25,7 +30,8 @@ const MIRRORS = [
 
 export default function DrawTheOtherHalfConfigBar({ value, onChange }: ConfigBarProps) {
   const groups = [
-    { label: 'Shape:', key: 'level', options: LEVELS },
+    { label: 'Draw:', key: 'subject', options: SUBJECTS },
+    { label: 'Level:', key: 'level', options: LEVELS },
     { label: 'Help:', key: 'help', options: HELP },
     { label: 'Mirror:', key: 'mirror', options: MIRRORS },
   ] as const;

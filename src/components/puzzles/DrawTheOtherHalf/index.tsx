@@ -8,10 +8,13 @@ import {
   type MirrorLine,
   type Point,
   type ShapeLevel,
+  type Subject,
 } from './generator';
 import styles from './DrawTheOtherHalf.module.css';
 
 export interface DrawTheOtherHalfConfig {
+  /** A random shape, or a picture from the hand-kept set. */
+  subject: Subject;
   /** How many lines, how far out, and whether any slant. */
   level: ShapeLevel;
   /** How much of the missing half is shown. */
@@ -20,17 +23,19 @@ export interface DrawTheOtherHalfConfig {
   mirror: MirrorLine;
 }
 
-const toPath = (points: Point[]) =>
-  points.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join('');
+const toPath = (lines: Point[][]) => lines
+  .map(points => points.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(''))
+  .join('');
 
 export default function DrawTheOtherHalf({ gridWidth, gridHeight, seed, config }: PuzzleProps<DrawTheOtherHalfConfig>) {
   const level = config?.level ?? 'easy';
   const help = config?.help ?? 'corners';
   const mirror = config?.mirror ?? 'vertical';
+  const subject = config?.subject ?? 'shape';
 
   const puzzle = useMemo(
-    () => generateDrawTheOtherHalf(gridWidth, gridHeight, seed, level, mirror, CELL_SIZE_MM),
-    [gridWidth, gridHeight, seed, level, mirror],
+    () => generateDrawTheOtherHalf(gridWidth, gridHeight, seed, level, mirror, subject, CELL_SIZE_MM),
+    [gridWidth, gridHeight, seed, level, mirror, subject],
   );
 
   const [from, to] = puzzle.mirror;
@@ -47,10 +52,10 @@ export default function DrawTheOtherHalf({ gridWidth, gridHeight, seed, config }
           <circle key={i} cx={x} cy={y} r={0.7} className={styles.gridDot} />
         ))}
         <path d={toPath(puzzle.given)} className={styles.given} />
-        {help === 'dotted' && traceDots(puzzle.answer).map(([x, y], i) => (
+        {help === 'dotted' && puzzle.answer.flatMap(traceDots).map(([x, y], i) => (
           <circle key={`t${i}`} cx={x} cy={y} r={0.5} className={styles.trace} />
         ))}
-        {help === 'corners' && puzzle.answer.slice(1, -1).map(([x, y], i) => (
+        {help === 'corners' && puzzle.corners.map(([x, y], i) => (
           <circle key={`c${i}`} cx={x} cy={y} r={1.4} className={styles.corner} />
         ))}
       </svg>

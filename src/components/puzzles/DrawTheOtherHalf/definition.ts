@@ -20,6 +20,7 @@ export const puzzleDefinition: PuzzleDefinition<DrawTheOtherHalfConfig> = {
   defaultWidth: 6,
   defaultHeight: 5,
   defaultConfig: {
+    subject: 'shape',
     level: 'easy',
     help: 'corners',
     mirror: 'vertical',

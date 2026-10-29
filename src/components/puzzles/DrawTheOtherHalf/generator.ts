@@ -1,8 +1,10 @@
 import { SeededRandom } from '../../../utils/random';
+import { PICTURES, type Picture } from './pictures';
 
 export type ShapeLevel = 'easy' | 'medium' | 'hard';
 export type HelpLevel = 'dotted' | 'corners' | 'none';
 export type MirrorLine = 'vertical' | 'horizontal';
+export type Subject = 'shape' | 'picture';
 
 /** All layout in mm. The component draws with the same numbers. */
 export const LAYOUT = {
@@ -27,17 +29,21 @@ export interface DrawTheOtherHalfPuzzle {
   /** Every grid dot, both sides. */
   dots: Point[];
   mirror: [Point, Point];
-  /** The half that is drawn: a line from the mirror line and back to it. */
-  given: Point[];
-  /** The same line mirrored: what the child draws. */
-  answer: Point[];
+  /** The half that is drawn: for a shape, one line from the mirror line and back to it. */
+  given: Point[][];
+  /** The same lines mirrored: what the child draws. */
+  answer: Point[][];
+  /** Every corner of the answer off the mirror line, once each. */
+  corners: Point[];
+  /** Which picture, if it is one. */
+  picture?: string;
 }
 
 /**
  * Grid points as [out, along]: dots out from the mirror line (0 is on it),
  * and dots along it.
  */
-type Lattice = [number, number];
+export type Lattice = [number, number];
 
 const withSigns = ([a, b]: Lattice): Lattice[] => {
   const all: Lattice[] = [[a, b], [-a, b], [a, -b], [-a, -b]];
@@ -178,6 +184,36 @@ function tryPath(rng: SeededRandom, level: ShapeLevel, out: number, along: numbe
   return path;
 }
 
+const LEVEL_ORDER: ShapeLevel[] = ['easy', 'medium', 'hard'];
+
+/** How far out and how far down a picture reaches, in dots. */
+const extent = (picture: Picture): Lattice => {
+  const points = picture.lines.flat();
+  return [Math.max(...points.map(p => p[0])), Math.max(...points.map(p => p[1]))];
+};
+
+/**
+ * A picture of the level that fits, or the nearest level that has one
+ * (easier first). Null if none fits at all.
+ */
+function choosePicture(rng: SeededRandom, level: ShapeLevel, out: number, along: number, sideways: boolean): Picture | null {
+  const fits = PICTURES.filter(p => {
+    const [u, v] = extent(p);
+    return u <= out && v < along && (!sideways || p.sideways);
+  });
+  const at = LEVEL_ORDER.indexOf(level);
+  const nearest = [...LEVEL_ORDER].sort((a, b) => {
+    const da = LEVEL_ORDER.indexOf(a) - at;
+    const db = LEVEL_ORDER.indexOf(b) - at;
+    return Math.abs(da) - Math.abs(db) || da - db;
+  });
+  for (const l of nearest) {
+    const pool = fits.filter(p => p.level === l);
+    if (pool.length) return rng.pick(pool);
+  }
+  return null;
+}
+
 /** A few good tries, keeping the chunkiest; a box if every try fails. */
 function choosePath(rng: SeededRandom, level: ShapeLevel, out: number, along: number): Lattice[] {
   let best: Lattice[] | null = null;
@@ -201,6 +237,7 @@ export function generateDrawTheOtherHalf(
   seed: number,
   level: ShapeLevel,
   mirror: MirrorLine,
+  subject: Subject,
   cellMm: number,
 ): DrawTheOtherHalfPuzzle {
   const width = gridWidth * cellMm;
@@ -212,11 +249,29 @@ export function generateDrawTheOtherHalf(
   const vertical = mirror === 'vertical';
   const roomAcross = (vertical ? width : height) - 2 * padding;
   const roomAlong = (vertical ? height : width) - 2 * padding;
-  const spacing = Math.max(LAYOUT.spacing, roomAcross / (2 * maxOut), roomAlong / (maxAlong - 1));
-  const out = Math.max(1, Math.floor(roomAcross / (2 * spacing) + 1e-6));
-  const along = Math.max(2, Math.floor(roomAlong / spacing + 1e-6) + 1);
+  const fit = (spacing: number) => [
+    Math.max(1, Math.floor(roomAcross / (2 * spacing) + 1e-6)),
+    Math.max(2, Math.floor(roomAlong / spacing + 1e-6) + 1),
+  ];
+  let spacing = Math.max(LAYOUT.spacing, roomAcross / (2 * maxOut), roomAlong / (maxAlong - 1));
+  let [out, along] = fit(spacing);
 
-  const path = choosePath(rng, level, out, along);
+  let lines: Lattice[][];
+  // Pictures are picked from the most dots that fit, then spread the dots to fill the space
+  const [mostOut, mostAlong] = fit(LAYOUT.spacing);
+  const picture = subject === 'picture'
+    ? choosePicture(rng, level, Math.min(mostOut, maxOut), Math.min(mostAlong, maxAlong), !vertical)
+    : null;
+  if (picture) {
+    // A spare dot round the picture where there's room
+    const [pictureOut, pictureAlong] = extent(picture);
+    spacing = Math.max(LAYOUT.spacing, Math.min(roomAcross / (2 * (pictureOut + 1)), roomAlong / (pictureAlong + 2)));
+    [out, along] = fit(spacing);
+    const shift = Math.floor((along - 1 - pictureAlong) / 2);
+    lines = picture.lines.map(line => line.map(([u, v]): Lattice => [u, v + shift]));
+  } else {
+    lines = [choosePath(rng, level, out, along)];
+  }
 
   const centreAcross = (vertical ? width : height) / 2;
   const startAlong = ((vertical ? height : width) - (along - 1) * spacing) / 2;
@@ -243,8 +298,11 @@ export function generateDrawTheOtherHalf(
     spacing,
     dots,
     mirror: mirrorEnds,
-    given: path.map(p => toMm(p, -1)),
-    answer: path.map(p => toMm(p, 1)),
+    given: lines.map(line => line.map(p => toMm(p, -1))),
+    answer: lines.map(line => line.map(p => toMm(p, 1))),
+    corners: [...new Map(lines.flat().filter(([u]) => u > 0).map(p => [p.join(), p])).values()]
+      .map(p => toMm(p, 1)),
+    picture: picture?.id,
   };
 }
 
