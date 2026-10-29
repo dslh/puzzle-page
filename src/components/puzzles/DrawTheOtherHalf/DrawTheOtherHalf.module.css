@@ -1,0 +1,59 @@
+.container {
+  width: 100%;
+  height: 100%;
+  background: white;
+  box-sizing: border-box;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* All sizes are in mm: the SVG's units are millimetres. */
+
+.mirror {
+  stroke: #555;
+  stroke-width: 0.6;
+  stroke-dasharray: 3 2;
+}
+
+.gridDot {
+  fill: #9a9a9a;
+}
+
+/* The half that is there, drawn as a pencil line. */
+.given {
+  fill: none;
+  stroke: #333;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Small and close together, so they read as a line to trace, not the grid. */
+.trace {
+  fill: #8e8e8e;
+}
+
+/* Bigger and darker than the grid dots, so the hint shows. */
+.corner {
+  fill: #222;
+}
+
+@media print {
+  .container {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .given,
+  .mirror {
+    stroke: #000;
+  }
+
+  .corner {
+    fill: #000;
+  }
+}

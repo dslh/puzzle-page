@@ -29,7 +29,8 @@ export type PuzzleType = 'maze'
                        | 'dotmarker'
                        | 'missingnumbers'
                        | 'lifecycles'
-                       | 'whogoeswhere';
+                       | 'whogoeswhere'
+                       | 'drawtheotherhalf';
 
 export interface PlacedPuzzle {
   id: string;

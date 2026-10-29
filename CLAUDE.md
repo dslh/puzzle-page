@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 29 puzzle types - see **Existing Puzzles** below.
+There are currently 30 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -596,7 +596,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 |---|---|
 | Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Roads *(preset)* |
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
-| Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker |
+| Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker, Draw the Other Half |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
 | Science & Nature | Life Cycles |
 | Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess, Who Goes Where? |
@@ -634,8 +634,9 @@ The puzzles in registry order:
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 | Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
+| Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | shape (easy / medium / hard), help (dotted / corners / none), mirror down / across |
 
-Thirteen of these carry notes worth reading before editing them:
+Fourteen of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -755,6 +756,17 @@ Thirteen of these carry notes worth reading before editing them:
   level's mix of clue kinds, and are each needed. Clues are then ordered by
   how far each gets a child. Brute force over 3! or 4! arrangements; 4 houses
   on Medium is the slow case at about 5ms.
+
+- **Draw the Other Half** - mirror symmetry on a dot grid (GitHub #29; the
+  picture mode in the issue isn't built yet). The given half is a path from
+  the mirror line, out, and back to it, never touching itself, so the two
+  halves make one closed shape with one right answer. It is laid out as if
+  the mirror runs down, in [out, along] dots, and turned for Across. Paths
+  come from rejection sampling: the roomiest of three tries that reach far
+  enough and use the level's slants. That burns thousands of draws, so this
+  generator uses mulberry32, not the shared LCG, whose one 233280-long cycle
+  made nearby seeds repeat shapes. Dots are at least 10mm apart; past 6 out
+  and 13 along they spread instead of multiplying.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather
