@@ -146,8 +146,9 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
       description: (
         <>
           <p>
-            With ABC Letters: what to dot, such as their name. Up to 12 capital letters and
-            numbers. Lower case is turned into capitals, and anything else is left out.
+            With ABC Letters: what to dot, such as their name. Up to 12 letters and numbers,
+            drawn as you type them, so “Leo” has a capital L and small e and o. Anything else
+            is left out.
           </p>
           <p>
             Leave it empty for one letter, picked at random. “Show another” picks a new one.
@@ -164,9 +165,10 @@ const docs: PuzzleDoc<DotMarkerConfig> = {
       </p>
       <p>
         Letters grow to fill the puzzle too, wrapping onto more rows if that makes them bigger.
-        If they would come out too small for the dots, the dots shrink instead. Dot Letters
-        starts at 10 by 10, room for a short name in big dots. Give a longer name the whole
-        page.
+        Words stay whole if they can: the dots shrink first, down to Small. Small letters
+        need more room than capitals, so “Leo” fits a smaller puzzle than “Olivia”. Dot
+        Letters starts at 10 by 10, room for a short name in big dots. Give a longer name the
+        whole page.
       </p>
     </>
   ),

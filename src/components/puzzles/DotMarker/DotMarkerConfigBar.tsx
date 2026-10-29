@@ -43,10 +43,10 @@ function ShapeIcon({ shape }: { shape: DotShape }) {
 
 /** What was typed but won't be drawn: anything but letters and digits, and letters past the limit. */
 function skippedFrom(text: string): string {
-  const typed = text.toUpperCase().replace(/\s+/g, '');
-  const kept = lettersIn(text).replace(/ /g, '');
-  const unknown = [...new Set(typed.split('').filter(c => !kept.includes(c) && !/[A-Z0-9]/.test(c)))].join(' ');
-  const cut = typed.replace(/[^A-Z0-9]/g, '').slice(kept.length);
+  const typed = text.replace(/\s+/g, '');
+  const known = typed.replace(/[^A-Za-z0-9]/g, '');
+  const unknown = [...new Set(typed.split('').filter(c => !/[A-Za-z0-9]/.test(c)))].join(' ');
+  const cut = known.slice(lettersIn(text).replace(/ /g, '').length);
   return [unknown, cut && `"${cut}"`].filter(Boolean).join(', ');
 }
 
@@ -105,7 +105,7 @@ export default function DotMarkerConfigBar({ value, onChange }: ConfigBarProps) 
           />
           {skipped && (
             <span className={styles.hint}>
-              Capitals and digits only, up to {MAX_LETTERS} letters. Left out: {skipped}
+              Letters and digits only, up to {MAX_LETTERS}. Left out: {skipped}
             </span>
           )}
         </div>

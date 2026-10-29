@@ -171,10 +171,12 @@ interface Key {
  * shared out evenly, but the strokes are open lines, not one loop.
  */
 export function strokeDots(strokes: Point[][], spacing: number, min: number, clear: number): Point[] {
-  const pieces = withoutRedrawing(strokes);
+  // A stroke with no length is the dot of an i or j: a circle of its own
+  const spots = strokes.filter(s => pathLength(s) < 0.5).map(s => s[0]);
+  const pieces = withoutRedrawing(strokes.filter(s => pathLength(s) >= 0.5));
   const lengths = pieces.map(pathLength);
 
-  const raw: Key[] = [];
+  const raw: Key[] = spots.map(at => ({ at, sharpness: 2 * Math.PI, on: [] }));
   pieces.forEach((piece, p) => {
     const end = lengths[p];
     raw.push({ at: piece[0], sharpness: Math.PI, on: [{ piece: p, along: 0 }] });
@@ -256,14 +258,16 @@ export function strokeDots(strokes: Point[][], spacing: number, min: number, cle
 
   // Dots evenly spaced along each stretch, after any push away from its ends
   const place = () => [
-    ...kept.map((key, k) => ({ at: key.at, run: -1, key: k })),
+    ...kept.map((key, k) => ({ at: key.at, run: -1, key: k, ends: [] as number[] })),
     ...runs.flatMap((run, r) => {
       const gap = (run.length - run.push[0] - run.push[1]) / run.gaps;
-      return Array.from({ length: run.gaps - 1 }, (_, i) => ({
-        at: pointAlong(run.points, run.push[0] + gap * (i + 1)),
-        run: r,
-        key: -1,
-      }));
+      return Array.from({ length: run.gaps - 1 }, (_, i) => {
+        const along = run.push[0] + gap * (i + 1);
+        // Which end it is nearer along the stretch; a dot halfway is near both
+        const half = run.length / 2;
+        const ends = [along <= half + 1e-6 ? 0 : -1, along >= half - 1e-6 ? 1 : -1].filter(e => e >= 0);
+        return { at: pointAlong(run.points, along), run: r, key: -1, ends };
+      });
     }),
   ];
 
@@ -271,13 +275,12 @@ export function strokeDots(strokes: Point[][], spacing: number, min: number, cle
   // corner's own, means its stretch has a dot too many: take one off and space
   // the rest out again. Down to one dot, it slides away from the corner
   // instead, so the sides of A still get a dot each below the point.
-  const shared = (r: number, d: { run: number; key: number }) =>
-    d.key >= 0 ? (runs[r].ends.includes(d.key) ? d.key : -1) : d.run === r ? -1 : (runs[r].ends.find(e => e >= 0 && runs[d.run].ends.includes(e)) ?? -1);
-  const endAt = (r: number, key: number, at: Point) => {
-    const [a, b] = runs[r].ends;
-    if (a !== b) return a === key ? 0 : 1;
-    const { points } = runs[r];
-    return dist(at, points[0]) <= dist(at, points[points.length - 1]) ? 0 : 1;
+  // Only the corner at the dot's own end of its stretch counts: a bowl that
+  // comes back round to its start, as in d, isn't crowded, just folded
+  const crowds = (a: { run: number }, end: number, b: { run: number; key: number }) => {
+    const corner = runs[a.run].ends[end];
+    if (corner < 0) return false;
+    return b.key >= 0 ? b.key === corner : b.run !== a.run && runs[b.run].ends.includes(corner);
   };
   const nudge = spacing / 10;
   let dots = place();
@@ -286,10 +289,11 @@ export function strokeDots(strokes: Point[][], spacing: number, min: number, cle
     for (const a of dots) {
       if (a.run < 0 || runs[a.run].gaps <= 1) continue;
       for (const b of dots) {
-        const key = b === a || dist(a.at, b.at) >= clear ? -1 : shared(a.run, b);
-        if (key < 0) continue;
-        if (!crowded.has(a.run)) crowded.set(a.run, new Set());
-        crowded.get(a.run)!.add(endAt(a.run, key, a.at));
+        if (b === a || dist(a.at, b.at) >= clear) continue;
+        for (const end of a.ends.filter(e => crowds(a, e, b))) {
+          if (!crowded.has(a.run)) crowded.set(a.run, new Set());
+          crowded.get(a.run)!.add(end);
+        }
       }
     }
     if (crowded.size === 0) break;
@@ -321,6 +325,8 @@ interface Glyph {
   strokes: Point[][];
   minX: number;
   maxX: number;
+  /** How tall its ink is, in letter units: 100 for a capital, 50 for an x-height letter. */
+  inkHeight: number;
 }
 
 const GLYPHS = new Map<string, Glyph>();
@@ -330,16 +336,19 @@ function glyph(form: LetterForm): Glyph {
   if (!g) {
     const strokes = form.strokes.map(s => flatten(s.d));
     const xs = strokes.flat().map(p => p.x);
-    g = { form, strokes, minX: Math.min(...xs), maxX: Math.max(...xs) };
+    const ys = strokes.flat().map(p => p.y);
+    g = { form, strokes, minX: Math.min(...xs), maxX: Math.max(...xs), inkHeight: Math.max(...ys) - Math.min(...ys) };
     GLYPHS.set(form.char, g);
   }
   return g;
 }
 
-/** The letters and digits we can draw, with spaces between words, capped at MAX_LETTERS. */
+/**
+ * The letters and digits we can draw, in the case typed, with spaces between
+ * words, capped at MAX_LETTERS.
+ */
 export function lettersIn(text: string): string {
   const kept = text
-    .toUpperCase()
     .split('')
     .map(c => (getLetterForm(c) ? c : c.trim() === '' ? ' ' : ''))
     .join('')
@@ -374,18 +383,39 @@ function rowSize(row: Row, spacing: number): { units: number; gaps: number } {
   return { units, gaps };
 }
 
+/** How far above its stem the dot of an i or j should sit, in dot spacings, if there's room. */
+const TITTLE_GAP = 1.6;
+
+/**
+ * Lift the dot of an i or j clear of its stem, as far as the top of the row
+ * allows. At the stroke data's own height it sits one spacing up, just where
+ * the next dot down the stem would be, so the i reads as an l.
+ */
+function liftDots(strokes: Point[][], gap: number, rowTop: number) {
+  for (const s of strokes) {
+    if (pathLength(s) >= 0.5) continue;
+    const stemTop = Math.min(...strokes.filter(o => o !== s).flat().map(p => p.y));
+    const y = Math.max(rowTop, Math.min(s[0].y, stemTop - gap));
+    s.forEach(p => (p.y = y));
+  }
+}
+
 /** Space between words, in dot spacings. Letters and rows are one spacing apart. */
 const WORD_GAP = 2;
-/** Letters shorter than this many dot spacings stop reading as letters, so the dots shrink. */
+/**
+ * Capitals shorter than this many dot spacings stop reading as letters, so
+ * the dots shrink. Small letters like o and e make do with fewer.
+ */
 const MIN_HEIGHT = 3.5;
+const MIN_SMALL_HEIGHT = 2.2;
 
 /**
  * Every way of cutting the text into rows, keeping the one with the biggest
- * letters. A row breaks between words where it can; inside a word only if
- * that makes the letters a good deal bigger. Of rows giving the same size,
- * the most even win.
+ * letters. With `breakWords`, a row may break inside a word, if that makes
+ * the letters a good deal bigger. Of rows giving the same size, the most even
+ * win.
  */
-function layOut(tokens: Row, width: number, height: number, rowUnits: number, spacing: number, room: number) {
+function layOut(tokens: Row, width: number, height: number, rowUnits: number, spacing: number, room: number, breakWords: boolean) {
   let best = { rows: [tokens], scale: 0, score: -Infinity, widest: Infinity };
   const n = tokens.length;
   const tryCuts = (cuts: number[]) => {
@@ -397,6 +427,7 @@ function layOut(tokens: Row, width: number, height: number, rowUnits: number, sp
     const down = (height - room - (rows.length - 1) * spacing) / (rows.length * rowUnits);
     const scale = Math.min(across, down);
     const midWord = cuts.filter(c => tokens[c - 1] !== null && tokens[c] !== null).length;
+    if (midWord > 0 && !breakWords) return;
     const score = scale * 0.75 ** midWord;
     const widest = Math.max(...sizes.map(({ units, gaps }) => units * scale + gaps));
     const better = score > best.score * (1 + 1e-6) || (score > best.score * (1 - 1e-6) && widest < best.widest - 1e-6);
@@ -432,16 +463,35 @@ export function generateLetterDots(
   const tokens: Row = chars.split('').map(c => (c === ' ' ? null : glyph(getLetterForm(c)!)));
 
   const ys = tokens.flatMap(t => t?.strokes.flat().map(p => p.y) ?? []);
-  const [top, bottom] = [Math.min(0, ...ys), Math.max(100, ...ys)];
+  // Rows fit the ink, so "sam" isn't left room for capitals it doesn't have
+  const [top, bottom] = [Math.min(...ys), Math.max(...ys)];
   const rowUnits = bottom - top;
 
-  let spacing = diameter * SPACING;
-  let layout = layOut(tokens, width, height, rowUnits, spacing, 2 * (MARGIN + diameter / 2));
-  while (100 * layout.scale < MIN_HEIGHT * spacing && diameter > smallest) {
-    diameter = Math.max(smallest, diameter - 1);
-    spacing = diameter * SPACING;
-    layout = layOut(tokens, width, height, rowUnits, spacing, 2 * (MARGIN + diameter / 2));
+  // Judged on the shortest letter, so "Leo" isn't sized for its L alone
+  const shortest = Math.min(...tokens.map(t => t?.inkHeight ?? Infinity));
+  const needed = shortest >= 90 ? MIN_HEIGHT : MIN_SMALL_HEIGHT;
+  const tryAt = (d: number, breakWords: boolean) =>
+    layOut(tokens, width, height, rowUnits, d * SPACING, 2 * (MARGIN + d / 2), breakWords);
+  const readable = (d: number, l: { scale: number }) => shortest * l.scale >= needed * d * SPACING;
+
+  // Words kept whole, shrinking the dots as far as Small if need be; then
+  // broken words at the chosen size and down; then the best that fits
+  const sizes = Array.from({ length: Math.max(1, Math.floor(diameter - smallest) + 1) }, (_, i) => Math.max(smallest, diameter - i));
+  let found: { d: number; layout: ReturnType<typeof layOut> } | undefined;
+  for (const breakWords of [false, true]) {
+    for (const d of sizes) {
+      const l = tryAt(d, breakWords);
+      if (readable(d, l)) {
+        found = { d, layout: l };
+        break;
+      }
+    }
+    if (found) break;
   }
+  if (!found) found = { d: smallest, layout: tryAt(smallest, true) };
+  diameter = found.d;
+  const layout = found.layout;
+  const spacing = diameter * SPACING;
 
   const scale = Math.max(0.05, layout.scale);
   const lines: Point[][] = [];
@@ -456,6 +506,7 @@ export function generateLetterDots(
       if (i > 0) x += spacing * (row[i - 1] === null ? WORD_GAP : 1);
       const ox = x - t.minX * scale;
       const strokes = t.strokes.map(s => s.map(p => ({ x: ox + p.x * scale, y: oy + p.y * scale })));
+      liftDots(strokes, spacing * TITTLE_GAP, oy + top * scale);
       lines.push(...strokes);
       dots.push(...strokeDots(strokes, spacing, diameter * MIN_SPACING, diameter * CLEAR_SPACING));
       x += (t.maxX - t.minX) * scale;
