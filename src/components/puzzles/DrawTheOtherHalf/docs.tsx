@@ -68,8 +68,8 @@ const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
           label: 'Picture',
           description: (
             <p>
-              A simple picture, such as a house, rocket, owl or crab. There are 35, from 8 to
-              16 a level. Across uses only the ones that still look right on their side.
+              A simple picture, such as a house, rocket, owl or crab. There are 36, from 8 to
+              17 a level. Across uses only the ones that still look right on their side.
             </p>
           ),
           example: { config: { subject: 'picture' } },

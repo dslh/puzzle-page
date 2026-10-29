@@ -624,7 +624,7 @@ The puzzles in registry order:
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
-| Letter Formation | `letterformation` | 6×3 | both (min height 3) | capitals / lower case / numbers, character, stroke guides, trace count per line |
+| Letter Formation | `letterformation` | 6×3 | both (min height 3) | capitals / lower case / pairs (Aa) / numbers, character, stroke guides, trace count per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
@@ -636,7 +636,7 @@ The puzzles in registry order:
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 | Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
-| Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | draw a shape / picture (random or one of 35), level (easy / medium / hard), help (dotted / corners / none), mirror down / across |
+| Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | draw a shape / picture (random or one of 36), level (easy / medium / hard), help (dotted / corners / none), mirror down / across |
 
 Fifteen of these carry notes worth reading before editing them:
 
@@ -661,6 +661,9 @@ Fifteen of these carry notes worth reading before editing them:
   with unnumbered `turns` arrows. The model letter is cropped to each form's
   `top`/`bottom`; practice lines keep the whole box. `set: 'letters'` means
   capitals: lower case came later, and saved pages keep the old value.
+  `'pairs'` draws a capital and its lower case side by side on the
+  lower-case lines (capitals reach the ascender line); `letter` holds the
+  capital, and the pair shares one crop so both sit on the baseline.
 - **Which Is the Same?** - one picture in a box, a row of choices, exactly
   one the same. Easy and medium draw on Which Doesn't Belong?'s `CATEGORIES`
   (other families / the same category); hard on the hand-kept `LOOKALIKES`
@@ -745,17 +748,21 @@ Fifteen of these carry notes worth reading before editing them:
   The picture goes at the sampled spot furthest from every edge dot.
   The spacing helpers both modes share live in `spacing.ts`.
 
-  ABC Letters (`letters.ts`, GitHub #28) dots Letter Formation's capitals and
-  digits, its stroke paths flattened to points. Strokes are open lines, so a
+  ABC Letters (`letters.ts`, GitHub #28) dots Letter Formation's letters, in
+  the case typed, and digits, its stroke paths flattened to points. Strokes are open lines, so a
   part already drawn - B's middle bar, 9 back down its own circle - is cut
   out first, then every end, corner, crossing and join (an end landing on a
   line, like E's middle bar) is a key point, merged where strokes meet. The
   stretches between are shared out as for shapes, except that a stretch down
   to one dot slides it away from a sharp corner rather than losing it, or A,
-  M and W lose their sides. Text is laid out by trying every way of cutting
-  it into rows for the biggest letters (breaking inside a word costs a
-  quarter, ties go to even rows); letters under 3.5 spacings tall shrink the
-  dots, down to Small. Lower case isn't offered yet.
+  M and W lose their sides; and only crowding at a dot's own end of its
+  stretch counts, so a bowl folding back to its start (d, g) isn't thinned.
+  The dot of an i or j is a circle of its own, lifted clear of its stem when
+  the row has room. Text is laid out by trying every way of cutting it into
+  rows for the biggest letters, ties going to even rows. Whole words come
+  first, shrinking the dots down to Small until the shortest letter is tall
+  enough (3.5 spacings for capitals, 2.2 for x-height letters); only then
+  may a row break inside a word.
 
 - **Life Cycles** - stages are emoji where Noto has a clear one, and our own
   drawings (`art.tsx`) where it doesn't: frogspawn to frog, butterfly eggs and
