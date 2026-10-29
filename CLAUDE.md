@@ -623,7 +623,7 @@ The puzzles in registry order:
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
 | Colour by Sight Word | `coloursightword` | 6×7 | both | colour count, case, custom words |
-| Letter Formation | `letterformation` | 6×3 | both (min height 3) | letters / numbers, character, stroke guides, trace count per line |
+| Letter Formation | `letterformation` | 6×3 | both (min height 3) | capitals / lower case / numbers, character, stroke guides, trace count per line |
 | Sums | `sums` | 4×3 | both | + / − / both |
 | Take Away | `takeaway` | 6×4 | both (min width 4) | blank answer / taken / mixed, worked example |
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
@@ -637,7 +637,7 @@ The puzzles in registry order:
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
 | Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | draw a shape / picture, level (easy / medium / hard), help (dotted / corners / none), mirror down / across |
 
-Fourteen of these carry notes worth reading before editing them:
+Fifteen of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -652,6 +652,14 @@ Fourteen of these carry notes worth reading before editing them:
   a new ring shape is just an outline. Curvy walls are
   a drawing option only (`curves.ts`): the same walls, joined into runs and
   drawn as corner-cutting curves, on any grid shape.
+- **Letter Formation** - every letterform in `letterForms.ts` is drawn by
+  hand (`docs/letter-formation-research.md` says why). Capitals and digits
+  sit on a 0..100 box and split at every change of direction into numbered
+  strokes. Lower case sits on 0..150 (x-height 50, descender line 150), is
+  one stroke until the pencil really lifts, and marks turns without a lift
+  with unnumbered `turns` arrows. The model letter is cropped to each form's
+  `top`/`bottom`; practice lines keep the whole box. `set: 'letters'` means
+  capitals: lower case came later, and saved pages keep the old value.
 - **Which Is the Same?** - one picture in a box, a row of choices, exactly
   one the same. Easy and medium draw on Which Doesn't Belong?'s `CATEGORIES`
   (other families / the same category); hard on the hand-kept `LOOKALIKES`

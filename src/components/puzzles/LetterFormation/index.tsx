@@ -1,15 +1,18 @@
 import { useMemo } from 'react';
-import { LETTER_FORMS, NUMBER_FORMS, getLetterForm, type LetterForm } from './letterForms';
+import { LETTER_FORMS, LOWER_FORMS, NUMBER_FORMS, getLetterForm, type LetterForm } from './letterForms';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './LetterFormation.module.css';
 import { SeededRandom } from '../../../utils/random';
 
 /** Empty letter means "let the seed pick", so rerolling gives a new one. */
 export interface LetterFormationConfig {
-  /** A capital or a digit. */
+  /** A capital, a lower-case letter or a digit. */
   letter: string;
-  /** Which set the config bar offers, and the random pick draws from. */
-  set: 'letters' | 'numbers';
+  /**
+   * Which set the config bar offers, and the random pick draws from.
+   * 'letters' is capitals: it predates lower case, and saved pages keep it.
+   */
+  set: 'letters' | 'lowercase' | 'numbers';
   /** Numbered start badges and direction arrows on the model letter. */
   guides: boolean;
   /** Grey letters to write over at the start of each practice line. */
@@ -41,10 +44,33 @@ const ROW_TARGET_PX = 76;
 const ROW_MIN_PX = 56;
 const ROW_MAX_PX = 88;
 
+/**
+ * Lower case needs room under the baseline, so its rows are taller and the
+ * letter takes more of them: the x-height lands near 8mm, the ascenders 16mm.
+ */
+const LOWER_ROW_TARGET_PX = 92;
+const LOWER_ROW_MIN_PX = 68;
+const LOWER_ROW_MAX_PX = 104;
+
+/** The lower-case box runs down to the descender line. See letterForms.ts. */
+const LOWER_DEPTH = 150;
+
+/**
+ * A short letter like "a" is cropped to its x-height for the model, which
+ * would draw it twice as big as a capital. Capped, so it stays in proportion
+ * with its badges.
+ */
+const MODEL_MAX_ZOOM = 1.4;
+
+const POOLS = { letters: LETTER_FORMS, lowercase: LOWER_FORMS, numbers: NUMBER_FORMS };
+
 interface GlyphProps {
   form: LetterForm;
   /** Cap height in px; the glyph scales from its 0..100 box to this. */
   height: number;
+  /** The slice of the box to draw, top to bottom. */
+  top?: number;
+  bottom?: number;
   strokeClass: string;
   showGuides?: boolean;
 }
@@ -70,19 +96,19 @@ function Arrow({ x, y, dx, dy, scale }: { x: number; y: number; dx: number; dy: 
   );
 }
 
-function Glyph({ form, height, strokeClass, showGuides = false }: GlyphProps) {
+function Glyph({ form, height, top = 0, bottom = 100, strokeClass, showGuides = false }: GlyphProps) {
   const scale = height / 100;
   const padL = showGuides ? BADGE_PAD_LEFT : 0;
   const padT = showGuides ? BADGE_PAD_TOP : 0;
   const boxW = form.advance + padL;
-  const boxH = 100 + padT;
+  const boxH = bottom - top + padT;
 
   return (
     <svg
       className={styles.glyph}
       width={boxW * scale}
       height={boxH * scale}
-      viewBox={`${-padL} ${-padT} ${boxW} ${boxH}`}
+      viewBox={`${-padL} ${top - padT} ${boxW} ${boxH}`}
     >
       {form.strokes.map((stroke, i) => (
         <path
@@ -97,12 +123,23 @@ function Glyph({ form, height, strokeClass, showGuides = false }: GlyphProps) {
       ))}
 
       {showGuides &&
+        form.strokes.flatMap((stroke, i) =>
+          (stroke.turns ?? []).map((turn, j) => (
+            <Arrow key={`t${i}-${j}`} x={turn.at.x} y={turn.at.y} dx={turn.dir.x} dy={turn.dir.y} scale={scale} />
+          ))
+        )}
+
+      {showGuides &&
         form.strokes.map((stroke, i) => {
           const bx = stroke.start.x + (stroke.labelOffset?.x ?? 0);
           const by = stroke.start.y + (stroke.labelOffset?.y ?? 0);
+          // A dot has nowhere to go, so no arrow
+          const moves = stroke.dir.x !== 0 || stroke.dir.y !== 0;
           return (
             <g key={`g${i}`}>
-              <Arrow x={stroke.start.x} y={stroke.start.y} dx={stroke.dir.x} dy={stroke.dir.y} scale={scale} />
+              {moves && (
+                <Arrow x={stroke.start.x} y={stroke.start.y} dx={stroke.dir.x} dy={stroke.dir.y} scale={scale} />
+              )}
               <circle cx={bx} cy={by} r={8} className={styles.badge} strokeWidth={1.8} />
               <text x={bx} y={by + 3.7} textAnchor="middle" fontSize={10.5} className={styles.badgeText}>
                 {i + 1}
@@ -120,8 +157,9 @@ export default function LetterFormation({
   seed,
   config,
 }: PuzzleProps<LetterFormationConfig>) {
-  const requested = (config?.letter ?? '').toUpperCase();
+  const requested = config?.letter ?? '';
   const set = config?.set ?? 'letters';
+  const lower = set === 'lowercase';
   const showGuides = config?.guides ?? true;
   const traceCount = config?.traceCount ?? 3;
 
@@ -130,7 +168,7 @@ export default function LetterFormation({
   const form = useMemo(() => {
     const chosen = getLetterForm(requested);
     if (chosen) return chosen;
-    const pool = set === 'numbers' ? NUMBER_FORMS : LETTER_FORMS;
+    const pool = POOLS[set];
     return pool[new SeededRandom(seed).nextInt(pool.length)];
   }, [requested, set, seed]);
 
@@ -141,13 +179,22 @@ export default function LetterFormation({
   // glyph is sized from the band rather than from the band minus badge padding,
   // so toggling guides off doesn't silently make the model bigger.
   const modelHeight = Math.min(availableHeight * 0.42, 112);
-  const modelGlyphHeight = modelHeight * 0.8;
+  const modelBand = modelHeight * 0.8;
+  const modelTop = form.top ?? 0;
+  const modelBottom = form.bottom ?? 100;
+  const modelGlyphHeight = Math.min((modelBand * 100) / (modelBottom - modelTop), modelBand * MODEL_MAX_ZOOM);
   const rowsHeight = availableHeight - modelHeight - 6;
-  const rowCount = Math.max(1, Math.floor(rowsHeight / ROW_TARGET_PX));
-  const rowHeight = Math.min(ROW_MAX_PX, Math.max(ROW_MIN_PX, rowsHeight / rowCount));
+  const rowTarget = lower ? LOWER_ROW_TARGET_PX : ROW_TARGET_PX;
+  const rowCount = Math.max(1, Math.floor(rowsHeight / rowTarget));
+  const rowHeight = Math.min(
+    lower ? LOWER_ROW_MAX_PX : ROW_MAX_PX,
+    Math.max(lower ? LOWER_ROW_MIN_PX : ROW_MIN_PX, rowsHeight / rowCount)
+  );
 
-  // Capitals and digits only, so no descender zone: cap line, dashed midline, baseline.
-  const capHeight = rowHeight * 0.64;
+  // Cap line (the ascender line for lower case), dashed midline (the
+  // x-height), baseline, and for lower case a descender line under it.
+  const capHeight = rowHeight * (lower ? 0.6 : 0.64);
+  const lineDepth = lower ? (capHeight * LOWER_DEPTH) / 100 : capHeight;
   const glyphWidth = form.advance * (capHeight / 100);
   const gap = capHeight * 0.45;
   const slots = Math.max(1, Math.floor((availableWidth - GLYPH_INSET_PX) / (glyphWidth + gap)));
@@ -159,6 +206,8 @@ export default function LetterFormation({
         <Glyph
           form={form}
           height={modelGlyphHeight}
+          top={modelTop}
+          bottom={modelBottom}
           strokeClass={styles.modelStroke}
           showGuides={showGuides}
         />
@@ -170,19 +219,28 @@ export default function LetterFormation({
             <svg
               className={styles.rule}
               width={availableWidth - 8}
-              height={capHeight}
-              viewBox={`0 0 ${availableWidth - 8} ${capHeight}`}
+              height={lineDepth}
+              viewBox={`0 0 ${availableWidth - 8} ${lineDepth}`}
             >
               <line x1={0} y1={0.5} x2={availableWidth - 8} y2={0.5} className={styles.capRule} />
               <line x1={0} y1={capHeight / 2} x2={availableWidth - 8} y2={capHeight / 2} className={styles.midRule} />
               <line x1={0} y1={capHeight - 0.5} x2={availableWidth - 8} y2={capHeight - 0.5} className={styles.baseRule} />
+              {lower && (
+                <line x1={0} y1={lineDepth - 0.5} x2={availableWidth - 8} y2={lineDepth - 0.5} className={styles.capRule} />
+              )}
             </svg>
             <div
               className={styles.rowGlyphs}
-              style={{ gap: `${gap}px`, height: `${capHeight}px`, paddingLeft: `${GLYPH_INSET_PX}px` }}
+              style={{ gap: `${gap}px`, height: `${lineDepth}px`, paddingLeft: `${GLYPH_INSET_PX}px` }}
             >
               {Array.from({ length: traced }, (_, i) => (
-                <Glyph key={i} form={form} height={capHeight} strokeClass={styles.traceStroke} />
+                <Glyph
+                  key={i}
+                  form={form}
+                  height={capHeight}
+                  bottom={lower ? LOWER_DEPTH : 100}
+                  strokeClass={styles.traceStroke}
+                />
               ))}
             </div>
           </div>

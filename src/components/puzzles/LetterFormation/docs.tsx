@@ -4,8 +4,8 @@ import type { LetterFormationConfig } from './index';
 const docs: PuzzleDoc<LetterFormationConfig> = {
   summary: (
     <>
-      One capital letter or number, with numbered dots and arrows showing where each line
-      starts and which way it goes. Then write over grey copies and fill the line.
+      One letter or number, with numbered dots and arrows showing where each line starts and
+      which way it goes. Then write over grey copies and fill the line.
     </>
   ),
 
@@ -24,10 +24,16 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
         letters to trace, then space to write on their own.
       </p>
       <p>
-        Letters with a straight-down line start with it (B, D, E, F, H, K, L, P, R, T).
-        Lines that go up, like the second line of V, are drawn going up. If school teaches
-        a letter another way, go with school.
+        Capitals with a straight-down line start with it (B, D, E, F, H, K, L, P, R, T).
+        Lines that go up, like the second line of V, are drawn going up.
       </p>
+      <p>
+        Lower-case letters are one movement: the pencil only lifts to cross f and t, dot i
+        and j, and start the second line of k, x and y. Where it turns without lifting, as
+        when it goes back up the line in n, a small arrow with no number shows the way.
+        Round letters (a, c, d, e, g, o, q, s) start at the top right and go back round.
+      </p>
+      <p>If school teaches a letter another way, go with school.</p>
     </>
   ),
 
@@ -39,7 +45,7 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
   skills: [
     'Where to start a letter',
     'Which way to move the pencil',
-    'Capitals and numbers 0–9',
+    'Capitals, lower case and numbers 0–9',
     'Pencil control',
   ],
   whyItMatters: (
@@ -52,9 +58,19 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
   settings: {
     set: {
       label: 'Write',
-      description: <p>Letters or numbers. Switching resets the choice to ? (random).</p>,
+      description: <p>Capitals, lower case or numbers. Switching resets the choice to ? (random).</p>,
       options: [
         { label: 'ABC', description: <p>Capital letters. Default.</p> },
+        {
+          label: 'abc',
+          description: (
+            <p>
+              Lower-case letters, plain print with no joining flicks. The lines add one under
+              the baseline for the tails of g, j, p, q and y.
+            </p>
+          ),
+          example: { config: { set: 'lowercase', letter: 'a' } },
+        },
         {
           label: '123',
           description: <p>The numbers 0–9.</p>,
@@ -75,6 +91,11 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
           label: 'S',
           description: <p>A hard one: one stroke that changes direction twice.</p>,
           example: { config: { set: 'letters', letter: 'S' } },
+        },
+        {
+          label: 'n',
+          description: <p>Down, back up the same line, then over. The small arrow shows the way back up.</p>,
+          example: { config: { set: 'lowercase', letter: 'n' } },
         },
       ],
     },
@@ -106,7 +127,8 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
   },
   size: (
     <p>
-      Letters on the practice lines stay about 14 mm tall. The default 6×3 gives one line;
+      Capitals on the practice lines stay about 14 mm tall; lower case gets taller lines, with
+      the small letters about 8 mm. The default 6×3 gives one line;
       each extra row adds about one more (6×5 gives three). Width adds space to write after
       the grey letters.
     </p>
@@ -127,6 +149,14 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
       meaning: <>Very common, and the letter may look fine. Put their pencil on dot 1 and go together.</>,
     },
     {
+      sign: 'Lifts the pencil in the middle of n, a or d',
+      meaning: <>Common, and it looks fine now, but it makes joining harder later. Follow the small arrows together.</>,
+    },
+    {
+      sign: 'Mixes up b and d',
+      meaning: <>Normal until about seven. Say “b starts with a tall line, d starts round like c”.</>,
+    },
+    {
       sign: 'Letters or numbers backwards (J, S, 3, 7)',
       meaning: <>Normal until about seven. Point to which way the arrow goes; don’t worry.</>,
     },
@@ -142,9 +172,10 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
 
   atSchool: (
     <>
-      Year 1 expects capital letters and the numbers 0–9 to be formed correctly. Lower case
-      comes first at school, taught in families of similar letters; this puzzle only does
-      capitals.
+      Year 1 expects lower-case letters formed “starting and finishing in the right place”,
+      plus capitals and the numbers 0–9. Schools often teach lower case in families of
+      letters made the same way, such as c a d g o q. Their school may use a
+      different style, for example with joining flicks.
     </>
   ),
 };
