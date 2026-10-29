@@ -48,6 +48,11 @@
   align-items: flex-start;
 }
 
+/* One letter, or a pair (Aa) traced together */
+.unit {
+  display: flex;
+}
+
 /* The model letter is mid-grey so it can be written over too, while staying
    dark enough to read the shape from across a table. */
 .modelStroke {

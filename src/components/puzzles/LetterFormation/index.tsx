@@ -6,13 +6,14 @@ import { SeededRandom } from '../../../utils/random';
 
 /** Empty letter means "let the seed pick", so rerolling gives a new one. */
 export interface LetterFormationConfig {
-  /** A capital, a lower-case letter or a digit. */
+  /** A capital, a lower-case letter or a digit. For pairs, the capital. */
   letter: string;
   /**
    * Which set the config bar offers, and the random pick draws from.
    * 'letters' is capitals: it predates lower case, and saved pages keep it.
+   * 'pairs' is each capital with its lower case beside it: Aa.
    */
-  set: 'letters' | 'lowercase' | 'numbers';
+  set: 'letters' | 'lowercase' | 'pairs' | 'numbers';
   /** Numbered start badges and direction arrows on the model letter. */
   guides: boolean;
   /** Grey letters to write over at the start of each practice line. */
@@ -62,7 +63,10 @@ const LOWER_DEPTH = 150;
  */
 const MODEL_MAX_ZOOM = 1.4;
 
-const POOLS = { letters: LETTER_FORMS, lowercase: LOWER_FORMS, numbers: NUMBER_FORMS };
+/** Space inside a pair, Aa, against the cap height; pairs are spaced as letters are. */
+const PAIR_GAP = 0.12;
+
+const POOLS = { letters: LETTER_FORMS, lowercase: LOWER_FORMS, pairs: LETTER_FORMS, numbers: NUMBER_FORMS };
 
 interface GlyphProps {
   form: LetterForm;
@@ -159,17 +163,19 @@ export default function LetterFormation({
 }: PuzzleProps<LetterFormationConfig>) {
   const requested = config?.letter ?? '';
   const set = config?.set ?? 'letters';
-  const lower = set === 'lowercase';
+  // Pairs use the lower-case lines too: the capitals reach the ascender line
+  const lower = set === 'lowercase' || set === 'pairs';
   const showGuides = config?.guides ?? true;
   const traceCount = config?.traceCount ?? 3;
 
   // Only the random pick consumes the seed, so rerolling a chosen letter is a
   // no-op rather than a surprise.
-  const form = useMemo(() => {
-    const chosen = getLetterForm(requested);
-    if (chosen) return chosen;
+  const forms = useMemo(() => {
     const pool = POOLS[set];
-    return pool[new SeededRandom(seed).nextInt(pool.length)];
+    const form =
+      getLetterForm(set === 'pairs' ? requested.toUpperCase() : requested) ??
+      pool[new SeededRandom(seed).nextInt(pool.length)];
+    return set === 'pairs' ? [form, getLetterForm(form.char.toLowerCase())!] : [form];
   }, [requested, set, seed]);
 
   const availableWidth = gridWidth * GRID_CELL_PX;
@@ -180,9 +186,17 @@ export default function LetterFormation({
   // so toggling guides off doesn't silently make the model bigger.
   const modelHeight = Math.min(availableHeight * 0.42, 112);
   const modelBand = modelHeight * 0.8;
-  const modelTop = form.top ?? 0;
-  const modelBottom = form.bottom ?? 100;
-  const modelGlyphHeight = Math.min((modelBand * 100) / (modelBottom - modelTop), modelBand * MODEL_MAX_ZOOM);
+  // A pair shares one crop, so the two letters sit on the same baseline
+  const modelTop = Math.min(...forms.map(f => f.top ?? 0));
+  const modelBottom = Math.max(...forms.map(f => f.bottom ?? 100));
+  // ...and may have to shrink to fit across a narrow puzzle
+  const modelUnits = forms.reduce((sum, f) => sum + f.advance + (showGuides ? BADGE_PAD_LEFT : 0), 0);
+  const modelGap = (forms.length - 1) * PAIR_GAP * 100;
+  const modelGlyphHeight = Math.min(
+    (modelBand * 100) / (modelBottom - modelTop),
+    modelBand * MODEL_MAX_ZOOM,
+    ((availableWidth - 16) * 100) / (modelUnits + modelGap)
+  );
   const rowsHeight = availableHeight - modelHeight - 6;
   const rowTarget = lower ? LOWER_ROW_TARGET_PX : ROW_TARGET_PX;
   const rowCount = Math.max(1, Math.floor(rowsHeight / rowTarget));
@@ -195,22 +209,30 @@ export default function LetterFormation({
   // x-height), baseline, and for lower case a descender line under it.
   const capHeight = rowHeight * (lower ? 0.6 : 0.64);
   const lineDepth = lower ? (capHeight * LOWER_DEPTH) / 100 : capHeight;
-  const glyphWidth = form.advance * (capHeight / 100);
+  const pairGap = capHeight * PAIR_GAP;
+  const unitWidth =
+    forms.reduce((sum, f) => sum + f.advance, 0) * (capHeight / 100) + (forms.length - 1) * pairGap;
   const gap = capHeight * 0.45;
-  const slots = Math.max(1, Math.floor((availableWidth - GLYPH_INSET_PX) / (glyphWidth + gap)));
+  const slots = Math.max(1, Math.floor((availableWidth - GLYPH_INSET_PX) / (unitWidth + gap)));
   const traced = Math.min(traceCount, slots);
 
   return (
     <div className={styles.container}>
-      <div className={styles.model} style={{ height: `${modelHeight}px` }}>
-        <Glyph
-          form={form}
-          height={modelGlyphHeight}
-          top={modelTop}
-          bottom={modelBottom}
-          strokeClass={styles.modelStroke}
-          showGuides={showGuides}
-        />
+      <div
+        className={styles.model}
+        style={{ height: `${modelHeight}px`, gap: `${modelGlyphHeight * PAIR_GAP}px` }}
+      >
+        {forms.map(form => (
+          <Glyph
+            key={form.char}
+            form={form}
+            height={modelGlyphHeight}
+            top={modelTop}
+            bottom={modelBottom}
+            strokeClass={styles.modelStroke}
+            showGuides={showGuides}
+          />
+        ))}
       </div>
 
       <div className={styles.rows}>
@@ -234,13 +256,17 @@ export default function LetterFormation({
               style={{ gap: `${gap}px`, height: `${lineDepth}px`, paddingLeft: `${GLYPH_INSET_PX}px` }}
             >
               {Array.from({ length: traced }, (_, i) => (
-                <Glyph
-                  key={i}
-                  form={form}
-                  height={capHeight}
-                  bottom={lower ? LOWER_DEPTH : 100}
-                  strokeClass={styles.traceStroke}
-                />
+                <div key={i} className={styles.unit} style={{ gap: `${pairGap}px` }}>
+                  {forms.map(form => (
+                    <Glyph
+                      key={form.char}
+                      form={form}
+                      height={capHeight}
+                      bottom={lower ? LOWER_DEPTH : 100}
+                      strokeClass={styles.traceStroke}
+                    />
+                  ))}
+                </div>
               ))}
             </div>
           </div>

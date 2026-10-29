@@ -58,7 +58,9 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
   settings: {
     set: {
       label: 'Write',
-      description: <p>Capitals, lower case or numbers. Switching resets the choice to ? (random).</p>,
+      description: (
+        <p>Capitals, lower case, both together or numbers. Switching resets the choice to ? (random).</p>
+      ),
       options: [
         { label: 'ABC', description: <p>Capital letters. Default.</p> },
         {
@@ -70,6 +72,18 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
             </p>
           ),
           example: { config: { set: 'lowercase', letter: 'a' } },
+        },
+        {
+          label: 'Aa',
+          description: (
+            <p>
+              Each capital with its lower case beside it, traced and written as a pair. It
+              links a capital they know to its lower case, and shows the capital reaching the
+              top line while most small letters stop at the dashed one. Pairs that look
+              different, like Aa, Bb, Dd, Ee, Gg, Qq and Rr, teach the most.
+            </p>
+          ),
+          example: { config: { set: 'pairs', letter: 'G' } },
         },
         {
           label: '123',
@@ -103,7 +117,7 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
       label: 'Trace',
       description: (
         <p>
-          How many grey letters start each line: 1, 2 or 3 (default). Fewer means more
+          How many grey letters (or pairs) start each line: 1, 2 or 3 (default). Fewer means more
           writing on their own. A narrow puzzle may fit fewer wide letters, like W.
         </p>
       ),
@@ -151,6 +165,10 @@ const docs: PuzzleDoc<LetterFormationConfig> = {
     {
       sign: 'Lifts the pencil in the middle of n, a or d',
       meaning: <>Common, and it looks fine now, but it makes joining harder later. Follow the small arrows together.</>,
+    },
+    {
+      sign: 'Writes the small letter as big as the capital',
+      meaning: <>Common when they’re side by side. Point to the dashed line: “small a stops here”.</>,
     },
     {
       sign: 'Mixes up b and d',

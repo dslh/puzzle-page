@@ -2,7 +2,7 @@ import type { LetterFormationConfig } from './index';
 import { LETTER_FORMS, LOWER_FORMS, NUMBER_FORMS } from './letterForms';
 import styles from './LetterFormationConfigBar.module.css';
 
-const SET_LABELS = { letters: 'ABC', lowercase: 'abc', numbers: '123' };
+const SET_LABELS = { letters: 'ABC', lowercase: 'abc', pairs: 'Aa', numbers: '123' };
 
 interface ConfigBarProps {
   value: LetterFormationConfig;
@@ -12,15 +12,15 @@ interface ConfigBarProps {
 export default function LetterFormationConfigBar({ value, onChange }: ConfigBarProps) {
   const { letter, guides, traceCount } = value;
   const set = value.set ?? 'letters';
-  const forms = { letters: LETTER_FORMS, lowercase: LOWER_FORMS, numbers: NUMBER_FORMS }[set];
-  const noun = set === 'numbers' ? 'number' : 'letter';
+  const forms = { letters: LETTER_FORMS, lowercase: LOWER_FORMS, pairs: LETTER_FORMS, numbers: NUMBER_FORMS }[set];
+  const noun = { letters: 'letter', lowercase: 'letter', pairs: 'pair', numbers: 'number' }[set];
 
   return (
     <div className={styles.configContainer}>
       <div className={styles.configGroup}>
         <span className={styles.label}>Write:</span>
         <div className={styles.buttonBar}>
-          {(['letters', 'lowercase', 'numbers'] as const).map(s => (
+          {(['letters', 'lowercase', 'pairs', 'numbers'] as const).map(s => (
             <button
               key={s}
               type="button"
@@ -52,7 +52,7 @@ export default function LetterFormationConfigBar({ value, onChange }: ConfigBarP
               className={`${styles.letterButton} ${letter === form.char ? styles.selected : ''}`}
               onClick={() => onChange({ ...value, letter: form.char })}
             >
-              {form.char}
+              {set === 'pairs' ? form.char + form.char.toLowerCase() : form.char}
             </button>
           ))}
         </div>
