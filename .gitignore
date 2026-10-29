@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Impeccable design-tool output; its settings stay tracked
+.impeccable/*
+!.impeccable/config.json
