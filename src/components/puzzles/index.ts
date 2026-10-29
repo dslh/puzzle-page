@@ -26,6 +26,7 @@ import { puzzleDefinition as secretCode } from './SecretCode/definition';
 import { puzzleDefinition as preWriting } from './PreWriting/definition';
 import { puzzleDefinition as dotMarker } from './DotMarker/definition';
 import { puzzleDefinition as lifeCycles } from './LifeCycles/definition';
+import { puzzleDefinition as whoGoesWhere } from './WhoGoesWhere/definition';
 import type { AgeBand, AgeSetting, PuzzleCategory, PuzzleDefinition, PuzzlePreset } from '../../types/puzzle';
 
 /**
@@ -61,6 +62,7 @@ export const PUZZLE_DEFINITIONS = [
   dotMarker,
   missingNumbers,
   lifeCycles,
+  whoGoesWhere,
 ] as const;
 
 export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];

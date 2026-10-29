@@ -1,0 +1,58 @@
+.configContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--paper);
+  padding: 8px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.buttonBar {
+  flex: 1;
+  display: flex;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.button {
+  flex: 1 1 auto;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: none;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button:last-child {
+  border-right: none;
+}
+
+.button:hover:not(.selected) {
+  background: var(--hover);
+}
+
+.selected {
+  background: var(--pencil);
+  color: var(--ink);
+}

@@ -18,7 +18,7 @@ No testing framework is configured.
 
 A React + TypeScript app for generating printable puzzle pages optimized for A4 paper (early years / early primary, roughly ages 4-7). Users drag puzzles from a sidebar onto a 10×14 grid, configure them, and print.
 
-There are currently 28 puzzle types - see **Existing Puzzles** below.
+There are currently 29 puzzle types - see **Existing Puzzles** below.
 
 ## Core Architecture
 
@@ -599,7 +599,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
 | Science & Nature | Life Cycles |
-| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess, Who Goes Where? |
 
 The puzzles in registry order:
 
@@ -633,8 +633,9 @@ The puzzles in registry order:
 | Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none) |
 | Missing Numbers | `missingnumbers` | 6×4 | both (min width 4) | track / 100 square, up to 20 / 50 / 100, count in 1s / 2s / 5s / 10s and forwards / backwards (track only), few / some / lots of gaps |
 | Life Cycles | `lifecycles` | 8×4 | both (min 4×2) | number the jumbled stages / draw the missing one in a circle, cycle (mixed or one of seven), first stage numbered or blank |
+| Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
 
-Twelve of these carry notes worth reading before editing them:
+Thirteen of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -745,6 +746,15 @@ Twelve of these carry notes worth reading before editing them:
   the cycle from any start, since a cycle has no end. Picking one cycle shows
   it once, as big as the puzzle allows; Mixed gives a row (two cells) or
   circle (a square) each.
+
+- **Who Goes Where?** - the line-up logic puzzle from GitHub #10, without the
+  grid: animals in a row of houses, picture clues (lives in / crossed out for
+  not / two plain houses for next door). The generator picks the fewest true
+  clues that leave one arrangement, pass `childSolve` (place, rule out, last
+  one left, and arc consistency for next door - no case-splitting), fit the
+  level's mix of clue kinds, and are each needed. Clues are then ordered by
+  how far each gets a child. Brute force over 3! or 4! arrangements; 4 houses
+  on Medium is the slow case at about 5ms.
 
 **Shared data:** `WordSearch/wordList.ts` holds 234 emoji-paired 3-5 letter
 words, imported by Word Search, Handwriting and Matching. Add words there rather
