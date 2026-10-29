@@ -3,8 +3,8 @@ import type { PuzzleDoc } from '../../../types/puzzleDoc';
 const docs: PuzzleDoc = {
   summary: (
     <>
-      A rocket shines a beam into a box of mirrors. Each mirror bounces the beam to one
-      side. Follow it from mirror to mirror and circle the picture where it comes out.
+      A torch shines into a box of mirrors. Each mirror bounces the light to one side.
+      Follow it from mirror to mirror and circle the animal or thing it finds.
     </>
   ),
 
@@ -18,21 +18,22 @@ const docs: PuzzleDoc = {
   howItWorks: (
     <>
       <p>
-        The beam enters through the gap at the top and goes straight until it meets a
+        The light enters through the gap at the top and goes straight until it meets a
         mirror. A mirror turns it a quarter turn, which way depending on the slant. It
-        always leaves through one of the openings on the sides, next to the answer.
-        Every puzzle has at least four bounces, so guessing doesn’t work.
+        always leaves through an opening on one side, beside the answer. Every puzzle
+        has at least five bounces, so guessing doesn’t work.
       </p>
       <p>
-        There are no grid lines. Keeping the beam straight on their own is part of the
-        challenge.
+        A dot marks a square with no mirror: the light goes straight over it. Both
+        sides of a mirror bounce, so the light can come back to a mirror, or cross its
+        own path.
       </p>
     </>
   ),
 
   sayAloud: [
     'Light goes in a straight line until it hits a mirror, then it bounces.',
-    'Put your finger where the light comes in and follow it. Where does it come out? Circle that picture.',
+    'Put your finger on the torch and follow the light. What does it shine on? Circle it.',
   ],
 
   skills: [
@@ -80,7 +81,7 @@ const docs: PuzzleDoc = {
     },
     {
       sign: 'Drifts into the next column',
-      meaning: <>No grid lines to help. A ruler fixes it.</>,
+      meaning: <>Normal on a long straight run. Count the squares, dots and mirrors, or lay a ruler along it.</>,
     },
     {
       sign: 'Circles the nearest picture to where they got lost',

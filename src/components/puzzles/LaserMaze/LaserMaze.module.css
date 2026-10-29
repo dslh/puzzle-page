@@ -9,3 +9,54 @@
 .svg {
   display: block;
 }
+
+.wall {
+  fill: none;
+  stroke: #2a2a2a;
+  stroke-linecap: round;
+}
+
+/* Mirrors are two-sided panes: an ink edge round pale glass, so they read
+   as objects rather than pencil lines. */
+.mirrorEdge {
+  fill: none;
+  stroke: #2a2a2a;
+  stroke-linecap: round;
+}
+
+.mirrorGlass {
+  fill: none;
+  stroke: #d6ecf5;
+  stroke-linecap: round;
+}
+
+.dot {
+  fill: #8f9a9d;
+}
+
+.beam {
+  fill: #ffe066;
+  opacity: 0.75;
+}
+
+.torchBody {
+  fill: #4f6d7a;
+}
+
+.torchSwitch {
+  fill: #e85a4f;
+}
+
+.torchHead {
+  fill: #7d97a3;
+}
+
+.torchLens {
+  fill: #fff3b0;
+  stroke: #4f6d7a;
+  stroke-width: 0.4;
+}
+
+.picture {
+  user-select: none;
+}

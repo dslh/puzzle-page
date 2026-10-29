@@ -162,11 +162,14 @@ function simulateLaserPath(
 }
 
 // Emoji sets
-const ENTRY_EMOJI = '🚀';
-// Need enough emojis for all positions on both sides (up to 6 + 6 = 12)
+const ENTRY_EMOJI = '🔦';
+// Things a torch finds in the dark. Enough for every opening on both sides
+// (up to 6 + 6 = 12), each easy to name and unlike the rest, so a beam
+// traced right is never circled wrong. Keep the list at 12: it is shuffled
+// from the seed, and a different length would change every puzzle.
 const EXIT_EMOJIS = [
-  '🪐', '⭐', '🌙', '☀️', '🌍', '💫',
-  '🌟', '✨', '🔮', '🎯', '💎', '🎪',
+  '🦉', '🦊', '🦔', '🦇', '🐸', '🐌',
+  '🐭', '🧸', '🔑', '🐞', '🦋', '🍪',
 ];
 
 export function generateLaserMaze(
