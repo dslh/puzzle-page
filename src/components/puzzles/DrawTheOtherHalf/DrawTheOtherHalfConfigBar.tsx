@@ -1,4 +1,5 @@
 import type { DrawTheOtherHalfConfig } from './index';
+import { PICTURES } from './pictures';
 import styles from './DrawTheOtherHalfConfigBar.module.css';
 
 interface ConfigBarProps {
@@ -56,6 +57,27 @@ export default function DrawTheOtherHalfConfigBar({ value, onChange }: ConfigBar
           </div>
         </div>
       ))}
+
+      {value.subject === 'picture' && (
+        <div className={styles.configGroup}>
+          <span className={styles.label}>Picture:</span>
+          <select
+            className={styles.select}
+            value={value.picture}
+            onChange={e => onChange({ ...value, picture: e.target.value })}
+            title="Which picture. Random picks one to suit the level"
+          >
+            <option value="random">Random</option>
+            {LEVELS.map(level => (
+              <optgroup key={level.id} label={level.label}>
+                {PICTURES.filter(p => p.level === level.id).map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }

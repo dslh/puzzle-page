@@ -15,6 +15,8 @@ import styles from './DrawTheOtherHalf.module.css';
 export interface DrawTheOtherHalfConfig {
   /** A random shape, or a picture from the hand-kept set. */
   subject: Subject;
+  /** Which picture: a picture's id, or 'random'. */
+  picture: string;
   /** How many lines, how far out, and whether any slant. */
   level: ShapeLevel;
   /** How much of the missing half is shown. */
@@ -32,10 +34,11 @@ export default function DrawTheOtherHalf({ gridWidth, gridHeight, seed, config }
   const help = config?.help ?? 'corners';
   const mirror = config?.mirror ?? 'vertical';
   const subject = config?.subject ?? 'shape';
+  const picture = config?.picture ?? 'random';
 
   const puzzle = useMemo(
-    () => generateDrawTheOtherHalf(gridWidth, gridHeight, seed, level, mirror, subject, CELL_SIZE_MM),
-    [gridWidth, gridHeight, seed, level, mirror, subject],
+    () => generateDrawTheOtherHalf(gridWidth, gridHeight, seed, level, mirror, subject, picture, CELL_SIZE_MM),
+    [gridWidth, gridHeight, seed, level, mirror, subject, picture],
   );
 
   const [from, to] = puzzle.mirror;

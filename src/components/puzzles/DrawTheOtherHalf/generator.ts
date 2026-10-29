@@ -192,15 +192,27 @@ const extent = (picture: Picture): Lattice => {
   return [Math.max(...points.map(p => p[0])), Math.max(...points.map(p => p[1]))];
 };
 
+const fits = (picture: Picture, out: number, along: number) => {
+  const [u, v] = extent(picture);
+  return u <= out && v < along;
+};
+
 /**
- * A picture of the level that fits, or the nearest level that has one
- * (easier first). Null if none fits at all.
+ * The picture asked for if it fits, whatever the level or mirror. Otherwise a
+ * picture of the level that fits, or the nearest level that has one (easier
+ * first). Null if none fits at all.
  */
-function choosePicture(rng: SeededRandom, level: ShapeLevel, out: number, along: number, sideways: boolean): Picture | null {
-  const fits = PICTURES.filter(p => {
-    const [u, v] = extent(p);
-    return u <= out && v < along && (!sideways || p.sideways);
-  });
+function choosePicture(
+  rng: SeededRandom,
+  wanted: string,
+  level: ShapeLevel,
+  out: number,
+  along: number,
+  sideways: boolean,
+): Picture | null {
+  const asked = PICTURES.find(p => p.id === wanted);
+  if (asked && fits(asked, out, along)) return asked;
+  const fitting = PICTURES.filter(p => fits(p, out, along) && (!sideways || p.sideways));
   const at = LEVEL_ORDER.indexOf(level);
   const nearest = [...LEVEL_ORDER].sort((a, b) => {
     const da = LEVEL_ORDER.indexOf(a) - at;
@@ -208,7 +220,7 @@ function choosePicture(rng: SeededRandom, level: ShapeLevel, out: number, along:
     return Math.abs(da) - Math.abs(db) || da - db;
   });
   for (const l of nearest) {
-    const pool = fits.filter(p => p.level === l);
+    const pool = fitting.filter(p => p.level === l);
     if (pool.length) return rng.pick(pool);
   }
   return null;
@@ -238,6 +250,8 @@ export function generateDrawTheOtherHalf(
   level: ShapeLevel,
   mirror: MirrorLine,
   subject: Subject,
+  /** A picture's id, or 'random'. */
+  wanted: string,
   cellMm: number,
 ): DrawTheOtherHalfPuzzle {
   const width = gridWidth * cellMm;
@@ -260,7 +274,7 @@ export function generateDrawTheOtherHalf(
   // Pictures are picked from the most dots that fit, then spread the dots to fill the space
   const [mostOut, mostAlong] = fit(LAYOUT.spacing);
   const picture = subject === 'picture'
-    ? choosePicture(rng, level, Math.min(mostOut, maxOut), Math.min(mostAlong, maxAlong), !vertical)
+    ? choosePicture(rng, wanted, level, Math.min(mostOut, maxOut), Math.min(mostAlong, maxAlong), !vertical)
     : null;
   if (picture) {
     // A spare dot round the picture where there's room
@@ -299,7 +313,8 @@ export function generateDrawTheOtherHalf(
     dots,
     mirror: mirrorEnds,
     given: lines.map(line => line.map(p => toMm(p, -1))),
-    answer: lines.map(line => line.map(p => toMm(p, 1))),
+    // A line on the mirror line itself (a stem, a spine) is already there
+    answer: lines.filter(line => line.some(([u]) => u > 0)).map(line => line.map(p => toMm(p, 1))),
     corners: [...new Map(lines.flat().filter(([u]) => u > 0).map(p => [p.join(), p])).values()]
       .map(p => toMm(p, 1)),
     picture: picture?.id,

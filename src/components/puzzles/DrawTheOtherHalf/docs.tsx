@@ -68,14 +68,29 @@ const docs: PuzzleDoc<DrawTheOtherHalfConfig> = {
           label: 'Picture',
           description: (
             <p>
-              A simple picture, such as a house, rocket, owl or cat. There are about five at
-              each level, so they come round again. Across uses only the ones that still look
-              right on their side.
+              A simple picture, such as a house, rocket, owl or crab. There are 35, from 8 to
+              16 a level. Across uses only the ones that still look right on their side.
             </p>
           ),
           example: { config: { subject: 'picture' } },
         },
       ],
+    },
+    picture: {
+      label: 'Picture',
+      description: (
+        <>
+          <p>
+            Shown when Draw is Picture. Random picks one to suit Level and Mirror, and New
+            puzzle picks again. Default.
+          </p>
+          <p>
+            Pick one by name to choose it whatever the level, even sideways for Across. The
+            list is grouped by level. If the puzzle is too small for it, you get a random one
+            that fits.
+          </p>
+        </>
+      ),
     },
     level: {
       label: 'Level',

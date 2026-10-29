@@ -21,6 +21,7 @@ export const puzzleDefinition: PuzzleDefinition<DrawTheOtherHalfConfig> = {
   defaultHeight: 5,
   defaultConfig: {
     subject: 'shape',
+    picture: 'random',
     level: 'easy',
     help: 'corners',
     mirror: 'vertical',
