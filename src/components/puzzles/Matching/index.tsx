@@ -102,6 +102,7 @@ export default function Matching({
   const isHalvesMode = puzzle.mode === 'halves';
   // Rhyme words need room on both sides, not just the left as in word mode.
   const isRhymeWide = isRhymeMode && rhymeDisplay !== 'pictures';
+  const itemClass = `${styles.item} ${isRhymeMode && rhymeDisplay === 'both' ? styles.captionedItem : ''}`;
   const leftClass = isWordMode ? styles.word : isLetterMode ? styles.letter : styles.emoji;
   const rightClass = isLetterMode
     ? styles.letter
@@ -146,7 +147,7 @@ export default function Matching({
           }`}
         >
           {puzzle.pairs.map((pair, index) => (
-            <div key={index} className={`${styles.item} ${isHalvesMode ? styles.leftHalfItem : ''}`}>
+            <div key={index} className={`${itemClass} ${isHalvesMode ? styles.leftHalfItem : ''}`}>
               {isHalvesMode
                 ? renderHalf(pair.left, 'left')
                 : renderCell(pair.left, leftClass, pair.leftWord)}
@@ -180,7 +181,7 @@ export default function Matching({
           }`}
         >
           {puzzle.shuffledRight.map((item, index) => (
-            <div key={index} className={`${styles.item} ${isHalvesMode ? styles.rightHalfItem : ''}`}>
+            <div key={index} className={`${itemClass} ${isHalvesMode ? styles.rightHalfItem : ''}`}>
               {isHalvesMode
                 ? renderHalf(item.symbol, 'right')
                 : renderCell(item.symbol, rightClass, item.word)}

@@ -98,12 +98,24 @@
   padding-right: 4px;
 }
 
-/* Rhyme mode, both: the picture with its word underneath. */
+/* Rhyme mode, both: the picture with its word underneath. Smaller and
+   tighter than the other modes, so a box fits its row (about 62px of a 72px
+   cell). Too tall, the screen squashes the boxes to fit but print doesn't,
+   and the puzzle runs into the row below. */
 .captioned {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+}
+
+.captioned .emoji {
+  font-size: 32px;
+}
+
+.captionedItem {
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .caption {
