@@ -1,0 +1,8 @@
+.controls { display: flex; flex-direction: column; gap: 12px; padding: 10px; background: var(--paper); border-radius: var(--radius); }
+.group { display: flex; gap: 5px; align-items: center; font-size: 13px; }
+.group span { margin-right: auto; }
+.group button { padding: 6px 12px; border: 2px solid var(--line); background: var(--paper); color: var(--ink); font-size: 14px; }
+.group button[aria-pressed='true'] { background: var(--pencil); border-color: var(--pencil-edge); }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.check input { accent-color: var(--ink); width: 18px; height: 18px; }
+.note { margin: 0; font-size: 13px; line-height: 1.4; color: var(--ink-soft); }

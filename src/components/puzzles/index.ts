@@ -28,6 +28,7 @@ import { puzzleDefinition as dotMarker } from './DotMarker/definition';
 import { puzzleDefinition as lifeCycles } from './LifeCycles/definition';
 import { puzzleDefinition as whoGoesWhere } from './WhoGoesWhere/definition';
 import { puzzleDefinition as drawTheOtherHalf } from './DrawTheOtherHalf/definition';
+import { puzzleDefinition as spotTheDifference } from './SpotTheDifference/definition';
 import type { AgeBand, AgeSetting, PuzzleCategory, PuzzleDefinition, PuzzlePreset } from '../../types/puzzle';
 
 /**
@@ -65,6 +66,7 @@ export const PUZZLE_DEFINITIONS = [
   lifeCycles,
   whoGoesWhere,
   drawTheOtherHalf,
+  spotTheDifference,
 ] as const;
 
 export type AnyPuzzleDefinition = typeof PUZZLE_DEFINITIONS[number];

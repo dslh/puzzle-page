@@ -49,6 +49,7 @@ Live at https://puzzle-page.fly.dev
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |
 | Colour by Sight Word | colour count, case, custom words |
+| Spot the Difference | illustrated cottage garden, 3 / 5 / 7 differences, black and white, marked answers |
 
 ## Getting Started
 
@@ -60,7 +61,12 @@ npm run lint     # ESLint
 npm run preview  # Preview the production build
 ```
 
-There is no test suite.
+Spot the Difference has focused generator and SVG checks:
+
+```bash
+node_modules/.bin/esbuild scripts/test-spot-the-difference.ts --bundle --platform=node --jsx=automatic --outfile=/tmp/spot-difference-test.cjs
+node --test /tmp/spot-difference-test.cjs
+```
 
 ## Usage
 

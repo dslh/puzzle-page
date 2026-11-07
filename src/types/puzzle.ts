@@ -30,7 +30,8 @@ export type PuzzleType = 'maze'
                        | 'missingnumbers'
                        | 'lifecycles'
                        | 'whogoeswhere'
-                       | 'drawtheotherhalf';
+                       | 'drawtheotherhalf'
+                       | 'spotthedifference';
 
 export interface PlacedPuzzle {
   id: string;

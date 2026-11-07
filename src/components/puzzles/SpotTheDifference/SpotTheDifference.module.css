@@ -1,0 +1,45 @@
+.puzzle {
+  width: 100%;
+  height: 100%;
+  padding: 1.5mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+  box-sizing: border-box;
+}
+
+.heading {
+  font-size: 3.2mm;
+  line-height: 1.3;
+  text-align: center;
+  color: #303b32;
+  flex-shrink: 0;
+}
+
+.pictures {
+  display: flex;
+  gap: 2mm;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.stacked { flex-direction: column; }
+.across { flex-direction: row; }
+
+.picture {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.picture svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
