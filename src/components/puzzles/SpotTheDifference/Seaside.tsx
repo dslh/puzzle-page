@@ -6,7 +6,7 @@ const COLOURS = ['#cf8773', '#83a9a7', '#d5af61', '#a39ab6'];
 
 export default function Seaside(props: SceneProps) {
   const { scene, second, outline, aspect } = props;
-  const layout = sceneLayout(aspect);
+  const layout = sceneLayout(aspect, scene);
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => scene.variants[key] ^ Number(second && scene.changes.includes(key));
@@ -21,11 +21,14 @@ export default function Seaside(props: SceneProps) {
       {Array.from({ length: scene.clouds }, (_, i) => <path key={i} transform={`translate(${321 + i * 87 + dx * (.5 + i * .12)} ${39 + i % 2 * 12})`} d="M0 12 Q-5 -1 9 0 Q11 -17 29 -8 Q40 -17 49 0 Q66 -3 65 12Z" fill={fill('#fffdf5')} strokeWidth="1.8" />)}
       {/* A gull gliding above the sailing boat. */}
       <g transform={transform('kite')}><g transform={`translate(244 103) scale(${v('kite') ? -1 : 1} 1)`}>
-        <path d="M-21 7 Q-12 -5 -5 0 Q-1 -24 8 -23 L6 -3 Q16 -6 18 2 L28 5 L17 9 Q2 21 -14 12Z" fill={fill('#fffdf5')} />
-        <path d="M18 2 L28 5 L18 7" fill={fill('#d4a45d')} /><circle cx="14" cy="2" r="1.5" fill={INK} /><path d="M-12 7 Q-2 10 7 4" fill="none" strokeWidth="1.5" />
+        <path d="M-16 5 L-29 -1 L-23 12 L-12 10 Q4 21 17 8 Q27 3 20 -6 Q12 -12 7 -2 L-2 0Z" fill={fill('#fffdf5')} />
+        <path d="M23 -2 L30 1 L22 3Z" fill={fill('#d4a45d')} /><circle cx="17" cy="-3" r="1.5" fill={INK} /><path d="M-6 5 Q-10 -16 -28 -26 Q-3 -24 6 1" fill="none" strokeWidth="1.5" />
       </g></g>
       {/* Lighthouse and striped parasol on the shore. */}
       <g transform={transform('cottage')}>
+        {/* A headland joins the beach and supports every shore structure. */}
+        <path d="M282 278 Q292 254 331 250 Q378 248 402 250 Q427 249 438 242 L511 242 Q539 251 548 278Z" fill={fill('#f0dfb6')} stroke="none" />
+        <path d="M442 258 L450 247 H506 L517 260 L505 269 H443Z" fill={fill('#b6b5a5')} strokeWidth="1.5" />
         <path d="M450 258 L457 140 H491 L501 258Z" fill={fill('#fff8e6')} />
         <path d="M455 164 H493 L495 180 H454Z M451 220 H498 L499 235 H451Z" fill={fill(accent)} />
         <path d="M450 141 H499 V147 H450Z M455 115 H494 V140 H455Z" fill={fill('#d6e6df')} />
@@ -38,7 +41,7 @@ export default function Seaside(props: SceneProps) {
         <path d="M401 264 V220" strokeWidth="6" />
         {v('door') === 0 && <g><circle cx="401" cy="240" r="14" fill={fill('#e8b48c')} /><circle cx="401" cy="240" r="7" fill={fill('#f0dfb6')} /><path d="M401 226 V233 M387 240 H394 M401 247 V254 M408 240 H415" /></g>}
         <path d="M342 215 V270" />
-        <path d={scene.decoration === 0 ? 'M298 214 Q342 159 386 214 Q375 206 364 214 Q353 206 342 214 Q331 206 320 214 Q309 206 298 214Z' : 'M298 214 L342 178 L386 214 Q375 206 364 214 Q353 206 342 214 Q331 206 320 214 Q309 206 298 214Z'} fill={fill(COLOURS[(scene.palette + 1) % 4])} />
+        <path d={scene.decoration === 0 ? 'M298 214 Q342 143 386 214 Q375 206 364 214 Q353 206 342 214 Q331 206 320 214 Q309 206 298 214Z' : 'M298 214 L342 178 L386 214 Q375 206 364 214 Q353 206 342 214 Q331 206 320 214 Q309 206 298 214Z'} fill={fill(COLOURS[(scene.palette + 1) % 4])} />
         <path d="M342 178 Q321 193 320 213 M342 178 V213 M342 178 Q362 193 364 213" fill="none" strokeWidth="1.5" />
       </g>
       {/* A small sailing boat: its stripe is a shape, not a colour-only change. */}
@@ -53,6 +56,7 @@ export default function Seaside(props: SceneProps) {
       </g></g>
       {/* A beach hut, complete with steps and a little name plaque. */}
       <g transform={transform('birdhouse')}>
+        <path d="M185 270 Q193 252 204 241 H265 Q280 250 285 270Z" fill={fill('#f0dfb6')} stroke="none" />
         <path d="M207 179 H263 V246 H207Z" fill={fill(COLOURS[(scene.palette + 2) % 4])} />
         <path d={scene.style === 1 ? 'M201 180 Q235 128 269 180Z' : 'M201 180 L235 149 L269 180Z'} fill={fill('#f5e3b8')} />
         <path d="M213 183 V243 M221 183 V243 M249 183 V243 M257 183 V243" fill="none" strokeWidth="1.2" />

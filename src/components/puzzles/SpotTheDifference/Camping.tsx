@@ -6,7 +6,7 @@ const TENTS = ['#c49869', '#86a5a0', '#c18876', '#b1a2ba'];
 
 export default function Camping(props: SceneProps) {
   const { scene, second, outline, aspect } = props;
-  const layout = sceneLayout(aspect);
+  const layout = sceneLayout(aspect, scene);
   const { width, height, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => scene.variants[key] ^ Number(second && scene.changes.includes(key));
@@ -30,12 +30,12 @@ export default function Camping(props: SceneProps) {
         <path d="M360 263 H424" strokeWidth="4" />
         {v('window') === 0 ? <circle cx="474" cy="210" r="14" fill={fill('#eaf0de')} /> : <path d="M460 224 L474 195 L488 224Z" fill={fill('#eaf0de')} />}
         <path d="M474 199 V222" strokeWidth="1.5" />
-        {scene.style === 1 && <path d="M433 147 L457 178 M451 147 L474 178 M469 155 L484 178" fill="none" strokeWidth="1.3" />}
+        {scene.style === 1 && <path d="M428 150 L449 178 M445 150 L466 178 M459 168 L467 178" fill="none" strokeWidth="1.3" />}
         <path d="M324 234 V259 Q300 267 279 258 V232" fill={fill('#b29a77')} /><ellipse cx="301" cy="232" rx="23" ry="8" fill={fill('#dac6a0')} /><ellipse cx="301" cy="232" rx="13" ry="4" fill="none" strokeWidth="1.4" /><path d="M287 242 V252 M312 239 V254" strokeWidth="1.3" />
       </g>
       {/* An owl perched in the hollow of an old tree. */}
       <g transform={transform('tree')}>
-        <path d="M64 273 Q85 199 64 110 L82 104 Q99 164 107 197 L127 132 L143 140 L120 229 L134 273Z" fill={fill('#b5a080')} />
+        <path d="M57 273 Q68 233 59 175 L62 108 L83 103 L100 132 L122 101 L145 111 L139 176 Q132 229 146 273Z" fill={fill('#b5a080')} />
         <path d={scene.style === 2 ? 'M100 48 L66 82 H79 L45 114 H63 L27 140 H173 L137 114 H155 L121 82 H134Z' : scene.tree === 0 ? 'M33 123 Q12 97 43 79 Q44 48 75 57 Q97 33 122 58 Q160 49 164 81 Q190 105 160 124 Q143 152 113 136 Q81 161 61 137 Q35 144 33 123Z' : 'M27 125 Q17 99 39 88 Q29 64 57 59 Q68 34 95 50 Q128 36 141 60 Q177 61 167 89 Q185 112 160 128 Q139 150 116 137 Q80 156 61 136Z'} fill={fill(scene.decoration === 2 ? '#b7bd8c' : '#9eb499')} />
         <ellipse cx="101" cy="170" rx="32" ry="43" fill={fill('#7c806a')} />
         <path d="M77 168 L77 135 L90 144 Q101 137 113 144 L125 135 V168 Q127 198 101 199 Q75 198 77 168Z" fill={fill('#d4b789')} />

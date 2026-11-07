@@ -1,5 +1,5 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
-import type { Feature } from './generator';
+import type { Feature, GeneratedScene } from './generator';
 
 const SCENE_ASPECT = 600 / 390;
 
@@ -34,19 +34,33 @@ export const FEATURE_PART: Record<Feature, ScenePart> = {
 /** Extend the world and move its objects, preserving their proportions.
  * The same transforms position the illustration and its answer marks.
  */
-export function sceneLayout(aspect = SCENE_ASPECT) {
+export function sceneLayout(aspect = SCENE_ASPECT, scene?: GeneratedScene) {
   const width = Math.max(600, 390 * aspect);
   const height = Math.max(390, 600 / aspect);
   const dx = width - 600;
   const dy = height - 390;
   const scale = 1 + Math.min(.15, Math.max(dx / 600, dy / 390) * .35);
-  const point = (part: ScenePart, x: number, y: number) => {
+  const isForeground = (part: ScenePart) => ['flower', 'cat', 'can', 'pond'].includes(part);
+  // Ground slots reserve physical space; do not inflate objects into neighbours
+  // when a tall panel adds vertical space without adding horizontal room.
+  const partScale = (part: ScenePart) => (isForeground(part) || scene?.placements[part] ? 1 : scale) * (scene?.placements[part]?.scale ?? 1);
+  const mapping = (part: ScenePart) => {
     const [ax, ay, fx, fy] = ANCHORS[part];
-    return { x: ax + dx * fx + (x - ax) * scale, y: ay + dy * fy + (y - ay) * scale };
+    const placement = scene?.placements[part];
+    const flipped = isForeground(part) ? scene?.foregroundFlipped : scene?.backgroundFlipped;
+    const cx = placement ? placement.x + dx * (placement.x / 600) : ax + dx * fx;
+    const cy = ay + dy * fy + (placement?.y ?? 0);
+    return { ax, ay, cx: flipped ? width - cx : cx, cy,
+      sx: partScale(part) * (flipped ? -1 : 1) * (placement?.flipped ? -1 : 1), sy: partScale(part) };
+  };
+  const point = (part: ScenePart, x: number, y: number) => {
+    const { ax, ay, cx, cy, sx, sy } = mapping(part);
+    return { x: cx + (x - ax) * sx, y: cy + (y - ay) * sy };
   };
   const transform = (part: ScenePart) => {
     const p = point(part, 0, 0);
-    return `translate(${p.x} ${p.y}) scale(${scale})`;
+    const { sx, sy } = mapping(part);
+    return `translate(${p.x} ${p.y}) scale(${sx} ${sy})`;
   };
-  return { width, height, dx, dy, scale, point, transform };
+  return { width, height, dx, dy, scale, partScale, point, transform };
 }

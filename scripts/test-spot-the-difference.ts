@@ -83,10 +83,11 @@ test('every allowed puzzle size fills its panels and keeps all answer areas in v
       assert.ok(Math.abs(layout.width / layout.height - aspect) < 1e-10);
       for (const { id } of SCENES) {
         const scene = generateScene(42, 7, id);
+        const layout = sceneLayout(aspect, scene);
         for (const key of Object.keys(FEATURES) as Feature[]) {
           const feature = scene.features[key];
           const p = layout.point(FEATURE_PART[key], feature.x, feature.y);
-          const radius = feature.radius * layout.scale;
+          const radius = feature.radius * layout.partScale(FEATURE_PART[key]);
           assert.ok(p.x - radius > 0 && p.x + radius < layout.width, `${columns}×${rows}: ${key} horizontally`);
           assert.ok(p.y - radius > 0 && p.y + radius < layout.height, `${columns}×${rows}: ${key} vertically`);
         }
@@ -107,4 +108,81 @@ test('surprise me covers every setting and stays stable when changing difficulty
     assert.equal(generateScene(seed, 3).theme, 'garden');
   }
   assert.deepEqual([...themes].sort(), SCENES.map(scene => scene.id).sort());
+});
+
+
+test('rerolls rearrange objects independently of mirroring and keep composition stable across difficulty', () => {
+  const arrangements = new Set<string>();
+  const pets = new Set<string>();
+  const background = new Set<boolean>();
+  const foreground = new Set<boolean>();
+  for (let seed = 0; seed < 100; seed++) {
+    const scene = generateScene(seed, 3);
+    const harder = generateScene(seed, 7);
+    arrangements.add((['flower', 'cat', 'can'] as const).map(part => scene.placements[part]!.x.toFixed(0)).join(','));
+    pets.add(scene.pet);
+    background.add(scene.backgroundFlipped);
+    foreground.add(scene.foregroundFlipped);
+    assert.deepEqual(scene.placements, harder.placements);
+    assert.equal(scene.pet, harder.pet);
+    assert.equal(scene.backgroundFlipped, harder.backgroundFlipped);
+    assert.equal(scene.foregroundFlipped, harder.foregroundFlipped);
+    assert.equal(scene.features.cat.label, `The ${scene.pet}’s tail`);
+  }
+  assert.ok(arrangements.size > 80);
+  assert.equal(pets.size, 2);
+  assert.equal(background.size, 2);
+  assert.equal(foreground.size, 2);
+});
+
+test('random layouts keep foreground footprints separate and answer circles within every panel size', () => {
+  // Conservative art footprints including both difference variants.
+  const footprints = {
+    flower: [18, 115, 277, 365], cat: [132, 225, 280, 356],
+    can: [245, 336, 277, 360], pond: [405, 573, 278, 375],
+  } as const;
+  for (let columns = 6; columns <= 10; columns++) {
+    for (let rows = 5; rows <= 14; rows++) {
+      const { aspect } = pictureLayout(columns, rows);
+      for (const { id } of SCENES) {
+        for (let seed = 0; seed < 100; seed++) {
+          const scene = generateScene(seed, 7, id);
+          const layout = sceneLayout(aspect, scene);
+          for (const key of Object.keys(FEATURES) as Feature[]) {
+            const { x, y, radius } = scene.features[key];
+            const part = FEATURE_PART[key];
+            const p = layout.point(part, x, y);
+            const r = radius * layout.partScale(part);
+            assert.ok(p.x - r > 2 && p.x + r < layout.width - 2, `${id}/${seed}/${columns}x${rows}/${key}: x`);
+            assert.ok(p.y - r > 2 && p.y + r < layout.height - 2, `${id}/${seed}/${columns}x${rows}/${key}: y`);
+          }
+          const boxes = Object.entries(footprints).map(([part, [left, right, top, bottom]]) => {
+            const a = layout.point(part as keyof typeof footprints, left, top);
+            const b = layout.point(part as keyof typeof footprints, right, bottom);
+            return { left: Math.min(a.x, b.x), right: Math.max(a.x, b.x), top: a.y, bottom: b.y };
+          }).sort((a, b) => a.left - b.left);
+          boxes.forEach((box, i) => {
+            assert.ok(box.left > 2 && box.right < layout.width - 2);
+            assert.ok(box.top > 2 && box.bottom < layout.height - 2);
+            if (i) assert.ok(box.left > boxes[i - 1].right, `${id}/${seed}: foreground overlap`);
+          });
+        }
+      }
+    }
+  }
+});
+
+test('either pet keeps its tail difference visible in colour and outline', () => {
+  for (const pet of ['cat', 'dog'] as const) {
+    for (const outline of [false, true]) {
+      for (const value of [0, 1]) {
+        const scene = generateScene(42, 3);
+        scene.pet = pet;
+        scene.variants.cat = value;
+        scene.changes = ['cat'];
+        assert.notEqual(render(scene, false, outline), render(scene, true, outline));
+        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: value ^ 1 } }, false, outline), render(scene, true, outline));
+      }
+    }
+  }
 });

@@ -1,3 +1,4 @@
+import type { ScenePart } from './layout';
 import { SeededRandom } from '../../../utils/random';
 
 export interface SpotTheDifferenceConfig {
@@ -17,7 +18,7 @@ export const FEATURES = {
   fruit: { x: 100, y: 146, radius: 48, label: 'The apples on the tree' },
   birdhouse: { x: 235, y: 182, radius: 23, label: 'The birdhouse entrance' },
   flower: { x: 66, y: 302, radius: 28, label: 'The flower’s shape' },
-  cat: { x: 213, y: 331, radius: 23, label: 'The cat’s tail' },
+  cat: { x: 209, y: 327, radius: 29, label: 'The cat’s tail' },
   can: { x: 324, y: 300, radius: 18, label: 'The watering can’s rose' },
   duck: { x: 477, y: 324, radius: 31, label: 'The way the duck faces' },
 } as const;
@@ -37,8 +38,8 @@ interface FeatureSpec { x: number; y: number; radius: number; label: string }
 export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = {
   garden: FEATURES,
   seaside: {
-    kite: { x: 244, y: 103, radius: 28, label: 'The way the seagull faces' },
-    chimney: { x: 472, y: 103, radius: 27, label: 'The lighthouse flag' },
+    kite: { x: 244, y: 103, radius: 34, label: 'The way the seagull faces' },
+    chimney: { x: 486, y: 87, radius: 24, label: 'The lighthouse flag' },
     window: { x: 474, y: 198, radius: 25, label: 'The lighthouse window' },
     door: { x: 401, y: 240, radius: 20, label: 'The lifebuoy' },
     fruit: { x: 100, y: 153, radius: 48, label: 'The sail’s pattern' },
@@ -50,7 +51,7 @@ export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = 
   },
   camping: {
     kite: { x: 244, y: 100, radius: 30, label: 'The moon’s shape' },
-    chimney: { x: 461, y: 99, radius: 28, label: 'The tent’s flag' },
+    chimney: { x: 456, y: 91, radius: 28, label: 'The tent’s flag' },
     window: { x: 474, y: 210, radius: 22, label: 'The tent’s window' },
     door: { x: 390, y: 229, radius: 25, label: 'The tent entrance' },
     fruit: { x: 100, y: 158, radius: 37, label: 'The owl’s eyes' },
@@ -71,9 +72,40 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   // Independent streams keep decoration and theme stable when the count changes.
   const decoration = new SeededRandom(seed ^ 0x7363656e);
   const theme = choice === 'random' ? new SeededRandom(seed ^ 0x7468656d).pick(SCENES).id : choice;
+  const composition = new SeededRandom(seed ^ 0x6c61796f);
+  const backgroundFlipped = composition.nextInt(2) === 1;
+  const foregroundFlipped = composition.nextInt(2) === 1;
+  // Three generous ground slots, independent of the large pond/picnic slot.
+  // Keep connected structures together: owl + tree, windows + building, etc.
+  const slots = composition.shuffle([70, 183, 296]);
+  const placements = Object.fromEntries((['flower', 'cat', 'can'] as const).map((part, i) => [part, {
+    x: slots[i] + composition.nextFloat(-5, 5),
+    y: composition.nextFloat(-5, 3),
+    scale: composition.nextFloat(.84, 1),
+    flipped: composition.nextInt(2) === 1,
+  }])) as Partial<Record<ScenePart, { x: number; y: number; scale: number; flipped: boolean }>>;
+  // Vary the landmarks within reserved regions, keeping their feet grounded.
+  for (const [part, x] of [['tree', 100], ['cottage', 435], ['birdhouse', 235], ['kite', 244]] as const) {
+    const scale = composition.nextFloat(.9, 1);
+    const ground = theme === 'seaside' ? 270 : theme === 'camping' ? 249 : 252;
+    placements[part] = {
+      x: x + composition.nextFloat(-6, 6),
+      y: part === 'kite' ? -5 : part === 'birdhouse' ? (ground - 149) * (1 - scale) : 0,
+      scale,
+      flipped: false,
+    };
+  }
+  // The hull and its wake must stay on the water side of the tideline.
+  if (theme === 'seaside') placements.tree!.y = -18;
+  const pet = composition.pick(['cat', 'dog'] as const);
+  const specs = SCENE_FEATURES[theme];
   return {
     theme,
-    features: SCENE_FEATURES[theme],
+    features: { ...specs, cat: { ...specs.cat, label: theme === 'garden' ? `The ${pet}’s tail` : specs.cat.label } },
+    backgroundFlipped,
+    foregroundFlipped,
+    placements,
+    pet,
     style: decoration.nextInt(3),
     palette: decoration.nextInt(4),
     detail: decoration.nextInt(3),
