@@ -28,6 +28,7 @@ export const SCENES = [
   { id: 'garden', label: 'Cottage garden' },
   { id: 'seaside', label: 'Seaside' },
   { id: 'camping', label: 'Woodland camp' },
+  { id: 'farmyard', label: 'Farmyard' },
 ] as const;
 export type SceneTheme = typeof SCENES[number]['id'];
 export type SceneChoice = SceneTheme | 'random';
@@ -37,6 +38,18 @@ interface FeatureSpec { x: number; y: number; radius: number; label: string }
 // different objects. Each scene supplies its own answer descriptions and bounds.
 export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = {
   garden: FEATURES,
+  farmyard: {
+    kite: { x: 244, y: 96, radius: 36, label: 'The sun’s rays' },
+    chimney: { x: 473, y: 93, radius: 28, label: 'The way the weather vane points' },
+    window: { x: 476, y: 203, radius: 29, label: 'The barn window’s shape' },
+    door: { x: 410, y: 230, radius: 33, label: 'The cross on the barn door' },
+    fruit: { x: 100, y: 148, radius: 48, label: 'The apples on the tree' },
+    birdhouse: { x: 235, y: 163, radius: 26, label: 'The scarecrow’s hat' },
+    flower: { x: 65, y: 300, radius: 25, label: 'The vegetables in the basket' },
+    cat: { x: 214, y: 328, radius: 18, label: 'The sheep’s tail' },
+    can: { x: 290, y: 296, radius: 23, label: 'The spade in the wheelbarrow' },
+    duck: { x: 447, y: 342, radius: 23, label: 'The tractor wheel’s spokes' },
+  },
   seaside: {
     kite: { x: 244, y: 103, radius: 34, label: 'The way the seagull faces' },
     chimney: { x: 486, y: 87, radius: 24, label: 'The lighthouse flag' },
@@ -98,14 +111,16 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   // The hull and its wake must stay on the water side of the tideline.
   if (theme === 'seaside') placements.tree!.y = -18;
   const pet = composition.pick(['cat', 'dog'] as const);
+  const livestock = new SeededRandom(seed ^ 0x6661726d).pick(['sheep', 'pig'] as const);
   const specs = SCENE_FEATURES[theme];
   return {
     theme,
-    features: { ...specs, cat: { ...specs.cat, label: theme === 'garden' ? `The ${pet}’s tail` : specs.cat.label } },
+    features: { ...specs, cat: { ...specs.cat, label: theme === 'garden' ? `The ${pet}’s tail` : theme === 'farmyard' ? `The ${livestock}’s tail` : specs.cat.label } },
     backgroundFlipped,
     foregroundFlipped,
     placements,
     pet,
+    livestock,
     style: decoration.nextInt(3),
     palette: decoration.nextInt(4),
     detail: decoration.nextInt(3),

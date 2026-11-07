@@ -186,3 +186,28 @@ test('either pet keeps its tail difference visible in colour and outline', () =>
     }
   }
 });
+
+
+test('farmyard rerolls include both animals and preserve their tail differences and answer descriptions', () => {
+  const animals = new Set<string>();
+  for (let seed = 0; seed < 100; seed++) {
+    const scene = generateScene(seed, 3, 'farmyard');
+    animals.add(scene.livestock);
+    const harder = generateScene(seed, 7, 'farmyard');
+    assert.equal(scene.livestock, harder.livestock);
+    assert.deepEqual(scene.placements, harder.placements);
+    assert.equal(scene.features.cat.label, `The ${scene.livestock}’s tail`);
+  }
+  assert.deepEqual([...animals].sort(), ['pig', 'sheep']);
+  for (const livestock of ['pig', 'sheep'] as const) {
+    for (const outline of [false, true]) {
+      for (const value of [0, 1]) {
+        const scene = { ...generateScene(42, 3, 'farmyard'), livestock };
+        scene.variants.cat = value;
+        scene.changes = ['cat'];
+        assert.notEqual(render(scene, false, outline), render(scene, true, outline));
+        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: value ^ 1 } }, false, outline), render(scene, true, outline));
+      }
+    }
+  }
+});
