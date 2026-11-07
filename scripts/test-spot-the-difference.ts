@@ -211,3 +211,34 @@ test('farmyard rerolls include both animals and preserve their tail differences 
     }
   }
 });
+
+
+test('playground rerolls cover every toy and ride, with fair changes for every combination', () => {
+  const combinations = new Set<string>();
+  for (let seed = 0; seed < 100; seed++) {
+    const scene = generateScene(seed, 3, 'playground');
+    const harder = generateScene(seed, 7, 'playground');
+    combinations.add(`${scene.playToy}/${scene.playRide}`);
+    assert.equal(scene.playToy, harder.playToy);
+    assert.equal(scene.playRide, harder.playRide);
+    assert.deepEqual(scene.placements, harder.placements);
+    assert.equal(scene.features.cat.label, `The ${scene.playToy}’s bow tie`);
+    assert.equal(scene.features.can.label, `The ${scene.playRide}’s bell`);
+  }
+  assert.equal(combinations.size, 4);
+  for (const playToy of ['teddy', 'bunny'] as const) {
+    for (const playRide of ['scooter', 'tricycle'] as const) {
+      for (const outline of [false, true]) {
+        for (const key of ['cat', 'can'] as const) {
+          for (const value of [0, 1]) {
+            const scene = { ...generateScene(42, 3, 'playground'), playToy, playRide };
+            scene.variants[key] = value;
+            scene.changes = [key];
+            assert.notEqual(render(scene, false, outline), render(scene, true, outline));
+            assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, [key]: value ^ 1 } }, false, outline), render(scene, true, outline));
+          }
+        }
+      }
+    }
+  }
+});

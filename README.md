@@ -49,7 +49,7 @@ Live at https://puzzle-page.fly.dev
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |
 | Colour by Sight Word | colour count, case, custom words |
-| Spot the Difference | cottage garden / seaside / woodland camp / farmyard / surprise me, 3 / 5 / 7 differences, black and white, marked answers |
+| Spot the Difference | cottage garden / seaside / woodland camp / farmyard / playground / surprise me, 3 / 5 / 7 differences, black and white, marked answers |
 
 ## Getting Started
 

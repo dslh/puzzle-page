@@ -29,6 +29,7 @@ export const SCENES = [
   { id: 'seaside', label: 'Seaside' },
   { id: 'camping', label: 'Woodland camp' },
   { id: 'farmyard', label: 'Farmyard' },
+  { id: 'playground', label: 'Playground' },
 ] as const;
 export type SceneTheme = typeof SCENES[number]['id'];
 export type SceneChoice = SceneTheme | 'random';
@@ -38,6 +39,18 @@ interface FeatureSpec { x: number; y: number; radius: number; label: string }
 // different objects. Each scene supplies its own answer descriptions and bounds.
 export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = {
   garden: FEATURES,
+  playground: {
+    kite: { x: 240, y: 114, radius: 18, label: 'The bow on the balloon string' },
+    chimney: { x: 437, y: 66, radius: 24, label: 'The play tower’s flag' },
+    window: { x: 422, y: 156, radius: 19, label: 'The play tower’s window' },
+    door: { x: 375, y: 211, radius: 18, label: 'The ladder’s steps' },
+    fruit: { x: 102, y: 214, radius: 30, label: 'The swing seat’s shape' },
+    birdhouse: { x: 235, y: 225, radius: 36, label: 'The climbing frame’s crossbar' },
+    flower: { x: 66, y: 337, radius: 17, label: 'The shape on the sand bucket' },
+    cat: { x: 176, y: 331, radius: 19, label: 'The teddy’s bow tie' },
+    can: { x: 319, y: 296, radius: 13, label: 'The scooter’s bell' },
+    duck: { x: 503, y: 291, radius: 19, label: 'The sandcastle’s flag' },
+  },
   farmyard: {
     kite: { x: 244, y: 96, radius: 36, label: 'The sun’s rays' },
     chimney: { x: 473, y: 93, radius: 28, label: 'The way the weather vane points' },
@@ -112,15 +125,29 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   if (theme === 'seaside') placements.tree!.y = -18;
   const pet = composition.pick(['cat', 'dog'] as const);
   const livestock = new SeededRandom(seed ^ 0x6661726d).pick(['sheep', 'pig'] as const);
+  const playground = new SeededRandom(seed ^ 0x706c6179);
+  const playToy = playground.pick(['teddy', 'bunny'] as const);
+  const playRide = playground.pick(['scooter', 'tricycle'] as const);
   const specs = SCENE_FEATURES[theme];
   return {
     theme,
-    features: { ...specs, cat: { ...specs.cat, label: theme === 'garden' ? `The ${pet}’s tail` : theme === 'farmyard' ? `The ${livestock}’s tail` : specs.cat.label } },
+    features: {
+      ...specs,
+      can: { ...specs.can, label: theme === 'playground' ? `The ${playRide}’s bell` : specs.can.label },
+      cat: {
+        ...specs.cat,
+        label: theme === 'garden' ? `The ${pet}’s tail`
+          : theme === 'farmyard' ? `The ${livestock}’s tail`
+          : theme === 'playground' ? `The ${playToy}’s bow tie` : specs.cat.label,
+      },
+    },
     backgroundFlipped,
     foregroundFlipped,
     placements,
     pet,
     livestock,
+    playToy,
+    playRide,
     style: decoration.nextInt(3),
     palette: decoration.nextInt(4),
     detail: decoration.nextInt(3),
