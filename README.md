@@ -34,6 +34,7 @@ Live at https://puzzle-page.fly.dev
 | Sudoku | 3×3 / 4×4 / 5×5, with colours, numbers, letters or custom symbols |
 | Which Doesn't Belong? | - |
 | Odd One Out | grid size |
+| Which Way Did It Turn? | clockwise / anticlockwise quarter-turns and half-turns, blocks / pointy / rounded shapes, first-row worked example |
 | Pattern Sequence | shapes or colours; choose any of AB/ABC, AAB/ABB/AABB, ABCD/ABAC, growing and mirror patterns; filled shapes; gap position |
 | Matching | pictures or words, max word length, custom words |
 | Picture Scramble | image URL |
@@ -80,6 +81,13 @@ Spot the Difference has focused generator and SVG checks:
 ```bash
 node_modules/.bin/esbuild scripts/test-spot-the-difference.ts --bundle --platform=node --jsx=automatic --outfile=/tmp/spot-difference-test.cjs
 node --test /tmp/spot-difference-test.cjs
+```
+
+Which Way Did It Turn? has focused geometry, generation and rendering checks:
+
+```bash
+node_modules/.bin/esbuild scripts/test-turns.ts --bundle --platform=node --jsx=automatic --loader:.css=empty --outfile=/tmp/puzzle-turn-tests.cjs
+node --test /tmp/puzzle-turn-tests.cjs
 ```
 
 Answer routes and chess data have focused checks too:

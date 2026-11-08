@@ -1,0 +1,10 @@
+.puzzle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--hand-font);
+  color: #222;
+  break-inside: avoid;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
