@@ -73,3 +73,5 @@
     visibility: hidden;
   }
 }
+
+.writeBox { display: flex; align-items: center; justify-content: center; }

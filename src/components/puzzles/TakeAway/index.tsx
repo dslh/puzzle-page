@@ -9,6 +9,7 @@ export interface TakeAwayConfig {
 }
 
 export default function TakeAway({
+  showAnswers = false,
   gridWidth = 6,
   gridHeight = 4,
   seed,
@@ -33,7 +34,7 @@ export default function TakeAway({
 
         const blankBox = (value: number) => (
           <span className={styles.answerBox}>
-            {isExample && <span className={styles.filledIn}>{value}</span>}
+            {(isExample || showAnswers) && <span className={styles.filledIn} data-answer={!isExample ? "text" : undefined}>{value}</span>}
           </span>
         );
 
@@ -43,9 +44,10 @@ export default function TakeAway({
               {Array.from({ length: problem.start }, (_, i) => (
                 <span
                   key={i}
+                  data-answer={showAnswers && !isExample && i >= firstCrossed ? "cross" : undefined}
                   className={[
                     styles.emoji,
-                    isExample && i >= firstCrossed ? styles.crossed : '',
+                    (isExample || showAnswers) && i >= firstCrossed ? styles.crossed : '',
                     grouped && i > 0 && i % GROUP_SIZE === 0 ? styles.groupStart : '',
                   ].join(' ')}
                 >

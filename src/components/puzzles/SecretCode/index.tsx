@@ -15,6 +15,7 @@ export interface SecretCodeConfig {
 }
 
 export default function SecretCode({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -81,8 +82,9 @@ export default function SecretCode({
                     </span>
                     <div
                       className={styles.writeBox}
-                      style={{ width: `${LAYOUT.writeBox}mm`, height: `${LAYOUT.writeBox}mm` }}
-                    />
+                      data-answer={showAnswers ? "text" : undefined}
+                      style={{ width: `${LAYOUT.writeBox}mm`, height: `${LAYOUT.writeBox}mm`, fontSize: `${LAYOUT.writeBox * 0.65}mm` }}
+                    >{showAnswers && formatLetter(letter)}</div>
                   </div>
                 ))}
               </div>

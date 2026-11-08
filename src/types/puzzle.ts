@@ -53,6 +53,8 @@ export interface PuzzleProps<TConfig = unknown> {
   gridHeight: number;  // Grid cells allocated (height)
   seed: number;        // For deterministic generation
   config?: TConfig;    // Optional puzzle-specific configuration
+  /** Presentation only: never changes the generated puzzle or saved config. */
+  showAnswers?: boolean;
 }
 
 export interface ResizableConfig {

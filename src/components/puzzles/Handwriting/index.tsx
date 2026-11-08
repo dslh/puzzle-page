@@ -41,6 +41,8 @@ interface LetterOptions {
   fontSize: number;
   className: string;
   skipIndex?: number;
+  answerIndex?: number;
+  answer?: boolean;
 }
 
 function renderLetters(word: string, keyPrefix: string, o: LetterOptions) {
@@ -53,6 +55,7 @@ function renderLetters(word: string, keyPrefix: string, o: LetterOptions) {
         fontSize={o.fontSize}
         textAnchor="middle"
         className={o.className}
+        data-answer={o.answer ? "model" : i === o.answerIndex ? "text" : undefined}
       >
         {char}
       </text>
@@ -61,6 +64,7 @@ function renderLetters(word: string, keyPrefix: string, o: LetterOptions) {
 }
 
 export default function Handwriting({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -123,11 +127,23 @@ export default function Handwriting({
     }
 
     if (mode === 'copy') {
-      return renderLetters(word, 'copy', {
-        ...shared,
-        x: 0,
-        className: styles.modelLetter,
-      });
+      const answerX = word.length * advance + advance * 0.5;
+      const answerScale = Math.min(1, (ruleWidth - answerX) / (word.length * advance));
+      return (
+        <>
+          {renderLetters(word, 'copy', {
+            ...shared, x: 0, className: styles.modelLetter,
+          })}
+          {showAnswers && renderLetters(word, 'answer', {
+            baseline,
+            advance: advance * answerScale,
+            fontSize: fontSize * answerScale,
+            x: answerX,
+            className: styles.answerLetter,
+            answer: true,
+          })}
+        </>
+      );
     }
 
     const blankCentre = row.missingIndex * advance + advance / 2;
@@ -138,7 +154,8 @@ export default function Handwriting({
           ...shared,
           x: 0,
           className: styles.modelLetter,
-          skipIndex: row.missingIndex,
+          skipIndex: showAnswers ? undefined : row.missingIndex,
+          answerIndex: showAnswers ? row.missingIndex : undefined,
         })}
         <line
           x1={blankCentre - advance * 0.35}

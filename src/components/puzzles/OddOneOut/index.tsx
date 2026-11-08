@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { generateOddOneOut, type OddOneOutMode } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
+import AnswerCircle from '../../AnswerCircle';
 import styles from './OddOneOut.module.css';
 
 export interface OddOneOutConfig {
@@ -15,7 +16,7 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-export default function OddOneOut({ gridWidth, gridHeight, seed, config }: PuzzleProps<OddOneOutConfig>) {
+export default function OddOneOut({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<OddOneOutConfig>) {
   const mode = config?.mode ?? 'odd';
   const size = config?.size ?? 5;
 
@@ -65,12 +66,14 @@ export default function OddOneOut({ gridWidth, gridHeight, seed, config }: Puzzl
             return (
               <div key={`${rowIndex}-${colIndex}`} className={styles.cell}>
                 <span
+                  data-answer-circle={showAnswers && emoji === puzzle.answer || undefined}
                   style={{
                     transform: `translate(${jiggle.x}%, ${jiggle.y}%)`,
                     display: 'inline-block',
                   }}
                 >
                   {emoji}
+                  {showAnswers && emoji === puzzle.answer && <AnswerCircle seed={`${seed}:odd:${cellIndex}`} />}
                 </span>
               </div>
             );

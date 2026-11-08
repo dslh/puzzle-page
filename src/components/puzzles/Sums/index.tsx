@@ -11,6 +11,7 @@ export interface SumsConfig {
 const CELLS_PER_PROBLEM = 2;
 
 export default function Sums({
+  showAnswers = false,
   gridWidth = 4,
   gridHeight = 3,
   seed,
@@ -37,7 +38,7 @@ export default function Sums({
                 <span className={styles.operator}>{problem.operator}</span>
                 <span className={styles.number}>{problem.right}</span>
                 <span className={styles.operator}>=</span>
-                <span className={styles.answerBox}></span>
+                <span className={styles.answerBox} data-answer={showAnswers ? "text" : undefined}>{showAnswers && problem.answer}</span>
               </div>
             ))}
         </div>

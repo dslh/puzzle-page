@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { generateInitialSounds } from './generator';
 import { CELL_SIZE_MM, type PuzzleProps } from '../../../types/puzzle';
+import AnswerCircle from '../../AnswerCircle';
 import styles from './InitialSounds.module.css';
 
 export type InitialSoundsMode = 'circle' | 'write';
@@ -19,6 +20,7 @@ const MIN_TILE_MM = 30;
 const PADDING_MM = 2;
 
 export default function InitialSounds({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -70,16 +72,18 @@ export default function InitialSounds({
           {mode === 'circle' ? (
             <div className={styles.choices} style={{ fontSize: `${letterSize}mm` }}>
               {item.choices.map((choice) => (
-                <span key={choice} className={styles.choice}>
+                <span key={choice} className={styles.choice} data-answer-circle={showAnswers && choice === item.letter || undefined}>
                   {formatLetter(choice)}
+                  {showAnswers && choice === item.letter && <AnswerCircle seed={`${seed}:sound:${i}:${choice}`} />}
                 </span>
               ))}
             </div>
           ) : (
             <div
               className={styles.writeBox}
-              style={{ width: `${boxSize}mm`, height: `${boxSize}mm` }}
-            />
+              data-answer={showAnswers ? "text" : undefined}
+              style={{ width: `${boxSize}mm`, height: `${boxSize}mm`, fontSize: `${letterSize}mm` }}
+            >{showAnswers && formatLetter(item.letter)}</div>
           )}
         </div>
       ))}

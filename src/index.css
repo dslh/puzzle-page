@@ -153,3 +153,18 @@ button, input, select, textarea {
     margin: 1cm;
   }
 }
+
+/* Answer marks use shape as well as colour, including on monochrome copies.
+   Outlines and inset borders do not change a puzzle's layout. */
+:root { --answer-ink: #dc5b61; }
+[data-answer] { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+[data-answer="text"][data-answer] { color: var(--answer-ink); fill: var(--answer-ink); font-weight: 700; }
+[data-answer="box"] { outline: 0.45mm dashed var(--answer-ink); outline-offset: -0.9mm; }
+[data-answer="path"] { fill: none; stroke: var(--answer-ink); stroke-linecap: round; stroke-linejoin: round; }
+[data-answer="model"][data-answer] { fill: none; stroke: var(--answer-ink); stroke-dasharray: 3 2; stroke-linecap: round; stroke-linejoin: round; }
+
+[data-answer="cross"]::before, [data-answer="cross"]::after { background: var(--answer-ink); }
+
+/* Low specificity preserves already-positioned pictures, such as life cycles. */
+:where([data-answer-circle]) { position: relative; }
+[data-answer-overlay] { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }

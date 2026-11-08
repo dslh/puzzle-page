@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import { curvePath, wallRuns } from './curves';
+import { clearance } from './concentric';
 import { generateMaze, type Maze as MazeType } from './generator';
 import type { GridShape, Point } from './grids';
 import { MAZE_THEMES, themeId } from './themes';
 import type { PuzzleProps } from '../../../types/puzzle';
+import { flowingPath } from '../../../utils/flowingPath';
+import AnswerPath from '../../AnswerPath';
 import styles from './Maze.module.css';
 
 export interface MazeConfig {
@@ -46,7 +49,7 @@ function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number)
   };
 }
 
-export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
+export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
   const gridShape = config?.gridShape ?? 'square';
   const ratio = config?.cellSizeRatio ?? 2;
   const branchiness = config?.branchiness ?? 'medium';
@@ -59,6 +62,11 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
   const maze: MazeType = useMemo(() => {
     return generateMaze(width, height, seed, branchiness, gridShape);
   }, [width, height, seed, branchiness, gridShape]);
+
+  const answerClearance = useMemo(() => Math.min(...maze.solution.map(index => {
+    const cell = maze.cells[index];
+    return clearance(cell.center, cell.corners);
+  })), [maze]);
 
   const runs = useMemo(() => (curvyWalls ? wallRuns(maze.walls) : []), [maze, curvyWalls]);
 
@@ -152,6 +160,8 @@ export default function Maze({ gridWidth = 4, gridHeight = 4, seed = 0, config }
               );
             })}
 
+        {showAnswers && <AnswerPath width={Math.max(1.5, cellSize * 0.12)}
+          d={flowingPath(maze.solution.map(index => toPx(maze.cells[index].center)), answerClearance * cellSize * 0.35, cellSize * 0.008)} />}
         {/* Draw start marker */}
         <text
           x={startCenter.x}

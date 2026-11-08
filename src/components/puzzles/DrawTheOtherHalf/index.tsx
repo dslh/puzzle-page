@@ -10,6 +10,7 @@ import {
   type ShapeLevel,
   type Subject,
 } from './generator';
+import AnswerPath from '../../AnswerPath';
 import styles from './DrawTheOtherHalf.module.css';
 
 export interface DrawTheOtherHalfConfig {
@@ -29,7 +30,7 @@ const toPath = (lines: Point[][]) => lines
   .map(points => points.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(''))
   .join('');
 
-export default function DrawTheOtherHalf({ gridWidth, gridHeight, seed, config }: PuzzleProps<DrawTheOtherHalfConfig>) {
+export default function DrawTheOtherHalf({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<DrawTheOtherHalfConfig>) {
   const level = config?.level ?? 'easy';
   const help = config?.help ?? 'corners';
   const mirror = config?.mirror ?? 'vertical';
@@ -55,6 +56,7 @@ export default function DrawTheOtherHalf({ gridWidth, gridHeight, seed, config }
           <circle key={i} cx={x} cy={y} r={0.7} className={styles.gridDot} />
         ))}
         <path d={toPath(puzzle.given)} className={styles.given} />
+        {showAnswers && <AnswerPath d={toPath(puzzle.answer)} dashed width={0.7} />}
         {help === 'dotted' && puzzle.answer.flatMap(traceDots).map(([x, y], i) => (
           <circle key={`t${i}`} cx={x} cy={y} r={0.5} className={styles.trace} />
         ))}

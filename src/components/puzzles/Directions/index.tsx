@@ -3,6 +3,7 @@ import type { PuzzleProps } from '../../../types/puzzle';
 import { ART, type ArtName } from './art';
 import {
   generateDirections,
+  directionsAnswer,
   DIRECTION_ARROWS,
   TOKEN_WIDTH_MM,
   stripHeightMm,
@@ -12,6 +13,9 @@ import {
   type Token,
 } from './generator';
 import type { Stamp } from './island';
+import { flowingPath } from '../../../utils/flowingPath';
+import AnswerPath from '../../AnswerPath';
+import AnswerCircle from '../../AnswerCircle';
 import styles from './Directions.module.css';
 
 export interface DirectionsConfig {
@@ -86,7 +90,7 @@ function Prompt({ mode, notation }: { mode: DirectionsMode; notation: Notation }
   }
 }
 
-export default function Directions({ gridWidth, gridHeight, seed, config }: PuzzleProps<DirectionsConfig>) {
+export default function Directions({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<DirectionsConfig>) {
   const mode = config?.mode ?? 'follow';
   const notation = config?.notation ?? 'arrows';
   const length = config?.length ?? 'medium';
@@ -103,6 +107,17 @@ export default function Directions({ gridWidth, gridHeight, seed, config }: Puzz
   const height = rows * cellMm;
   const tokenWidth = `${TOKEN_WIDTH_MM[notation]}mm`;
 
+  const answer = useMemo(() => showAnswers ? directionsAnswer(puzzle, mode, notation) : [], [puzzle, mode, notation, showAnswers]);
+  const routePath = () => {
+    let { x, y } = puzzle.start;
+    const points = [{ x: (x + 0.5) * cellMm, y: (y + 0.5) * cellMm }];
+    for (const token of answer) {
+      x += token.dir === 'right' ? token.count : token.dir === 'left' ? -token.count : 0;
+      y += token.dir === 'down' ? token.count : token.dir === 'up' ? -token.count : 0;
+      points.push({ x: (x + 0.5) * cellMm, y: (y + 0.5) * cellMm });
+    }
+    return flowingPath(points, cellMm * 0.18, cellMm * 0.012);
+  };
   const gridLines = [
     ...Array.from({ length: cols - 1 }, (_, i) => `M${(i + 1) * cellMm} 0 V${height}`),
     ...Array.from({ length: rows - 1 }, (_, i) => `M0 ${(i + 1) * cellMm} H${width}`),
@@ -111,7 +126,9 @@ export default function Directions({ gridWidth, gridHeight, seed, config }: Puzz
   return (
     <div className={styles.container}>
       <div className={styles.prompt}>
-        <Prompt mode={mode} notation={notation} />
+        {showAnswers && mode === 'write'
+          ? <span data-answer="text">Example route from <InlineIcon icon="ship" /> to <InlineIcon icon="chest" />.</span>
+          : <Prompt mode={mode} notation={notation} />}
       </div>
 
       <div className={styles.mapArea}>
@@ -133,6 +150,9 @@ export default function Directions({ gridWidth, gridHeight, seed, config }: Puzz
             <path d={gridLines} className={styles.gridLines} />
             {coast.map((d, i) => <path key={i} d={d} className={styles.coast} />)}
             {stamps.map((stamp, i) => <MapIcon key={i} {...stamp} />)}
+            {showAnswers && <AnswerPath d={routePath()} />}
+            {showAnswers && mode === 'follow' && <path data-answer="path" strokeWidth="0.9"
+              d={`M${(puzzle.goal.x + 0.25) * cellMm} ${(puzzle.goal.y + 0.25) * cellMm}l${cellMm * 0.5} ${cellMm * 0.5}m0 ${-cellMm * 0.5}l${-cellMm * 0.5} ${cellMm * 0.5}`} />}
           </g>
           <rect width={width} height={height} className={styles.border} />
         </svg>
@@ -141,7 +161,7 @@ export default function Directions({ gridWidth, gridHeight, seed, config }: Puzz
       <div className={styles.strip} style={{ height: `${stripHeightMm(puzzle.stripLines)}mm` }}>
         {mode === 'write'
           ? Array.from({ length: puzzle.boxCount }, (_, i) => (
-              <span key={i} className={`${styles.token} ${styles.answerBox}`} style={{ width: tokenWidth }} />
+              <span key={i} className={`${styles.token} ${styles.answerBox} ${notation === 'arrows' ? '' : styles.boxed}`} data-answer={showAnswers && answer[i] ? "text" : undefined} style={{ width: tokenWidth }}>{showAnswers && answer[i] && tokenText(answer[i], notation)}</span>
             ))
           : puzzle.tokens.map((token, i) => (
               <span
@@ -149,7 +169,8 @@ export default function Directions({ gridWidth, gridHeight, seed, config }: Puzz
                 className={`${styles.token} ${notation === 'arrows' ? '' : styles.boxed}`}
                 style={{ width: tokenWidth }}
               >
-                {tokenText(token, notation)}
+                <span data-answer-circle={showAnswers && i === puzzle.mistake?.index || undefined}>{tokenText(token, notation)}{showAnswers && i === puzzle.mistake?.index && <AnswerCircle seed={`${seed}:direction:${i}`} />}</span>
+                {showAnswers && i === puzzle.mistake?.index && <span className={styles.correction} data-answer="text">{tokenText(puzzle.mistake.correct, notation)}</span>}
               </span>
             ))}
       </div>

@@ -53,3 +53,5 @@
     -webkit-print-color-adjust: exact;
   }
 }
+
+.answerSlot { display: inline-flex; flex-shrink: 0; }

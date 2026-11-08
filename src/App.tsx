@@ -24,7 +24,13 @@ function App() {
   const compact = useCompactLayout();
   const docked = useDockedPanel();
 
-  // The page being made, or (for a child) the pages printed for them before
+  // Answer visibility belongs to this viewing session, not the saved worksheet.
+  const [answerView, setAnswerView] = useState<{ owner: string | undefined; visible: boolean }>({ owner: child?.id, visible: false });
+  const showAnswers = answerView.owner === child?.id && answerView.visible;
+  // Reset when changing child, including a switch back to a previous child.
+  if (answerView.owner !== child?.id) setAnswerView({ owner: child?.id, visible: false });
+
+  // The page being made, or (for a child) their previously printed pages.
   const [view, setView] = useState<'page' | 'pages'>('page');
   const showingPages = view === 'pages' && child !== undefined;
 
@@ -154,21 +160,23 @@ function App() {
   const printedRef = useRef<HTMLButtonElement>(null);
 
   const handlePrint = () => {
-    change(recordPrint);
+    if (!showAnswers) change(recordPrint);
     window.print();
     // The print dialog has closed by now; show the page going into the history
-    if (child) {
+    if (child && !showAnswers) {
       fileAway(document.querySelector<HTMLElement>('[data-sheet]'), printedRef.current);
       setNotice(`${child.name}’s page is kept in Printed`);
     }
   };
 
   const handleClear = () => {
+    setAnswerView({ owner: child?.id, visible: false });
     setPage(() => [], 'Cleared the page');
   };
 
   // Puts a page from the history on the desk, in place of the one there
   const choosePage = (page: PlacedPuzzle[], print: boolean) => {
+    setAnswerView({ owner: child?.id, visible: false });
     change(
       s => {
         const next = updateSlot(s, () => ({ page }));
@@ -262,7 +270,7 @@ function App() {
               {showingPages ? `Pages printed for ${child.name}` : status}
             </span>
             {!showingPages && (
-              <>
+              <div className={styles.pageActions}>
                 <button
                   type="button"
                   className={styles.clearButton}
@@ -271,15 +279,20 @@ function App() {
                 >
                   Clear page
                 </button>
+                <label className={styles.answerToggle}>
+                  <input type="checkbox" checked={showAnswers} disabled={puzzles.length === 0}
+                    onChange={e => setAnswerView({ owner: child?.id, visible: e.target.checked })} />
+                  Show answer key
+                </label>
                 <button
                   type="button"
                   className={styles.printButton}
                   onClick={handlePrint}
                   disabled={puzzles.length === 0}
                 >
-                  Print
+                  {showAnswers ? 'Print answer key' : 'Print'}
                 </button>
-              </>
+              </div>
             )}
           </div>
           {showingPages && (
@@ -294,6 +307,7 @@ function App() {
           <div className={showingPages ? styles.offScreen : styles.pageArea}>
             <GridLayout
               puzzles={puzzles}
+              showAnswers={showAnswers}
               onAddPuzzle={handleAddPuzzle}
               onRemovePuzzle={handleRemovePuzzle}
               onRerollPuzzle={handleRerollPuzzle}

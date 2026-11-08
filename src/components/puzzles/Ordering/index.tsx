@@ -8,6 +8,7 @@ export interface OrderingConfig {
 }
 
 export default function Ordering({
+  showAnswers = false,
   gridWidth = 5,
   gridHeight = 3,
   seed,
@@ -35,7 +36,7 @@ export default function Ordering({
               >
                 {item.display}
               </span>
-              <div className={styles.answerBox}></div>
+              <div className={styles.answerBox} data-answer={showAnswers ? "text" : undefined}>{showAnswers && (1 + row.items.filter(other => other.value < item.value).length)}</div>
             </div>
           ))}
         </div>

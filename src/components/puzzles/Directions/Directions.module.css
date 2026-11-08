@@ -136,3 +136,6 @@
     page-break-inside: avoid;
   }
 }
+
+.token { position: relative; }
+.correction { position: absolute; bottom: 100%; font-size: 0.7em; white-space: nowrap; padding: 0.5mm; background: white; border: 0.3mm dashed var(--answer-ink); }

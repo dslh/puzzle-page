@@ -120,6 +120,7 @@ function cellSize(availableWidth: number, availableHeight: number, cols: number,
 }
 
 export default function ColourBySightWord({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -214,7 +215,8 @@ export default function ColourBySightWord({
               <div
                 key={index}
                 className={`${styles.cell} ${edges}`}
-                style={{ fontSize: `${wordFontSize.toFixed(1)}px` }}
+                data-answer={showAnswers ? "box" : undefined}
+                style={{ fontSize: `${wordFontSize.toFixed(1)}px`, backgroundColor: showAnswers ? puzzle.key[region].hex : undefined }}
               >
                 {displayWord(puzzle.key[region].word, letterCase)}
               </div>

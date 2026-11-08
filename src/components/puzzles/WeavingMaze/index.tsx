@@ -1,6 +1,7 @@
 import { useId, useMemo } from 'react';
 import {
   generateWeavingMaze,
+  weavingAnswer,
   type WeavingMaze as WeavingMazeType,
   type Bridge,
   type CrossingDensity,
@@ -8,6 +9,8 @@ import {
 } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { MAZE_THEMES } from '../Maze/themes';
+import { flowingPath } from '../../../utils/flowingPath';
+import AnswerPath from '../../AnswerPath';
 import styles from './WeavingMaze.module.css';
 
 export interface WeavingMazeConfig {
@@ -110,6 +113,7 @@ const circlePath = (centres: Point[], r: number) =>
     .join('');
 
 export default function WeavingMaze({
+  showAnswers = false,
   gridWidth = 5,
   gridHeight = 5,
   seed = 0,
@@ -124,6 +128,8 @@ export default function WeavingMaze({
   const maze: WeavingMazeType = useMemo(() => {
     return generateWeavingMaze(width, height, seed, crossingDensity, branchiness);
   }, [width, height, seed, crossingDensity, branchiness]);
+
+  const solution = useMemo(() => weavingAnswer(maze), [maze]);
 
   const theme = useMemo(() => {
     const themeIndex = Math.floor(seededRandom(seed + 12345) * MAZE_THEMES.length);
@@ -341,6 +347,9 @@ export default function WeavingMaze({
           />
         ))}
 
+        {/* Draw at corridor level so bridges still hide the route beneath them. */}
+        {showAnswers && <AnswerPath width={Math.max(1.5, cellSize * 0.1)}
+          d={flowingPath(solution.map(p => centreOf(p.x, p.y)), cellSize * 0.16, cellSize * 0.008)} />}
         {/* Bridges, drawn over everything they cross */}
         <path
           d={segmentPath(bridgeSpans)}
@@ -357,6 +366,19 @@ export default function WeavingMaze({
           strokeLinecap="butt"
         />
 
+        {showAnswers && maze.bridges.map((bridge, i) => {
+          const used = solution.slice(1).some((to, j) => {
+            const from = solution[j];
+            return (bridge.start.x === from.x && bridge.start.y === from.y && bridge.end.x === to.x && bridge.end.y === to.y) ||
+              (bridge.start.x === to.x && bridge.start.y === to.y && bridge.end.x === from.x && bridge.end.y === from.y);
+          });
+          if (!used) return null;
+          // Only the span goes above the bridge. Redrawing the entire route here
+          // would reveal tunnels on top of bridges at the crossings.
+          const span = bridgeSpans[i];
+          return <AnswerPath key={i} width={Math.max(1.5, cellSize * 0.1)}
+            d={flowingPath([{ x: span.x1, y: span.y1 }, { x: span.x2, y: span.y2 }], 0, cellSize * 0.008)} />;
+        })}
         {/* Start and finish markers */}
         <text
           x={start.x}

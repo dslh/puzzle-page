@@ -5,7 +5,6 @@ export interface SpotTheDifferenceConfig {
   scene: SceneChoice;
   differences: 3 | 5 | 7;
   outline: boolean;
-  answers: boolean;
 }
 
 // Each change belongs to a separate, unobscured part of the illustration.

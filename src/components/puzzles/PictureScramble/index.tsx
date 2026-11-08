@@ -17,7 +17,7 @@ function getQuadrantPosition(quadrantIndex: number): string {
   return positions[quadrantIndex];
 }
 
-export default function PictureScramble({ seed, config }: PuzzleProps<PictureScrambleConfig>) {
+export default function PictureScramble({ showAnswers = false, seed, config }: PuzzleProps<PictureScrambleConfig>) {
   const puzzle = useMemo(() => generateScramble(seed), [seed]);
   const imageUrl = config?.imageUrl;
 
@@ -47,7 +47,10 @@ export default function PictureScramble({ seed, config }: PuzzleProps<PictureScr
                 backgroundSize: '200% 200%',
                 transform: `rotate(${quadrant.rotation}deg)`,
               }}
-            />
+            >{showAnswers && <span className={styles.answer} data-answer="text" style={{ transform: `rotate(${-quadrant.rotation}deg)` }}>
+              {['Top left', 'Top right', 'Bottom left', 'Bottom right'][quadrant.originalPosition]}
+              {quadrant.rotation !== 0 && <><br />Turn {360 - quadrant.rotation}° clockwise</>}
+            </span>}</div>
           ))}
         </div>
       )}

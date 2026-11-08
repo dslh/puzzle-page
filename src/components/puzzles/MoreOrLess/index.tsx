@@ -20,6 +20,7 @@ function SideBox({ side, width, height }: { side: Side; width: number; height: n
 }
 
 export default function MoreOrLess({
+  showAnswers = false,
   gridWidth = 6,
   gridHeight = 7,
   seed,
@@ -43,8 +44,8 @@ export default function MoreOrLess({
         <div key={rowIndex} className={styles.row}>
           <SideBox side={problem.left} width={puzzle.sideWidth} height={puzzle.sideHeight} />
           <span className={styles.answerBox}>
-            {workedExample && rowIndex === 0 && (
-              <span className={styles.filledIn}>{problem.relation}</span>
+            {(showAnswers || (workedExample && rowIndex === 0)) && (
+              <span className={styles.filledIn} data-answer={showAnswers && !(workedExample && rowIndex === 0) ? "text" : undefined}>{problem.relation}</span>
             )}
           </span>
           <SideBox side={problem.right} width={puzzle.sideWidth} height={puzzle.sideHeight} />

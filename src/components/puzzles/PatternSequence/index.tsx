@@ -103,6 +103,7 @@ function ItemSvg({ item, blank, size }: { item: PatternItem; blank: boolean; siz
 }
 
 export default function PatternSequence({
+  showAnswers = false,
   gridWidth = 8,
   gridHeight = 2,
   seed,
@@ -139,7 +140,10 @@ export default function PatternSequence({
         <div key={rowIndex} className={styles.row}>
           <div className={styles.itemsContainer}>
             {row.items.map((item, index) => (
-              <ItemSvg key={index} item={item} blank={row.blanks.includes(index)} size={itemSize} />
+              <span key={index} className={styles.answerSlot}
+                data-answer={showAnswers && row.blanks.includes(index) ? 'box' : undefined}>
+                <ItemSvg item={item} blank={!showAnswers && row.blanks.includes(index)} size={itemSize} />
+              </span>
             ))}
           </div>
         </div>

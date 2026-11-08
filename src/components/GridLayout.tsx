@@ -11,6 +11,7 @@ import PuzzleWrapper from './PuzzleWrapper';
 import styles from './GridLayout.module.css';
 
 interface GridLayoutProps {
+  showAnswers?: boolean;
   puzzles: PlacedPuzzle[];
   onAddPuzzle: (puzzle: PlacedPuzzle) => void;
   onRemovePuzzle?: (id: string) => void;
@@ -51,7 +52,7 @@ interface Ghost {
   excludeId?: string;
 }
 
-export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, selectedId, onSelect, emptyPrompt }: GridLayoutProps) {
+export default function GridLayout({ showAnswers = false, puzzles, onAddPuzzle, onRemovePuzzle, onRerollPuzzle, onUpdatePuzzle, onResizePuzzle, selectedId, onSelect, emptyPrompt }: GridLayoutProps) {
   const [dragOver, setDragOver] = useState<{ x: number; y: number } | null>(null);
   const [dragData, setDragData] = useState<DragState | null>(null);
   const [move, setMove] = useState<MoveState | null>(null);
@@ -302,6 +303,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
           '--sheet-scale': scale,
         } as React.CSSProperties}
       >
+        {showAnswers && <div className={styles.answerLabel}>Answer key · Added answers have red marks or dashed boxes</div>}
         {renderGridCells()}
 
         {puzzles.length === 0 && leaving.length === 0 && !dragData && emptyPrompt && (
@@ -313,6 +315,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
           <PuzzleWrapper
             key={puzzle.id}
             puzzle={puzzle}
+            showAnswers={showAnswers}
             onRemove={onRemovePuzzle}
             onReroll={onRerollPuzzle}
             onResize={onResizePuzzle}
@@ -326,7 +329,7 @@ export default function GridLayout({ puzzles, onAddPuzzle, onRemovePuzzle, onRer
         ))}
 
         {leaving.map(puzzle => (
-          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} leaving />
+          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} showAnswers={showAnswers} leaving />
         ))}
 
         <p className={styles.announcement} aria-live="polite">

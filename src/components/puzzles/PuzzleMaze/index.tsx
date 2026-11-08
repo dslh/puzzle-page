@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
 import { generatePuzzleMaze, ALL_DIRECTIONS, type Direction, type EmojiMode } from './generator';
+import { flowingPath } from '../../../utils/flowingPath';
+import AnswerPath from '../../AnswerPath';
 import styles from './PuzzleMaze.module.css';
 
 export interface PuzzleMazeConfig {
@@ -17,7 +19,7 @@ function getArrowEmoji(dir: Direction): string {
   }
 }
 
-export default function PuzzleMaze({ gridWidth, gridHeight, seed, config }: PuzzleProps<PuzzleMazeConfig>) {
+export default function PuzzleMaze({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<PuzzleMazeConfig>) {
   const emojiMode = config?.emojiMode ?? 'random';
 
   // Double the grid dimensions for more cells; subtract 1 row for the legend
@@ -35,6 +37,18 @@ export default function PuzzleMaze({ gridWidth, gridHeight, seed, config }: Puzz
   const totalWidth = gridWidth * CELL_SIZE_MM;
   const gridCellSize = CELL_SIZE_MM / 2;
   const emojiFontSize = gridCellSize * 0.7;
+
+  const route = [{ x: (puzzleData.startX + 0.5) * gridCellSize, y: 0 }];
+  if (showAnswers) {
+    let x = puzzleData.startX, y = 0;
+    for (let i = 0; i <= cols * rows && x >= 0 && x < cols && y >= 0 && y < rows; i++) {
+      route.push({ x: (x + 0.5) * gridCellSize, y: (y + 0.5) * gridCellSize });
+      const dir = grid[y][x].direction;
+      x += dir === 'right' ? 1 : dir === 'left' ? -1 : 0;
+      y += dir === 'down' ? 1 : dir === 'up' ? -1 : 0;
+      if (y === rows) route.push({ x: (x + 0.5) * gridCellSize, y: rows * gridCellSize });
+    }
+  }
 
   return (
     <div className={styles.container} style={{ width: `${totalWidth}mm`, height: `${totalHeight}mm` }}>
@@ -63,6 +77,9 @@ export default function PuzzleMaze({ gridWidth, gridHeight, seed, config }: Puzz
           gridTemplateRows: `repeat(${rows}, ${gridCellSize}mm)`,
         }}
       >
+        {showAnswers && <svg className={styles.answerRoute} viewBox={`0 0 ${cols * gridCellSize} ${rows * gridCellSize}`}>
+          <AnswerPath d={flowingPath(route, gridCellSize * 0.2, gridCellSize * 0.012)} width={0.5} />
+        </svg>}
         {grid.map((row, y) =>
           row.map((cell, x) => (
             <div

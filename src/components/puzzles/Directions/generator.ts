@@ -430,3 +430,31 @@ export function generateDirections(
     start: { x: 0, y: 0 }, goal: { x: 1, y: 0 }, tokens: [{ dir: 'right', count: 1 }], boxCount: 1, stripLines: 1,
   };
 }
+
+/** One valid answer. Write mode may have several equally short routes. */
+export function directionsAnswer(puzzle: DirectionsPuzzle, mode: DirectionsMode, notation: Notation): Token[] {
+  if (mode !== 'write') return puzzle.tokens.map((token, i) => i === puzzle.mistake?.index ? puzzle.mistake.correct : token);
+  const queue: { point: Point; steps: Token[]; turns: number; dir?: Direction }[] = [{ point: puzzle.start, steps: [], turns: 0 }];
+  const seen = new Set<string>();
+  while (queue.length) {
+    queue.sort((a, b) => a.steps.length - b.steps.length || a.turns - b.turns);
+    const current = queue.shift()!;
+    const state = `${key(current.point)},${current.dir ?? ''}`;
+    if (seen.has(state)) continue;
+    seen.add(state);
+    if (key(current.point) === key(puzzle.goal)) {
+      const runs: Token[] = [];
+      for (const step of current.steps) {
+        if (runs.at(-1)?.dir === step.dir) runs[runs.length - 1].count++;
+        else runs.push({ ...step });
+      }
+      return toNotation(runs, notation);
+    }
+    for (const dir of ALL_DIRECTIONS) {
+      const point = { x: current.point.x + STEP[dir].x, y: current.point.y + STEP[dir].y };
+      if (point.x < 0 || point.x >= puzzle.cols || point.y < 0 || point.y >= puzzle.rows || puzzle.blocked.has(key(point))) continue;
+      queue.push({ point, steps: [...current.steps, { dir, count: 1 }], turns: current.turns + (current.dir === dir ? 0 : 1), dir });
+    }
+  }
+  return [];
+}

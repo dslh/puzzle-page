@@ -56,3 +56,6 @@
     -webkit-print-color-adjust: exact;
   }
 }
+
+.quadrant { position: relative; }
+.answer { position: absolute; inset: 40% 8%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: #ffffffed; border: 1.5px dashed var(--answer-ink); font: 12px var(--ui-font); }

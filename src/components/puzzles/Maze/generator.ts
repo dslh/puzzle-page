@@ -1,4 +1,5 @@
 import { buildGrid, type GridCell, type GridShape, type Point } from './grids';
+import { answerPath } from '../../../utils/answerPath';
 import { SeededRandom } from '../../../utils/random';
 
 export interface Wall {
@@ -8,6 +9,7 @@ export interface Wall {
 
 export interface Maze {
   cells: GridCell[];
+  solution: number[];
   /** Every wall still standing, including the outer edge of the maze. */
   walls: Wall[];
   width: number;
@@ -109,6 +111,7 @@ export function generateMaze(
 
   return {
     cells,
+    solution: answerPath(grid.start, grid.end, node => passages[node]),
     walls,
     width: grid.width,
     height: grid.height,

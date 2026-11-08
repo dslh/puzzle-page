@@ -8,6 +8,7 @@ import {
   type MissingCircle,
 } from './generator';
 import { CELL_SIZE_MM, type PuzzleProps } from '../../../types/puzzle';
+import AnswerCircle from '../../AnswerCircle';
 import styles from './LifeCycles.module.css';
 
 export interface LifeCyclesConfig {
@@ -52,7 +53,7 @@ function Picture({ stage, size }: { stage: Stage; size: number }) {
  * The stages round a circle, clockwise from the top, joined by arrows. One is
  * a dashed ring for the child to draw in.
  */
-function Circle({ circle, size }: { circle: MissingCircle; size: number }) {
+function Circle({ circle, size, showAnswers, seed }: { circle: MissingCircle; size: number; showAnswers: boolean; seed: number }) {
   const arrowId = useId();
   const n = circle.stages.length;
   const centre = size / 2;
@@ -91,15 +92,16 @@ function Circle({ circle, size }: { circle: MissingCircle; size: number }) {
       {circle.stages.map((stage, i) => {
         const [x, y] = point(at(i));
         const style = { left: `${x - picture / 2}mm`, top: `${y - picture / 2}mm` };
-        return i === circle.missing ? (
+        return i === circle.missing && !showAnswers ? (
           <div
             key={i}
             className={styles.blank}
             style={{ ...style, width: `${picture}mm`, height: `${picture}mm` }}
           />
         ) : (
-          <div key={i} className={styles.placed} style={style}>
+          <div key={i} className={styles.placed} data-answer-circle={showAnswers && i === circle.missing || undefined} style={style}>
             <Picture stage={stage} size={picture} />
+            {showAnswers && i === circle.missing && <AnswerCircle seed={`${seed}:cycle:${i}`} />}
           </div>
         );
       })}
@@ -108,6 +110,7 @@ function Circle({ circle, size }: { circle: MissingCircle; size: number }) {
 }
 
 export default function LifeCycles({
+  showAnswers = false,
   gridWidth = 8,
   gridHeight = 4,
   seed,
@@ -132,7 +135,7 @@ export default function LifeCycles({
       : Math.min(width, height / count);
     return (
       <div className={`${styles.container} ${puzzle.across ? '' : styles.down}`}>
-        {puzzle.circles.map((c, i) => <Circle key={i} circle={c} size={size} />)}
+        {puzzle.circles.map((c, i) => <Circle key={i} circle={c} size={size} showAnswers={showAnswers} seed={seed + i * 103} />)}
       </div>
     );
   }
@@ -149,7 +152,7 @@ export default function LifeCycles({
               <div key={place} className={styles.item}>
                 <Picture stage={stage} size={picture} />
                 <div className={styles.answer} style={{ width: `${BOX_MM}mm`, height: `${BOX_MM}mm` }}>
-                  {firstShown && place === 1 && '1'}
+                  {firstShown && place === 1 ? '1' : showAnswers ? <span data-answer="text">{place}</span> : null}
                 </div>
               </div>
             ))}

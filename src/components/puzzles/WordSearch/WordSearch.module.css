@@ -76,3 +76,6 @@
     background: #fafafa;
   }
 }
+
+.grid { position: relative; }
+.answers { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }

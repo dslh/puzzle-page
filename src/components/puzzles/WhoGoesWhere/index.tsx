@@ -51,7 +51,7 @@ function PictureClue({ clue, puzzle }: { clue: Clue; puzzle: WhoGoesWherePuzzle 
   );
 }
 
-export default function WhoGoesWhere({ gridWidth, gridHeight, seed, config }: PuzzleProps<WhoGoesWhereConfig>) {
+export default function WhoGoesWhere({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<WhoGoesWhereConfig>) {
   const level = config?.level ?? 'easy';
   const houseCount = config?.houses ?? 3;
   const clueStyle = config?.clues ?? 'pictures';
@@ -112,6 +112,9 @@ export default function WhoGoesWhere({ gridWidth, gridHeight, seed, config }: Pu
             colour={house.colour}
             number={i + 1}
             open
+            answer={showAnswers}
+            answerSeed={seed}
+            animal={showAnswers ? puzzle.animals[puzzle.solution[i]].emoji : undefined}
             style={{ width: `${houseSize}mm`, height: `${houseSize}mm` }}
           />
         ))}

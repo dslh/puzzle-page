@@ -19,13 +19,14 @@ export interface MissingNumbersConfig {
   gaps: MissingNumbersGaps;
 }
 
-function Box({ cell }: { cell: NumberCell }) {
+function Box({ cell, showAnswers }: { cell: NumberCell; showAnswers: boolean }) {
   return (
-    <div className={styles.box}>{!cell.blank && cell.value}</div>
+    <div className={styles.box} data-answer={showAnswers && cell.blank ? "text" : undefined}>{(!cell.blank || showAnswers) && cell.value}</div>
   );
 }
 
 export default function MissingNumbers({
+  showAnswers = false,
   gridWidth = 6,
   gridHeight = 4,
   seed,
@@ -48,7 +49,7 @@ export default function MissingNumbers({
         <div className={styles.square}>
           {puzzle.rows.map((row, r) => (
             <div key={r} className={styles.squareRow}>
-              {row.map((cell, c) => <Box key={c} cell={cell} />)}
+              {row.map((cell, c) => <Box key={c} cell={cell} showAnswers={showAnswers} />)}
             </div>
           ))}
         </div>
@@ -60,7 +61,7 @@ export default function MissingNumbers({
     <div className={`${styles.container} ${styles.tracks}`}>
       {puzzle.rows.map((row, r) => (
         <div key={r} className={styles.track}>
-          {row.map((cell, c) => <Box key={c} cell={cell} />)}
+          {row.map((cell, c) => <Box key={c} cell={cell} showAnswers={showAnswers} />)}
         </div>
       ))}
     </div>

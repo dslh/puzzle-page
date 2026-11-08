@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { selectPuzzle, type Difficulty, type PuzzleMode } from './generator';
 import { parseFEN, applyMove, type PieceType } from './fenParser';
+import AnswerPath from '../../AnswerPath';
 import styles from './Chess.module.css';
 
 // Import piece SVGs
@@ -41,16 +42,16 @@ const PIECE_IMAGES: Record<PieceType, string> = {
   p: pawnDark,
 };
 
-export default function Chess({ seed = 0, config }: PuzzleProps<ChessConfig>) {
+export default function Chess({ showAnswers = false, seed = 0, config }: PuzzleProps<ChessConfig>) {
   const difficulty = config?.difficulty ?? 'easy';
   const mode = config?.mode ?? 'mate';
 
+  const puzzle = useMemo(() => selectPuzzle(seed, difficulty, mode), [seed, difficulty, mode]);
   const { board, activeColor } = useMemo(() => {
-    const puzzle = selectPuzzle(seed, difficulty, mode);
     const initialPosition = parseFEN(puzzle.fen);
     // Apply the setup move to get the actual puzzle position
     return applyMove(initialPosition, puzzle.setupMove);
-  }, [seed, difficulty, mode]);
+  }, [puzzle]);
 
   const toMoveKing = activeColor === 'w' ? kingLight : kingDark;
 
@@ -63,12 +64,27 @@ export default function Chess({ seed = 0, config }: PuzzleProps<ChessConfig>) {
     return board.map(row => [...row].reverse()).reverse();
   }, [board, activeColor]);
 
+  const move = puzzle.solution[0];
+  const at = (square: string) => {
+    const col = square.charCodeAt(0) - 97, row = 8 - Number(square[1]);
+    return activeColor === 'w' ? [col + 0.5, row + 0.5] : [7.5 - col, 7.5 - row];
+  };
+  const [x1, y1] = at(move.slice(0, 2)), [x2, y2] = at(move.slice(2, 4));
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const arrow = `M${x2 - 0.3 * Math.cos(angle - 0.5)} ${y2 - 0.3 * Math.sin(angle - 0.5)}L${x2} ${y2}L${x2 - 0.3 * Math.cos(angle + 0.5)} ${y2 - 0.3 * Math.sin(angle + 0.5)}`;
+
   return (
     <div className={styles.container}>
       <div className={styles.turnIndicator}>
         <img src={toMoveKing} alt="To move" className={styles.turnIcon} />
+        {showAnswers && <span className={styles.answerMove} data-answer="text">
+          {move.slice(0, 2)} → {move.slice(2, 4)}{move[4] ? ` = ${move[4].toUpperCase()}` : ''}
+        </span>}
       </div>
       <div className={styles.board}>
+        {showAnswers && <svg className={styles.answerRoute} viewBox="0 0 8 8">
+          <AnswerPath width={0.075} d={`M${x1} ${y1}L${x2} ${y2} ${arrow}`} />
+        </svg>}
         {displayBoard.map((row, rowIndex) =>
           row.map((piece, colIndex) => {
             // Calculate original board position for consistent square colors

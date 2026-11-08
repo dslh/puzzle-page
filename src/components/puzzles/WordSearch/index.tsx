@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { generateWordSearch } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import LeftOutNotice from '../../LeftOutNotice';
+import { CircleStroke } from '../../AnswerCircle';
 import styles from './WordSearch.module.css';
 
 export interface WordSearchConfig {
@@ -22,6 +23,7 @@ function calculateGridSize(gridWidth: number, gridHeight: number): number {
 }
 
 export default function WordSearch({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -62,6 +64,16 @@ export default function WordSearch({
           gridTemplateRows: `repeat(${puzzle.gridSize}, ${cellSize}px)`,
         }}
       >
+        {showAnswers && <svg className={styles.answers} viewBox={`0 0 ${puzzle.gridSize * cellSize} ${puzzle.gridSize * cellSize}`}>
+          {puzzle.words.map((word, i) => {
+            const x = (word.startX + 0.5) * cellSize, y = (word.startY + 0.5) * cellSize;
+            const dx = word.direction.dx, dy = word.direction.dy;
+            const length = (word.word.length - 1) * cellSize * Math.hypot(dx, dy);
+            return <g key={i} transform={`translate(${x} ${y}) rotate(${Math.atan2(dy, dx) * 180 / Math.PI})`}>
+              <CircleStroke seed={`${seed}:word:${word.word}`} cx={length / 2} cy={0} rx={cellSize * 0.4} ry={cellSize * 0.4} span={length} width={1.8} />
+            </g>;
+          })}
+        </svg>}
         {puzzle.grid.map((row, y) =>
           row.map((letter, x) => (
             <div

@@ -49,7 +49,21 @@ Live at https://puzzle-page.fly.dev
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |
 | Colour by Sight Word | colour count, case, custom words |
-| Spot the Difference | cottage garden / seaside / woodland camp / farmyard / playground / surprise me, 3 / 5 / 7 differences, black and white, marked answers |
+| Spot the Difference | cottage garden / seaside / woodland camp / farmyard / playground / surprise me, 3 / 5 / 7 differences, black and white |
+
+## Answer keys
+
+Use **Show answer key** beside Print to reveal answers across the page. Print
+changes to **Print answer key**; key copies do not add to a child’s printed-page
+history. Answers start hidden when reopening a page or switching child. The view
+does not change seeds, settings or saved worksheets.
+
+Marks use a lighter red for dashed circles, gently curved routes and text. Coloured symbols keep their actual
+colour; dashed red borders distinguish revealed answers from givens. Answer
+circles have slightly uneven loops with overlapping pen ends; their seeded
+variation stays the same on screen and in print. Writing
+activities show models where useful; tracing and dot-marker activities that
+already supply the full model stay unchanged.
 
 ## Getting Started
 
@@ -66,6 +80,13 @@ Spot the Difference has focused generator and SVG checks:
 ```bash
 node_modules/.bin/esbuild scripts/test-spot-the-difference.ts --bundle --platform=node --jsx=automatic --outfile=/tmp/spot-difference-test.cjs
 node --test /tmp/spot-difference-test.cjs
+```
+
+Answer routes and chess data have focused checks too:
+
+```bash
+node_modules/.bin/esbuild scripts/test-answer-keys.ts --bundle --platform=node --jsx=automatic --loader:.css=empty --outfile=/tmp/puzzle-answer-tests.cjs
+node --test /tmp/puzzle-answer-tests.cjs
 ```
 
 ## Usage

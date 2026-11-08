@@ -9,6 +9,7 @@ import {
   type PatternSize,
   type Point,
 } from './generator';
+import AnswerPath from '../../AnswerPath';
 import styles from './PreWriting.module.css';
 
 export interface PreWritingConfig {
@@ -24,7 +25,7 @@ export interface PreWritingConfig {
 const toPath = (points: Point[], dy: number) =>
   points.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${(y + dy).toFixed(2)}`).join('');
 
-export default function PreWriting({ gridWidth, gridHeight, seed, config }: PuzzleProps<PreWritingConfig>) {
+export default function PreWriting({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<PreWritingConfig>) {
   const line = config?.line ?? 'dotted';
   const patterns = config?.patterns ?? DEFAULT_PATTERNS;
   const size = config?.size ?? 'medium';
@@ -49,6 +50,7 @@ export default function PreWriting({ gridWidth, gridHeight, seed, config }: Puzz
               <g key={i}>
                 <path d={d} className={styles.roadEdge} strokeWidth={puzzle.roadWidth + 2 * ROAD_EDGE} />
                 <path d={d} className={styles.roadSurface} strokeWidth={puzzle.roadWidth} />
+                {showAnswers && <AnswerPath d={d} width={0.6} dashed />}
                 {([[row.from, row.theme.start], [row.to, row.theme.end]] as const).map(([[x, y], emoji]) => (
                   <text
                     key={emoji}
@@ -78,6 +80,7 @@ export default function PreWriting({ gridWidth, gridHeight, seed, config }: Puzz
                   strokeWidth={Math.min(1, puzzle.dotSpacing * 0.5)}
                 />
               ))}
+              {showAnswers && row.answer.map((stroke, j) => <AnswerPath key={`a${j}`} d={toPath(stroke, row.y)} width={0.5} dashed />)}
               {row.starts.map(([x, y], j) => (
                 <circle key={`s${j}`} cx={x} cy={y + row.y} r={1.1} className={styles.start} />
               ))}

@@ -19,7 +19,7 @@ export interface SudokuConfig {
   customSymbols?: string;
 }
 
-export default function Sudoku({ seed = 0, config }: PuzzleProps<SudokuConfig>) {
+export default function Sudoku({ showAnswers = false, seed = 0, config }: PuzzleProps<SudokuConfig>) {
   const size = config?.size ?? 3;
   const symbolType = config?.symbolType ?? 'colors';
   const customSymbols = parseCustomSymbols(config?.customSymbols ?? '', size);
@@ -79,8 +79,8 @@ export default function Sudoku({ seed = 0, config }: PuzzleProps<SudokuConfig>) 
               .join(' ');
 
             return (
-              <div key={`${rowIndex}-${colIndex}`} className={cellClasses}>
-                {cell.isGiven ? renderCell(cell.value) : ''}
+              <div key={`${rowIndex}-${colIndex}`} className={cellClasses} data-answer={showAnswers && !cell.isGiven ? "box" : undefined}>
+                {cell.isGiven || showAnswers ? renderCell(puzzle.solution[rowIndex][colIndex]) : ''}
               </div>
             );
           })

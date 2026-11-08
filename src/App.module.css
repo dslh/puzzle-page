@@ -25,6 +25,7 @@
 /* Sits along the top edge of the sheet, at its width */
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   width: 190mm;
@@ -350,3 +351,26 @@
     display: none !important;
   }
 }
+
+.pageActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pageActions button, .viewSwitch { flex-shrink: 0; white-space: nowrap; }
+
+.answerToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  color: var(--paper);
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.answerToggle input { accent-color: var(--answer-ink); }

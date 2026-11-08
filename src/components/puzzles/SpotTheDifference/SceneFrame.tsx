@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { CircleStroke } from '../../AnswerCircle';
 import type { GeneratedScene } from './generator';
 import { FEATURE_PART, type sceneLayout } from './layout';
 
@@ -22,7 +23,9 @@ export default function SceneFrame({ scene, second, outline, answers, layout, ch
         {children}
         {second && answers && scene.changes.map(key => {
           const { x, y, radius } = scene.features[key];
-          return <circle key={key} transform={transform(FEATURE_PART[key])} cx={x} cy={y} r={radius} fill="none" stroke={outline ? INK : '#b7463f'} strokeWidth="3" strokeDasharray="7 4" />;
+          return <g key={key} transform={transform(FEATURE_PART[key])}>
+            <CircleStroke seed={JSON.stringify([key, scene.variants, scene.placements])} cx={x} cy={y} rx={radius} ry={radius} width={3} dash="7 4" />
+          </g>;
         })}
       </g>
     </svg>

@@ -1,3 +1,4 @@
+import { answerPath } from '../../../utils/answerPath';
 import { SeededRandom } from '../../../utils/random';
 
 export interface WeavingCell {
@@ -290,4 +291,23 @@ function addConnection(a: WeavingCell, b: WeavingCell): void {
     a.connections.top = true;
     b.connections.bottom = true;
   }
+}
+
+/** A bridge connects only its endpoints; the cells below remain a separate passage. */
+export function weavingAnswer(maze: WeavingMaze): { x: number; y: number }[] {
+  const id = (x: number, y: number) => y * maze.width + x;
+  const graph = maze.grid.flat().map(cell => {
+    const edges: number[] = [];
+    if (cell.connections.top) edges.push(id(cell.x, cell.y - 1));
+    if (cell.connections.right) edges.push(id(cell.x + 1, cell.y));
+    if (cell.connections.bottom) edges.push(id(cell.x, cell.y + 1));
+    if (cell.connections.left) edges.push(id(cell.x - 1, cell.y));
+    return edges;
+  });
+  for (const bridge of maze.bridges) {
+    const a = id(bridge.start.x, bridge.start.y), b = id(bridge.end.x, bridge.end.y);
+    graph[a].push(b); graph[b].push(a);
+  }
+  return answerPath(id(maze.start.x, maze.start.y), id(maze.end.x, maze.end.y), node => graph[node])
+    .map(node => ({ x: node % maze.width, y: Math.floor(node / maze.width) }));
 }

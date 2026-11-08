@@ -77,6 +77,7 @@ interface GlyphProps {
   bottom?: number;
   strokeClass: string;
   showGuides?: boolean;
+  answer?: boolean;
 }
 
 function Arrow({ x, y, dx, dy, scale }: { x: number; y: number; dx: number; dy: number; scale: number }) {
@@ -100,7 +101,7 @@ function Arrow({ x, y, dx, dy, scale }: { x: number; y: number; dx: number; dy: 
   );
 }
 
-function Glyph({ form, height, top = 0, bottom = 100, strokeClass, showGuides = false }: GlyphProps) {
+function Glyph({ form, height, top = 0, bottom = 100, strokeClass, showGuides = false, answer = false }: GlyphProps) {
   const scale = height / 100;
   const padL = showGuides ? BADGE_PAD_LEFT : 0;
   const padT = showGuides ? BADGE_PAD_TOP : 0;
@@ -119,7 +120,9 @@ function Glyph({ form, height, top = 0, bottom = 100, strokeClass, showGuides = 
           key={i}
           d={stroke.d}
           className={strokeClass}
-          strokeWidth={9}
+          data-answer={answer ? "model" : undefined}
+          strokeWidth={answer ? 4 : 9}
+          style={answer ? { strokeDasharray: '5 9' } : undefined}
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -156,6 +159,7 @@ function Glyph({ form, height, top = 0, bottom = 100, strokeClass, showGuides = 
 }
 
 export default function LetterFormation({
+  showAnswers = false,
   gridWidth,
   gridHeight,
   seed,
@@ -255,7 +259,7 @@ export default function LetterFormation({
               className={styles.rowGlyphs}
               style={{ gap: `${gap}px`, height: `${lineDepth}px`, paddingLeft: `${GLYPH_INSET_PX}px` }}
             >
-              {Array.from({ length: traced }, (_, i) => (
+              {Array.from({ length: showAnswers ? slots : traced }, (_, i) => (
                 <div key={i} className={styles.unit} style={{ gap: `${pairGap}px` }}>
                   {forms.map(form => (
                     <Glyph
@@ -264,6 +268,7 @@ export default function LetterFormation({
                       height={capHeight}
                       bottom={lower ? LOWER_DEPTH : 100}
                       strokeClass={styles.traceStroke}
+                      answer={i >= traced}
                     />
                   ))}
                 </div>

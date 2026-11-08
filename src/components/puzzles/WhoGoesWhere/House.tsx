@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { CircleStroke } from '../../AnswerCircle';
 
 interface HouseProps {
   /** Wall colour; a plain house when left out (the "next door" clue) */
@@ -11,6 +12,8 @@ interface HouseProps {
   crossed?: boolean;
   /** An open white doorway to draw in */
   open?: boolean;
+  answer?: boolean;
+  answerSeed?: number;
   style?: CSSProperties;
   className?: string;
 }
@@ -20,7 +23,7 @@ interface HouseProps {
  * houses in the row (open, numbered) and the small ones in the clues (with
  * the animal in the doorway, crossed out for a "not" clue).
  */
-export default function House({ colour, number, animal, crossed, open, style, className }: HouseProps) {
+export default function House({ colour, number, animal, crossed, open, answer, answerSeed = 0, style, className }: HouseProps) {
   return (
     <svg viewBox="0 0 100 100" style={style} className={className} aria-hidden="true">
       <rect x="12" y="42" width="76" height="54" fill={colour ?? '#fff'} stroke="#333" strokeWidth="2.5" />
@@ -35,6 +38,9 @@ export default function House({ colour, number, animal, crossed, open, style, cl
         <text x="50" y="69" textAnchor="middle" dominantBaseline="central" fontSize="50">
           {animal}
         </text>
+      )}
+      {answer && (
+        <CircleStroke seed={`${answerSeed}:house:${number}`} cx={50} cy={71} rx={25} ry={23} />
       )}
       {crossed && (
         <g stroke="#d9342b" strokeWidth="8" strokeLinecap="round">

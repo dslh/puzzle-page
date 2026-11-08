@@ -12,7 +12,7 @@ export const puzzleDefinition: PuzzleDefinition<SpotTheDifferenceConfig> = {
   component: SpotTheDifference,
   configComponent: SpotTheDifferenceConfigBar,
   docs: () => import('./docs'),
-  defaultConfig: { scene: 'garden', differences: 3, outline: false, answers: false },
+  defaultConfig: { scene: 'garden', differences: 3, outline: false },
   defaultWidth: 10,
   defaultHeight: 5,
   resizable: { width: true, height: true, minWidth: 6, maxWidth: 10, minHeight: 5, maxHeight: 14 },

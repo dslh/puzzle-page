@@ -7,6 +7,19 @@
   padding: 0 10mm 10mm;
 }
 
+.answerLabel {
+  position: absolute;
+  top: 100%;
+  margin-top: 3mm;
+  right: 0;
+  padding: 0.5mm 1.5mm;
+  background: var(--paper);
+  border-radius: 1mm 1mm 0 0;
+  color: var(--answer-ink);
+  font: 9pt var(--ui-font);
+  white-space: nowrap;
+}
+
 .grid {
   position: relative;
   flex-shrink: 0;

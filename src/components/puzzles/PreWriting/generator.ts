@@ -65,6 +65,7 @@ export interface DottedRow {
   /** Each a separate stroke (a mark, or one run of a flowing pattern). */
   example: Point[][];
   trace: Point[][];
+  answer: Point[][];
   /** Where to put the pencil down on the trace part: one per stroke. */
   starts: Point[];
 }
@@ -219,7 +220,10 @@ function dottedRow(pattern: PatternId, y: number, width: number, h: number, fini
       starts.push(strokes[0][0]);
     }
   }
-  return { kind: 'dotted', pattern, y, example, trace, starts };
+  const answer = continuous
+    ? [flowStroke(pattern, afterExample, fits, period, h)]
+    : Array.from({ length: fits }, (_, i) => markStrokes(pattern, afterExample + markWidth / 2 + i * period, h)).flat();
+  return { kind: 'dotted', pattern, y, example, trace, starts, answer };
 }
 
 function roadRow(

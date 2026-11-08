@@ -3,7 +3,7 @@ import { generateCountingRow } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import styles from './Counting.module.css';
 
-export default function Counting({ gridWidth = 4, gridHeight = 3, seed }: PuzzleProps) {
+export default function Counting({ showAnswers = false, gridWidth = 4, gridHeight = 3, seed }: PuzzleProps) {
   // Calculate item count range based on grid width
   const minItems = Math.max(1, gridWidth - 3);
   const maxItems = gridWidth + 2;
@@ -25,7 +25,7 @@ export default function Counting({ gridWidth = 4, gridHeight = 3, seed }: Puzzle
             ))}
           </span>
           <span className={styles.equals}>=</span>
-          <span className={styles.blank}></span>
+          <span className={styles.blank} data-answer={showAnswers ? "text" : undefined}>{showAnswers && row.count}</span>
         </div>
       ))}
     </div>

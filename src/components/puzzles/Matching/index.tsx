@@ -40,6 +40,7 @@ export interface MatchingConfig {
 const CELL_PX = (19 / 25.4) * 96;
 
 export default function Matching({
+  showAnswers = false,
   gridWidth = 5,
   gridHeight = 4,
   seed,
@@ -70,7 +71,7 @@ export default function Matching({
     // Shuffle the right column for display
     const random = new SeededRandom(seed + 1); // Different seed for shuffling
     const shuffledRight = random.shuffle(
-      basePuzzle.pairs.map(p => ({ symbol: p.right, word: p.rightWord }))
+      basePuzzle.pairs.map((p, pairIndex) => ({ symbol: p.right, word: p.rightWord, pairIndex }))
     );
 
     // Find where the first pair's match ended up in the shuffled right column
@@ -160,7 +161,18 @@ export default function Matching({
             isWordMode ? styles.narrowConnector : isRhymeWide ? styles.rhymeConnector : ''
           }`}
         >
-          {workedExample && (
+          {showAnswers && (
+            <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
+              {puzzle.pairs.map((_, i) => {
+                const from = (i + 0.5) / puzzle.pairs.length * 100;
+                const to = (puzzle.shuffledRight.findIndex(item => item.pairIndex === i) + 0.5) / puzzle.pairs.length * 100;
+                const bow = i % 2 ? 2 : -2;
+                return <path key={i} d={`M0 ${from} C33 ${from + (to - from) / 3 + bow} 67 ${from + (to - from) * 2 / 3 + bow} 100 ${to}`}
+                  data-answer="path" strokeWidth="0.5mm" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" />;
+              })}
+            </svg>
+          )}
+          {workedExample && !showAnswers && (
             <svg className={styles.exampleLine} viewBox="0 0 100 100" preserveAspectRatio="none">
               <line
                 x1="0"

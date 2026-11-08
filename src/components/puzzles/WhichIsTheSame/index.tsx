@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { generateWhichIsTheSame, type Picture, type SameDifficulty } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
+import AnswerCircle from '../../AnswerCircle';
 import styles from './WhichIsTheSame.module.css';
 
 export interface WhichIsTheSameConfig {
@@ -22,7 +23,7 @@ function PictureSlot({ picture }: { picture: Picture }) {
   );
 }
 
-export default function WhichIsTheSame({ gridWidth, gridHeight, seed, config }: PuzzleProps<WhichIsTheSameConfig>) {
+export default function WhichIsTheSame({ showAnswers = false, gridWidth, gridHeight, seed, config }: PuzzleProps<WhichIsTheSameConfig>) {
   const difficulty = config?.difficulty ?? 'medium';
   const choiceCount = config?.choices ?? 4;
   const flipped = config?.flipped ?? false;
@@ -51,8 +52,9 @@ export default function WhichIsTheSame({ gridWidth, gridHeight, seed, config }: 
           </div>
           <div className={styles.choices}>
             {row.choices.map((choice, index) => (
-              <div key={index} className={styles.choice} style={{ width: `${slot}mm` }}>
+              <div key={index} className={styles.choice} data-answer-circle={showAnswers && index === row.answer || undefined} style={{ width: `${slot}mm` }}>
                 <PictureSlot picture={choice} />
+                {showAnswers && index === row.answer && <AnswerCircle seed={`${seed}:same:${rowIndex}:${index}`} />}
               </div>
             ))}
           </div>

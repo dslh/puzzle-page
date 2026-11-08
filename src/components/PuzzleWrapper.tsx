@@ -17,6 +17,7 @@ const ARROW_STEPS: Record<string, [number, number]> = {
 };
 
 interface PuzzleWrapperProps {
+  showAnswers?: boolean;
   puzzle: PlacedPuzzle;
   onRemove?: (id: string) => void;
   onReroll?: (id: string) => void;
@@ -36,7 +37,7 @@ interface PuzzleWrapperProps {
   leaving?: boolean;
 }
 
-export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, onMoveStart, onKeyStep, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, onReroll, onResize, onMoveStart, onKeyStep, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
   const entry = getSidebarEntry(puzzle.entry, puzzle.type);
@@ -213,6 +214,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
       gridHeight: number;
       seed: number;
       config: unknown;
+      showAnswers: boolean;
     }>;
 
     // Use puzzle's stored config, fallback to definition default
@@ -224,6 +226,7 @@ export default function PuzzleWrapper({ puzzle, onRemove, onReroll, onResize, on
         gridHeight={puzzle.height}
         seed={puzzle.seed}
         config={config}
+        showAnswers={showAnswers}
       />
     );
   };

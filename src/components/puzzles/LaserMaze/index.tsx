@@ -2,6 +2,9 @@ import { useMemo } from 'react';
 import { generateLaserMaze, type LaserMazePuzzle } from './generator';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { CELL_SIZE_MM } from '../../../types/puzzle';
+import { flowingPath } from '../../../utils/flowingPath';
+import { laserAnswerPoints } from './answer';
+import AnswerPath from '../../AnswerPath';
 import styles from './LaserMaze.module.css';
 
 // Everything is laid out in mm (the SVG's user unit), so line weights print
@@ -74,7 +77,7 @@ function Torch({ x, y, size }: { x: number; y: number; size: number }) {
   );
 }
 
-export default function LaserMaze({ gridWidth, gridHeight, seed }: PuzzleProps) {
+export default function LaserMaze({ showAnswers = false, gridWidth, gridHeight, seed }: PuzzleProps) {
   const puzzle: LaserMazePuzzle = useMemo(() => {
     return generateLaserMaze(gridWidth, gridHeight, seed);
   }, [gridWidth, gridHeight, seed]);
@@ -136,14 +139,18 @@ export default function LaserMaze({ gridWidth, gridHeight, seed }: PuzzleProps) 
 
         <path className={styles.wall} d={walls.join(' ')} strokeWidth={WALL_MM} />
 
+        {mirrors.flatMap((row, y) => row.map((mirror, x) => !mirror && (
+          <circle key={`${x}-${y}`} className={styles.dot} cx={left + (x + 0.5) * cell} cy={rowY(y)} r={DOT_MM} />
+        )))}
+
+        {showAnswers && <AnswerPath
+          d={flowingPath(laserAnswerPoints(puzzle).map(p => ({ x: left + p.x * cell, y: top + p.y * cell })), 0, cell * 0.008)} />}
+        {/* Glass stays above the answer ink, so a contact never erases the mirror. */}
         {mirrors.map((row, y) =>
           row.map((mirror, x) => {
             const cx = left + (x + 0.5) * cell;
             const cy = top + (y + 0.5) * cell;
-            if (!mirror) {
-              // A dot in each empty square, for counting along a row
-              return <circle key={`${x}-${y}`} className={styles.dot} cx={cx} cy={cy} r={DOT_MM} />;
-            }
+            if (!mirror) return null;
             const dy = mirror === '/' ? reach : -reach;
             const d = `M ${cx - reach} ${cy + dy} L ${cx + reach} ${cy - dy}`;
             return (

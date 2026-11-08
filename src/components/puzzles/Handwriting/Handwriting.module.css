@@ -106,3 +106,5 @@
     stroke: #000;
   }
 }
+
+.answerLetter { fill: none; stroke: var(--answer-ink); stroke-width: 0.8; stroke-dasharray: 2 1.5; }
