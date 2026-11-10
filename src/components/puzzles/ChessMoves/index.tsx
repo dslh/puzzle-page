@@ -36,18 +36,35 @@ function starPath(cx: number, cy: number, r: number): string {
   }).join('') + 'Z';
 }
 
-/** Knight hops go two then one, the way children are taught to count them. */
-function routePath(board: Board & { mode: 'collect' }, centre: (square: number) => [number, number]): string {
+type Point = [number, number];
+
+/** Each move's corners, start to landing. Knight hops go two then one, the way children are taught to count them. */
+function routeMoves(board: Board & { mode: 'collect' }, centre: (square: number) => Point): Point[][] {
   const { route, n, piece } = board;
-  return route.map((square, i) => {
-    const [x, y] = centre(square);
-    if (i === 0) return `M${x} ${y}`;
-    if (piece !== 'knight') return `L${x} ${y}`;
-    const from = route[i - 1];
-    const dx = square % n - from % n;
-    const [fx, fy] = centre(from);
-    const [cx, cy] = Math.abs(dx) === 2 ? [x, fy] : [fx, y];
-    return `L${cx} ${cy}L${x} ${y}`;
+  return route.slice(1).map((square, i) => {
+    const from = centre(route[i]), to = centre(square);
+    if (piece !== 'knight') return [from, to];
+    const corner: Point = Math.abs(square % n - route[i] % n) === 2 ? [to[0], from[1]] : [from[0], to[1]];
+    return [from, corner, to];
+  });
+}
+
+function routePath(moves: Point[][]): string {
+  return moves.map((points, i) => points.slice(i ? 1 : 0).map(([x, y], j) => `${i || j ? 'L' : 'M'}${x} ${y}`).join('')).join('');
+}
+
+/**
+ * An arrowhead at the end of every move, just short of where it lands, so a
+ * route that doubles back still reads in order.
+ */
+function routeArrows(moves: Point[][], size: number, gap: number): string {
+  return moves.map(points => {
+    const [fx, fy] = points[points.length - 2], [tx, ty] = points[points.length - 1];
+    const length = Math.hypot(tx - fx, ty - fy);
+    const ux = (tx - fx) / length, uy = (ty - fy) / length;
+    const x = tx - ux * gap, y = ty - uy * gap;
+    const wing = (side: number) => `${x - size * (ux - side * uy * 0.75)} ${y - size * (uy + side * ux * 0.75)}`;
+    return `M${wing(1)}L${x} ${y}L${wing(-1)}`;
   }).join('');
 }
 
@@ -63,6 +80,8 @@ function BoardView({ board, index, x0, y0, square, example, showAnswers, showMov
     return <image key={key} href={href} x={cx - square * 0.45} y={cy - square * 0.45} width={square * 0.9} height={square * 0.9} />;
   };
   const moves = board.mode === 'collect' ? board.route.length - 1 : 0;
+  const route = board.mode === 'collect' ? routeMoves(board, centre) : [];
+  const arrowSize = Math.min(2, square * 0.16), arrowGap = Math.min(2.6, square * 0.2);
 
   return <g data-chess-board={index} data-piece={board.piece}>
     {Array.from({ length: n * n }, (_, s) => {
@@ -85,11 +104,13 @@ function BoardView({ board, index, x0, y0, square, example, showAnswers, showMov
     })}
 
     {board.mode === 'collect' && example && <g data-worked-example fill="none" stroke={EXAMPLE_INK} strokeWidth={0.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d={routePath(board, centre)} />
+      <path d={routePath(route)} />
+      <path d={routeArrows(route, arrowSize, arrowGap)} />
       {board.route.slice(1).map((s, i) => { const [cx, cy] = centre(s); return <circle key={i} cx={cx} cy={cy} r={0.9} fill={EXAMPLE_INK} />; })}
     </g>}
     {board.mode === 'collect' && !example && showAnswers && <g>
-      <AnswerPath d={routePath(board, centre)} width={0.5} />
+      <AnswerPath d={routePath(route)} width={0.5} />
+      <AnswerPath d={routeArrows(route, arrowSize, arrowGap)} width={0.5} dashed={false} />
       {board.route.slice(1).map((s, i) => { const [cx, cy] = centre(s); return <circle key={i} cx={cx} cy={cy} r={0.9} fill="var(--answer-ink)" />; })}
     </g>}
 
