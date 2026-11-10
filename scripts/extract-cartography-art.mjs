@@ -1,4 +1,4 @@
-// Pulls the Directions puzzle's map icons out of Kenney's Cartography Pack
+// Pulls the Directions and Treasure Chess map icons out of Kenney's Cartography Pack
 // (CC0, https://kenney.nl/assets/cartography-pack) into a TypeScript module.
 //
 //   node scripts/extract-cartography-art.mjs path/to/cartographyPack_vector.svg
@@ -35,6 +35,7 @@ const ICONS = {
   chest: [7, 4],
   waves: [5, 5],
   compass: [8, 6],
+  flag: [0, 1],
 };
 
 const svg = readFileSync(process.argv[2], 'utf8');

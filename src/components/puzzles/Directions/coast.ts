@@ -13,9 +13,22 @@
  * is where the field crosses zero; the echo lines out to sea are other levels.
  */
 
+import type { SeededRandom } from '../../../utils/random';
+
 export interface Wobble {
   /** Spatial frequencies, in waves per square, and phases of a few sine terms. */
   terms: { fx: number; fy: number; phase: number }[];
+}
+
+/** A slow swell and two faster ripples, each heading a random way. */
+export function randomWobble(rng: SeededRandom): Wobble {
+  return {
+    terms: [1, 2.6, 5].map(base => {
+      const angle = rng.next() * 2 * Math.PI;
+      const freq = base * (0.8 + rng.next() * 0.4);
+      return { fx: freq * Math.cos(angle), fy: freq * Math.sin(angle), phase: rng.next() * 2 * Math.PI };
+    }),
+  };
 }
 
 /** Land cores stop this far short of each side of their square. */

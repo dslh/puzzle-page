@@ -20,17 +20,18 @@ const STEPS: Record<ChessPiece, [number, number][]> = {
 const SLIDES: Record<ChessPiece, boolean> = { rook: true, bishop: true, queen: true, king: false, knight: false };
 
 /**
- * Squares are numbered across then down: `y * n + x`, with y = 0 the top row.
- * Pieces stop before a blocker, never on it: blockers are the child's own
- * pieces. The knight jumps, so only its landing square matters.
+ * Squares are numbered across then down: `y * cols + x`, with y = 0 the top
+ * row. Pieces stop before a blocker, never on it: blockers are the child's own
+ * pieces (or, in Treasure Chess, the island's trees, rocks and sea). The
+ * knight jumps, so only its landing square matters.
  */
-export function movesFrom(piece: ChessPiece, from: number, n: number, blocked: ReadonlySet<number>): number[] {
-  const fx = from % n, fy = Math.floor(from / n);
+export function movesFrom(piece: ChessPiece, from: number, cols: number, rows: number, blocked: ReadonlySet<number>): number[] {
+  const fx = from % cols, fy = Math.floor(from / cols);
   const result: number[] = [];
   for (const [dx, dy] of STEPS[piece]) {
     let x = fx + dx, y = fy + dy;
-    while (x >= 0 && y >= 0 && x < n && y < n && !blocked.has(y * n + x)) {
-      result.push(y * n + x);
+    while (x >= 0 && y >= 0 && x < cols && y < rows && !blocked.has(y * cols + x)) {
+      result.push(y * cols + x);
       if (!SLIDES[piece]) break;
       x += dx; y += dy;
     }
@@ -79,13 +80,13 @@ function whereBoard(rng: SeededRandom, piece: ChessPiece, n: number, blockers: b
     const at = rng.nextInt(n * n);
     const placed = blockers ? pickSquares(rng, n, blockerCount(rng, 'where', n), new Set([at])) : [];
     const blocked = new Set(placed);
-    const reach = movesFrom(piece, at, n, blocked);
+    const reach = movesFrom(piece, at, n, n, blocked);
     const board: WhereBoard = { mode: 'where', piece, n, at, blockers: placed, reach };
     fallback ??= board;
     if (reach.length < 3) continue;
     // A blocker earns its place by standing where the piece could otherwise go.
     if (blockers) {
-      const open = new Set(movesFrom(piece, at, n, NONE));
+      const open = new Set(movesFrom(piece, at, n, n, NONE));
       if (!placed.some(b => open.has(b))) continue;
     }
     return board;
@@ -93,8 +94,13 @@ function whereBoard(rng: SeededRandom, piece: ChessPiece, n: number, blockers: b
   return fallback!;
 }
 
-/** Fewest moves that land on every star, by breadth-first search over (square, stars landed on). */
-function shortestRoute(piece: ChessPiece, n: number, at: number, stars: number[], blocked: ReadonlySet<number>): number[] | null {
+/**
+ * Fewest moves that land on every star, by breadth-first search over (square,
+ * stars landed on). With a `goal`, the route must also end there.
+ */
+export function shortestRoute(
+  piece: ChessPiece, cols: number, rows: number, at: number, stars: number[], blocked: ReadonlySet<number>, goal?: number,
+): number[] | null {
   const all = (1 << stars.length) - 1;
   const starBit = new Map(stars.map((s, i) => [s, 1 << i]));
   const key = (square: number, mask: number) => square * (all + 1) + mask;
@@ -104,12 +110,12 @@ function shortestRoute(piece: ChessPiece, n: number, at: number, stars: number[]
     const next: number[] = [];
     for (const state of frontier) {
       const square = Math.floor(state / (all + 1)), mask = state % (all + 1);
-      if (mask === all) {
+      if (mask === all && (goal === undefined || square === goal)) {
         const route: number[] = [];
         for (let s = state; s !== -1; s = previous.get(s)!) route.unshift(Math.floor(s / (all + 1)));
         return route;
       }
-      for (const to of movesFrom(piece, square, n, blocked)) {
+      for (const to of movesFrom(piece, square, cols, rows, blocked)) {
         const k = key(to, mask | (starBit.get(to) ?? 0));
         if (previous.has(k)) continue;
         previous.set(k, state);
@@ -129,7 +135,7 @@ function collectBoard(rng: SeededRandom, piece: ChessPiece, n: number, blockers:
     const at = rng.nextInt(n * n);
     const placed = blockers ? pickSquares(rng, n, blockerCount(rng, 'collect', n), new Set([at])) : [];
     const stars = pickSquares(rng, n, starCount, new Set([at, ...placed]));
-    const route = shortestRoute(piece, n, at, stars, new Set(placed));
+    const route = shortestRoute(piece, n, n, at, stars, new Set(placed));
     if (!route) continue;
     const board: CollectBoard = { mode: 'collect', piece, n, at, blockers: placed, stars, route };
     const moves = route.length - 1;

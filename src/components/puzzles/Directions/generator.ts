@@ -1,5 +1,5 @@
 import { CELL_SIZE_MM } from '../../../types/puzzle';
-import { traceCoast } from './coast';
+import { randomWobble, traceCoast } from './coast';
 import { buildIsland, stampIsland, type Stamp } from './island';
 import { SeededRandom } from '../../../utils/random';
 
@@ -388,15 +388,7 @@ export function generateDirections(
           // Follow mode hides the goal: finding it is the puzzle
           const goal = mode === 'follow' ? undefined : route.goal;
           const stamps = stampIsland(rng, island, cols, rows, cellMm, route.start, goal);
-          // A slow swell and two faster ripples, each heading a random way
-          const wobble = {
-            terms: [1, 2.6, 5].map(base => {
-              const angle = rng.next() * 2 * Math.PI;
-              const freq = base * (0.8 + rng.next() * 0.4);
-              return { fx: freq * Math.cos(angle), fy: freq * Math.sin(angle), phase: rng.next() * 2 * Math.PI };
-            }),
-          };
-          const { coast, echoes } = traceCoast(cols, rows, cellMm, island.sea, wobble);
+          const { coast, echoes } = traceCoast(cols, rows, cellMm, island.sea, randomWobble(rng));
           return {
             cols, rows, cellMm, blocked, stamps, coast, echoes,
             start: route.start, goal: route.goal, tokens: shown, stripLines, ...extra,

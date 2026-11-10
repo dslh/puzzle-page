@@ -24,6 +24,7 @@ import { puzzleDefinition as moreOrLess } from './MoreOrLess/definition';
 import { puzzleDefinition as missingNumbers } from './MissingNumbers/definition';
 import { puzzleDefinition as initialSounds } from './InitialSounds/definition';
 import { puzzleDefinition as directions } from './Directions/definition';
+import { puzzleDefinition as treasureChess } from './TreasureChess/definition';
 import { puzzleDefinition as secretCode } from './SecretCode/definition';
 import { puzzleDefinition as preWriting } from './PreWriting/definition';
 import { puzzleDefinition as dotMarker } from './DotMarker/definition';
@@ -63,6 +64,7 @@ export const PUZZLE_DEFINITIONS = [
   moreOrLess,
   initialSounds,
   directions,
+  treasureChess,
   secretCode,
   preWriting,
   dotMarker,

@@ -27,7 +27,7 @@ export interface Island {
 
 type Feature = 'forest' | 'mountain' | { landmark: ArtName };
 
-/** Share of the free land squares that get trees or mountains. */
+/** Share of the free land squares that get trees or mountains, unless asked otherwise. */
 const TERRAIN_DENSITY = 0.3;
 const LANDMARKS: ArtName[] = ['hut', 'tent', 'skullRock', 'stones', 'campfire', 'well', 'cave'];
 /** Only by the sea. */
@@ -46,7 +46,7 @@ const NEIGHBOURS = [
  * Lays out the island around a route. `keepClear` squares (the route) stay
  * walkable sand, except `harbour`, the route's start on the edge, which is
  * sea for the ship to moor in. `landmarks` squares each get a landmark, all
- * different.
+ * different. `density` is the share of the remaining land that gets terrain.
  */
 export function buildIsland(
   rng: SeededRandom,
@@ -54,7 +54,8 @@ export function buildIsland(
   rows: number,
   keepClear: Set<string>,
   harbour: Point,
-  landmarks: Point[]
+  landmarks: Point[],
+  density = TERRAIN_DENSITY
 ): Island {
   const inMap = (p: Point) => p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
   const onEdge = (p: Point) => p.x === 0 || p.y === 0 || p.x === cols - 1 || p.y === rows - 1;
@@ -104,7 +105,7 @@ export function buildIsland(
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) if (!taken(key({ x, y }))) free.push({ x, y });
   }
-  const target = Math.round(free.length * TERRAIN_DENSITY);
+  const target = Math.round(free.length * density);
   let placed = 0;
   for (const start of rng.shuffle(free)) {
     if (placed >= target) break;
@@ -129,7 +130,8 @@ export function buildIsland(
 
 /**
  * The icons that draw the island, the ship at the start and (if shown) the
- * chest at the goal.
+ * chest at the goal. `compass` puts one in a corner bay, if there is one.
+ * `extras` are more icons on sand squares, drawn like the chest.
  * Edge squares lose their outer part to the sea strip, so their icons are
  * pulled inward and shrunk to stay on the sand.
  */
@@ -140,7 +142,9 @@ export function stampIsland(
   rows: number,
   cellMm: number,
   start: Point,
-  goal: Point | undefined
+  goal: Point | undefined,
+  compass = true,
+  extras: { icon: ArtName; at: Point }[] = []
 ): Stamp[] {
   const stamps: Stamp[] = [];
   const nearSea = (p: Point) =>
@@ -175,9 +179,9 @@ export function stampIsland(
   });
   const isCorner = (p: Point) => (p.x === 0 || p.x === cols - 1) && (p.y === 0 || p.y === rows - 1);
   const isStart = (p: Point) => p.x === start.x && p.y === start.y;
-  const compass = seaSquares.find(p => isCorner(p) && !isStart(p));
+  const compassAt = compass ? seaSquares.find(p => isCorner(p) && !isStart(p)) : undefined;
   for (const p of seaSquares) {
-    const icon: ArtName = isStart(p) ? 'ship' : p === compass ? 'compass' : 'waves';
+    const icon: ArtName = isStart(p) ? 'ship' : p === compassAt ? 'compass' : 'waves';
     stamps.push({
       icon,
       x: (p.x + 0.5) * cellMm,
@@ -220,5 +224,6 @@ export function stampIsland(
   }
 
   if (goal) single(goal, 'chest', 0.85, 0);
+  for (const { icon, at } of extras) single(at, icon, 0.8, 0);
   return stamps;
 }

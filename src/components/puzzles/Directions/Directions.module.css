@@ -27,6 +27,7 @@
   color: #333;
 }
 
+/* The X in the prompt, sized like the map icons beside it (MapIcon.module.css) */
 .inlineIcon {
   height: 7mm;
   width: auto;
@@ -85,14 +86,6 @@
   fill: none;
   stroke: #333;
   stroke-width: 0.5;
-}
-
-/* Kenney's line art: stroked, never filled */
-.icon path {
-  fill: none;
-  stroke: #2a2a2a;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 /* Height is set inline from the number of lines - see generator.ts */

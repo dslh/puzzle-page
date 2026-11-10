@@ -1,0 +1,13 @@
+/* Kenney's line art: stroked, never filled */
+.icon path {
+  fill: none;
+  stroke: #2a2a2a;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.inlineIcon {
+  height: 7mm;
+  width: auto;
+  flex-shrink: 0;
+}

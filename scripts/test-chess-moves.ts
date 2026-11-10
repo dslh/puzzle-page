@@ -9,11 +9,11 @@ import { PIECES, generateBoards, movesFrom, movesLayout, type BoardSize, type Co
 const SIZES: BoardSize[] = [4, 5, 6];
 
 test('pieces move by the rules and stop before their own pawns', () => {
-  assert.deepEqual(movesFrom('rook', 0, 4, new Set([2])).sort((a, b) => a - b), [1, 4, 8, 12]);
-  assert.deepEqual(movesFrom('bishop', 0, 4, new Set()).sort((a, b) => a - b), [5, 10, 15]);
-  assert.equal(movesFrom('king', 5, 4, new Set()).length, 8);
-  assert.deepEqual(movesFrom('knight', 0, 4, new Set([1, 4, 9])).sort((a, b) => a - b), [6]);
-  assert.equal(movesFrom('queen', 12, 5, new Set()).length, 16);
+  assert.deepEqual(movesFrom('rook', 0, 4, 4, new Set([2])).sort((a, b) => a - b), [1, 4, 8, 12]);
+  assert.deepEqual(movesFrom('bishop', 0, 4, 4, new Set()).sort((a, b) => a - b), [5, 10, 15]);
+  assert.equal(movesFrom('king', 5, 4, 4, new Set()).length, 8);
+  assert.deepEqual(movesFrom('knight', 0, 4, 4, new Set([1, 4, 9])).sort((a, b) => a - b), [6]);
+  assert.equal(movesFrom('queen', 12, 5, 5, new Set()).length, 16);
 });
 
 test('dot boards have at least three answers, and pawns stand in the way', () => {
@@ -24,7 +24,7 @@ test('dot boards have at least three answers, and pawns stand in the way', () =>
       assert.ok(board.reach.length >= 3, `seed ${seed}`);
       assert.ok(!board.blockers.includes(board.at));
       if (blockers) {
-        const open = new Set(movesFrom(board.piece, board.at, board.n, new Set()));
+        const open = new Set(movesFrom(board.piece, board.at, board.n, board.n, new Set()));
         assert.ok(board.blockers.some(b => open.has(b)), `seed ${seed} ${board.piece}`);
       }
     }
@@ -39,7 +39,7 @@ test('star routes are legal, land on every star, and fit the move range', () => 
       const blocked = new Set(board.blockers);
       assert.equal(board.route[0], board.at);
       for (let i = 1; i < board.route.length; i++) {
-        assert.ok(movesFrom(piece, board.route[i - 1], boardSize, blocked).includes(board.route[i]));
+        assert.ok(movesFrom(piece, board.route[i - 1], boardSize, boardSize, blocked).includes(board.route[i]));
       }
       for (const star of board.stars) assert.ok(board.route.slice(1).includes(star));
       const moves = board.route.length - 1;

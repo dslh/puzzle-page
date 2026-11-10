@@ -4,6 +4,7 @@ import { CELL_SIZE_MM } from '../../../types/puzzle';
 import AnswerPath from '../../AnswerPath';
 import { CAPTION, generateBoards, movesLayout, type Board, type BoardSize, type MovesMode, type PieceChoice } from './generator';
 import { PAWN_IMAGE, PIECE_IMAGES } from './pieces';
+import { routeArrows, routeMoves, routePath, starPath } from './route';
 import styles from './ChessMoves.module.css';
 
 export interface ChessMovesConfig {
@@ -25,46 +26,6 @@ function instruction(mode: MovesMode, piece: PieceChoice): string {
     : `Move ${who} to land on every star.`;
 }
 
-function starPath(cx: number, cy: number, r: number): string {
-  return Array.from({ length: 10 }, (_, i) => {
-    const angle = -Math.PI / 2 + i * Math.PI / 5;
-    const radius = i % 2 ? r * 0.45 : r;
-    return `${i ? 'L' : 'M'}${(cx + radius * Math.cos(angle)).toFixed(2)} ${(cy + radius * Math.sin(angle)).toFixed(2)}`;
-  }).join('') + 'Z';
-}
-
-type Point = [number, number];
-
-/** Each move's corners, start to landing. Knight hops go two then one, the way children are taught to count them. */
-function routeMoves(board: Board & { mode: 'collect' }, centre: (square: number) => Point): Point[][] {
-  const { route, n, piece } = board;
-  return route.slice(1).map((square, i) => {
-    const from = centre(route[i]), to = centre(square);
-    if (piece !== 'knight') return [from, to];
-    const corner: Point = Math.abs(square % n - route[i] % n) === 2 ? [to[0], from[1]] : [from[0], to[1]];
-    return [from, corner, to];
-  });
-}
-
-function routePath(moves: Point[][]): string {
-  return moves.map((points, i) => points.slice(i ? 1 : 0).map(([x, y], j) => `${i || j ? 'L' : 'M'}${x} ${y}`).join('')).join('');
-}
-
-/**
- * An arrowhead at the end of every move, just short of where it lands, so a
- * route that doubles back still reads in order.
- */
-function routeArrows(moves: Point[][], size: number, gap: number): string {
-  return moves.map(points => {
-    const [fx, fy] = points[points.length - 2], [tx, ty] = points[points.length - 1];
-    const length = Math.hypot(tx - fx, ty - fy);
-    const ux = (tx - fx) / length, uy = (ty - fy) / length;
-    const x = tx - ux * gap, y = ty - uy * gap;
-    const wing = (side: number) => `${x - size * (ux - side * uy * 0.75)} ${y - size * (uy + side * ux * 0.75)}`;
-    return `M${wing(1)}L${x} ${y}L${wing(-1)}`;
-  }).join('');
-}
-
 function BoardView({ board, index, x0, y0, square, example, showAnswers, showMoves }: {
   board: Board; index: number; x0: number; y0: number; square: number;
   example: boolean; showAnswers: boolean; showMoves: boolean;
@@ -77,7 +38,7 @@ function BoardView({ board, index, x0, y0, square, example, showAnswers, showMov
     return <image key={key} href={href} x={cx - square * 0.45} y={cy - square * 0.45} width={square * 0.9} height={square * 0.9} />;
   };
   const moves = board.mode === 'collect' ? board.route.length - 1 : 0;
-  const route = board.mode === 'collect' ? routeMoves(board, centre) : [];
+  const route = board.mode === 'collect' ? routeMoves(board.route, n, board.piece, centre) : [];
   const arrowSize = Math.min(2, square * 0.16), arrowGap = Math.min(2.6, square * 0.2);
 
   return <g data-chess-board={index} data-piece={board.piece}>

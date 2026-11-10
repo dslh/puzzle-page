@@ -619,7 +619,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 
 | Category | Puzzles |
 |---|---|
-| Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Roads *(preset)* |
+| Mazes & Paths | Maze, Weaving Maze, Laser Maze, Puzzle Maze, Directions, Treasure Chess, Roads *(preset)* |
 | Reading & Phonics | Word / Letter / Rhyme Matching *(presets)*, Word Search, Colour by Sight Word, Initial Sounds, Secret Code |
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker, Dot Letters *(preset)*, Draw the Other Half |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
@@ -654,6 +654,7 @@ The puzzles in registry order:
 | More or Less | `moreorless` | 8×5 | both (min 5×2) | worked example |
 | Initial Sounds | `initialsounds` | 6×4 | both | circle / write, case, limit to letters |
 | Directions | `directions` | 6×7 | both (min 4×4) | follow / write / fix, arrows / `2 ➡️` / `2 right`, route length, spare boxes |
+| Treasure Chess | `treasurechess` | 6×7 | both (min 4×4) | rook / bishop / knight / queen / mix, short / medium / long, collect 0-3 (compasses or flags), fewest moves shown |
 | Secret Code | `secretcode` | 6×7 | both (min 3×3) | code / sounds key, case, decoys, custom words |
 | Pre-Writing Patterns | `prewriting` | 8×5 | both (min 4×2) | wide road / thin road / dotted, shapes, size, trace all / carry on |
 | Dot Marker | `dotmarker` | 6×6 | both (min 3×3) | shape (circle / heart / star / square / triangle; house / fish / pumpkin / tree / cloud), small / medium / big dots, edge / filled, picture (random / an animal / none); or ABC Letters, with letters to dot (a name; empty = a random letter) |
@@ -662,7 +663,7 @@ The puzzles in registry order:
 | Who Goes Where? | `whogoeswhere` | 6×4 | both (min 4×3, max height 7) | level (easy / medium / hard), 3 / 4 houses, picture / words clues |
 | Draw the Other Half | `drawtheotherhalf` | 6×5 | both (min 3×3) | draw a shape / picture (random or one of 36), level (easy / medium / hard), help (dotted / corners / none), mirror down / across |
 
-Fifteen of these carry notes worth reading before editing them:
+Sixteen of these carry notes worth reading before editing them:
 
 - **Maze** - the generator and renderer are grid-shape-agnostic. `grids.ts`
   describes each cell by its outline and the neighbour across each side, so a
@@ -711,7 +712,7 @@ Fifteen of these carry notes worth reading before editing them:
   max(2, stars) and stars + 3 moves. Each board has its own seed, so bigger
   puzzles add boards and keep the first ones. The pawn is left out on
   purpose. Piece art is the Chess puzzle's.
-- **Chess pieces and boards** (both chess puzzles) - the pieces in
+- **Chess pieces and boards** (all three chess puzzles) - the pieces in
   `Chess/pieces/` were drawn for this app: one bold silhouette per piece, a
   2.8 graphite outline, a soft drop shadow, white or mid-grey (#535a66) fill
   so the outline still shows on the dark side, and at most one detail (the
@@ -750,13 +751,26 @@ Fifteen of these carry notes worth reading before editing them:
   (`coast.ts`) is drawn afterwards as a contour of a distance field and never
   changes which squares are land. The line art is Kenney's Cartography Pack
   (CC0), pulled into `art.ts` by `scripts/extract-cartography-art.mjs`; don't
-  hand-edit it, and add icons by sheet cell there. Write mode's boxes come from
+  hand-edit it, and add icons by sheet cell there. `MapIcon.tsx` draws them,
+  for Treasure Chess too. Write mode's boxes come from
   a BFS over the map, not from the generated route, so any shortest answer
   fits, and its length setting is the *answer's* run count - maps whose
   obstacles allow a shorter way are rejected. Fix mode only plants a mistake
   that has exactly one single-token fix. All of it is laid out against the mm
   constants at the top of `generator.ts`, mirrored in the CSS; the strip
   under the map takes one line of steps when the route fits, else two.
+- **Treasure Chess** - Collect the Stars on Directions' island: a rook,
+  bishop, knight or queen goes from beside the ship to the chest, landing on
+  any compasses or flags first (one kind a map). `buildIsland` lays the
+  island around the squares that must stay sand, then ChessMoves'
+  `shortestRoute` (cols × rows, with a goal) finds the fewest moves, with
+  every sea, terrain and landmark square blocked. Maps are kept only if the
+  terrain makes the route longer than with just the sea in the way - except
+  for the knight, whose short routes the trees seldom lengthen. Length bands
+  are the moves to the chest plus one per pickup; the bishop's chest and
+  pickups are put on its colour. The land is the chess board's lime checker,
+  clipped to the coastline. Maps stop at 10×12 squares, so the search stays
+  fast (about 7ms at the default size, under 20ms on a full page).
 - **Secret Code** - pictures in a key stand for letters; the child decodes
   each word under it. Words are packed several to a row where the width
   allows, and chosen to reuse each other's letters (`orderBySharedLetters`)
