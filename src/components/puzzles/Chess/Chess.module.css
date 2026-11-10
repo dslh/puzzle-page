@@ -35,11 +35,11 @@
 }
 
 .lightSquare {
-  background-color: #f0d9b5;
+  background-color: var(--board-light);
 }
 
 .darkSquare {
-  background-color: #b58863;
+  background-color: var(--board-dark);
 }
 
 .piece {
@@ -50,13 +50,13 @@
 
 @media print {
   .lightSquare {
-    background-color: #f0d9b5 !important;
+    background-color: var(--board-light) !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
   .darkSquare {
-    background-color: #b58863 !important;
+    background-color: var(--board-dark) !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }

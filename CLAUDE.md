@@ -711,6 +711,14 @@ Fifteen of these carry notes worth reading before editing them:
   max(2, stars) and stars + 3 moves. Each board has its own seed, so bigger
   puzzles add boards and keep the first ones. The pawn is left out on
   purpose. Piece art is the Chess puzzle's.
+- **Chess pieces and boards** (both chess puzzles) - the pieces in
+  `Chess/pieces/` were drawn for this app: one bold silhouette per piece, a
+  2.8 graphite outline, a soft drop shadow, white or mid-grey (#535a66) fill
+  so the outline still shows on the dark side, and at most one detail (the
+  bishop's slit, the knight's eye). They are checked at 9, 12 and 19mm
+  squares; keep any change readable at 9mm. Board squares are the
+  `--board-light` / `--board-dark` tokens in `index.css`, pale lime so pencil
+  shows on both.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in

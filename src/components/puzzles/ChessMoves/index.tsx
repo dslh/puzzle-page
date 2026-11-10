@@ -16,9 +16,6 @@ export interface ChessMovesConfig {
   workedExample: boolean;
 }
 
-// Pale enough that a pencil dot shows on either colour.
-const LIGHT = '#f6ecdc';
-const DARK = '#dcc3a0';
 const EXAMPLE_INK = '#7a7f86';
 
 function instruction(mode: MovesMode, piece: PieceChoice): string {
@@ -86,7 +83,7 @@ function BoardView({ board, index, x0, y0, square, example, showAnswers, showMov
   return <g data-chess-board={index} data-piece={board.piece}>
     {Array.from({ length: n * n }, (_, s) => {
       const x = s % n, y = Math.floor(s / n);
-      return <rect key={s} x={x0 + x * square} y={y0 + y * square} width={square} height={square} fill={(x + y) % 2 ? DARK : LIGHT} />;
+      return <rect key={s} x={x0 + x * square} y={y0 + y * square} width={square} height={square} fill={(x + y) % 2 ? 'var(--board-dark)' : 'var(--board-light)'} />;
     })}
     <rect x={x0} y={y0} width={side} height={side} fill="none" stroke="#3a3f45" strokeWidth={0.5} />
     {board.mode === 'collect' && board.stars.map(s => {

@@ -61,6 +61,9 @@
   --pencil: #f6cb3a;
   --pencil-edge: #c99a0c;
   --danger: #c43d32;
+  /* Chess boards: pale lime, light enough to draw on in pencil */
+  --board-light: #f1f8ec;
+  --board-dark: #b9dcae;
   --radius: 6px;
   /* Arrivals decelerate into place; exits leave quicker than they came */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
