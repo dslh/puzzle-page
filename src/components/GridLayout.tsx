@@ -3,7 +3,7 @@ import type { DragEvent, PointerEvent as ReactPointerEvent, ReactNode } from 're
 import { GRID_COLS, GRID_ROWS, CELL_SIZE_MM } from '../types/puzzle';
 import type { PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition, getSidebarEntry } from './puzzles';
-import { collides, fitAtCell, newPlacedPuzzle } from '../utils/placement';
+import { collides, fitAtCell, freeRegion, newPlacedPuzzle } from '../utils/placement';
 import { trackPointerDrag } from '../utils/pointerDrag';
 import { EXIT_MS } from '../utils/motion';
 import { useDragConfig } from '../contexts/DragConfigContext';
@@ -99,6 +99,10 @@ export default function GridLayout({ showAnswers = false, puzzles, onAddPuzzle, 
     observer.observe(container);
     return () => observer.disconnect();
   }, []);
+
+  // The space a filler draws in. A string, so the filler is only generated
+  // again when the space changes.
+  const region = freeRegion(puzzles);
 
   const checkCollision = (x: number, y: number, width: number, height: number, excludeId?: string) =>
     collides(puzzles, x, y, width, height, excludeId);
@@ -310,16 +314,17 @@ export default function GridLayout({ showAnswers = false, puzzles, onAddPuzzle, 
           <div className={styles.empty}>{emptyPrompt}</div>
         )}
 
-        {/* Render placed puzzles */}
-        {puzzles.map(puzzle => (
+        {/* Render placed puzzles, a filler first so it lies under the rest */}
+        {[...puzzles].sort((a, b) => Number(b.fill ?? 0) - Number(a.fill ?? 0)).map(puzzle => (
           <PuzzleWrapper
             key={puzzle.id}
             puzzle={puzzle}
+            region={region}
             showAnswers={showAnswers}
             onRemove={onRemovePuzzle}
             onReroll={onRerollPuzzle}
-            onResize={onResizePuzzle}
-            onMoveStart={onUpdatePuzzle && handleMoveStart}
+            onResize={puzzle.fill ? undefined : onResizePuzzle}
+            onMoveStart={puzzle.fill ? undefined : onUpdatePuzzle && handleMoveStart}
             onKeyStep={handleKeyStep}
             moving={puzzle.id === move?.id}
             selected={puzzle.id === selectedId}
@@ -329,7 +334,7 @@ export default function GridLayout({ showAnswers = false, puzzles, onAddPuzzle, 
         ))}
 
         {leaving.map(puzzle => (
-          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} showAnswers={showAnswers} leaving />
+          <PuzzleWrapper key={puzzle.id} puzzle={puzzle} region={region} showAnswers={showAnswers} leaving />
         ))}
 
         <p className={styles.announcement} aria-live="polite">

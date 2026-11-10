@@ -304,3 +304,35 @@
     display: none !important;
   }
 }
+
+/* A filler covers the whole page behind the other puzzles. Only its drawn
+   part takes the pointer (the puzzle draws that), so a tap on the space it
+   left empty still reaches the page. Selected or focused, it glows round
+   its own outline rather than the page's. */
+.wrapper.fill {
+  pointer-events: none;
+}
+
+.wrapper.fill.selected,
+.wrapper.fill:focus-visible,
+.wrapper.fill.selected:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.wrapper.fill.selected .content {
+  filter:
+    drop-shadow(0 0 calc(1.5px / var(--sheet-scale, 1)) var(--pencil))
+    drop-shadow(0 0 calc(1.5px / var(--sheet-scale, 1)) var(--pencil))
+    drop-shadow(0 0 calc(1.5px / var(--sheet-scale, 1)) var(--pencil));
+}
+
+.wrapper.fill:focus-visible .content {
+  filter: drop-shadow(0 0 calc(2px / var(--sheet-scale, 1)) var(--ink));
+}
+
+@media print {
+  .wrapper.fill .content {
+    filter: none !important;
+  }
+}

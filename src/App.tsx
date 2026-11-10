@@ -5,7 +5,7 @@ import PuzzleSheet from './components/PuzzleSheet';
 import PageHistory from './components/PageHistory';
 import { getSidebarEntry, type SidebarEntry } from './components/puzzles';
 import { DragConfigProvider } from './contexts/DragConfigContext';
-import type { PlacedPuzzle } from './types/puzzle';
+import { GRID_COLS, GRID_ROWS, type PlacedPuzzle } from './types/puzzle';
 import { activeChild, activeSlot, copyPage, newSeed, recordPrint, updateSlot, type SavedPage } from './profiles/store';
 import { useStore } from './profiles/useStore';
 import { collides, findFreeSpot, newPlacedPuzzle } from './utils/placement';
@@ -120,6 +120,28 @@ function App() {
     return true;
   };
 
+  // Fill the gaps: the chosen filler in place of the one there, if any, or
+  // none. Selected, so its settings open.
+  const handleFill = (entry: SidebarEntry | null, config: unknown) => {
+    const current = puzzles.find(p => p.fill);
+    setDrawerOpen(false);
+    setView('page');
+    if (!entry) {
+      if (current) setPage(page => page.filter(p => !p.fill), `Removed ${puzzleLabel(current)}`);
+      return;
+    }
+    if (current?.entry === entry.key) {
+      select(current.id);
+      return;
+    }
+    const filler: PlacedPuzzle = {
+      ...newPlacedPuzzle(entry.definition.type, 0, 0, GRID_COLS, GRID_ROWS, config, entry.key),
+      fill: true,
+    };
+    setPage(page => [...page.filter(p => !p.fill), filler], current && `Replaced ${puzzleLabel(current)}`);
+    select(filler.id);
+  };
+
   const handleRemovePuzzle = (id: string) => {
     const puzzle = puzzles.find(p => p.id === id);
     setPage(page => page.filter(p => p.id !== id), puzzle && `Removed ${puzzleLabel(puzzle)}`);
@@ -229,6 +251,7 @@ function App() {
           }}
           canSave={canSave}
           onAdd={handleAddFromSidebar}
+          onFill={handleFill}
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
         />

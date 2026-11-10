@@ -40,7 +40,9 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
   const ConfigComponent = definition.configComponent as React.ComponentType<{
     value: unknown;
     onChange: (config: unknown) => void;
+    fill?: boolean;
   }> | undefined;
+  const fill = puzzle.fill === true;
 
   return (
     <section
@@ -78,19 +80,27 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
           Remove
         </button>
       </div>
-      <p className={`${styles.hint} ${styles.touchHint}`}>
-        {definition.resizable
-          ? 'Drag the puzzle to move it. Drag the dark tabs on its edges to change its size.'
-          : 'Drag the puzzle to move it.'}
-      </p>
-      <p className={`${styles.hint} ${styles.mouseHint}`}>
-        {definition.resizable
-          ? 'Drag the puzzle to move it, or the dark tabs on its edges to change its size. Arrow keys move it too, and Shift with an arrow changes its size.'
-          : 'Drag the puzzle to move it. Arrow keys move it too.'}
-      </p>
+      {fill ? (
+        <p className={styles.hint}>
+          It fills the space the other puzzles leave. Move them or change their size to change its shape.
+        </p>
+      ) : (
+        <>
+          <p className={`${styles.hint} ${styles.touchHint}`}>
+            {definition.resizable
+              ? 'Drag the puzzle to move it. Drag the dark tabs on its edges to change its size.'
+              : 'Drag the puzzle to move it.'}
+          </p>
+          <p className={`${styles.hint} ${styles.mouseHint}`}>
+            {definition.resizable
+              ? 'Drag the puzzle to move it, or the dark tabs on its edges to change its size. Arrow keys move it too, and Shift with an arrow changes its size.'
+              : 'Drag the puzzle to move it. Arrow keys move it too.'}
+          </p>
+        </>
+      )}
       {ConfigComponent && config !== undefined && (
         <div className={styles.config}>
-          <ConfigComponent value={config} onChange={newConfig => onConfigChange(puzzle.id, newConfig)} />
+          <ConfigComponent value={config} onChange={newConfig => onConfigChange(puzzle.id, newConfig)} fill={fill} />
         </div>
       )}
     </section>

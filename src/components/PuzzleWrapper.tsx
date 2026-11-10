@@ -19,6 +19,8 @@ const ARROW_STEPS: Record<string, [number, number]> = {
 interface PuzzleWrapperProps {
   showAnswers?: boolean;
   puzzle: PlacedPuzzle;
+  /** For a filler, the free squares it draws in (see `freeRegion`). */
+  region?: string;
   onRemove?: (id: string) => void;
   onReroll?: (id: string) => void;
   onResize?: (id: string, width: number, height: number) => void;
@@ -37,17 +39,21 @@ interface PuzzleWrapperProps {
   leaving?: boolean;
 }
 
-export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, onReroll, onResize, onMoveStart, onKeyStep, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
+export default function PuzzleWrapper({ showAnswers = false, puzzle, region, onRemove, onReroll, onResize, onMoveStart, onKeyStep, moving, selected, onSelect, animateIn, leaving }: PuzzleWrapperProps) {
   const puzzleDef = getPuzzleDefinition(puzzle.type);
   const resizable = puzzleDef?.resizable;
   const entry = getSidebarEntry(puzzle.entry, puzzle.type);
   const label = entry?.label ?? puzzleDef?.label ?? 'Puzzle';
+  // A filler has the whole page and no place of its own: it is never moved
+  // or resized, and its quick controls would land on whatever is in the
+  // page's corners, so it has only the ones in its panel
+  const fill = puzzle.fill === true;
 
   // Bring a newly selected puzzle into view, e.g. one just added from the drawer
   const wrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (selected) wrapperRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [selected]);
+    if (selected && !fill) wrapperRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selected, fill]);
 
   useEffect(() => {
     if (!animateIn) return;
@@ -130,7 +136,7 @@ export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, o
   const handleKeyDown = (e: ReactKeyboardEvent) => {
     if (e.target !== e.currentTarget) return;
     const step = ARROW_STEPS[e.key];
-    if (step && onKeyStep) {
+    if (step && onKeyStep && !fill) {
       e.preventDefault();
       onKeyStep(puzzle, step[0], step[1], e.shiftKey);
     } else if ((e.key === 'Enter' || e.key === ' ') && onSelect) {
@@ -215,6 +221,7 @@ export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, o
       seed: number;
       config: unknown;
       showAnswers: boolean;
+      region?: string;
     }>;
 
     // Use puzzle's stored config, fallback to definition default
@@ -227,6 +234,7 @@ export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, o
         seed={puzzle.seed}
         config={config}
         showAnswers={showAnswers}
+        region={fill ? region : undefined}
       />
     );
   };
@@ -234,12 +242,14 @@ export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, o
   return (
     <div
       ref={wrapperRef}
-      className={`${styles.wrapper} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''} ${leaving ? styles.leaving : ''}`}
+      className={`${styles.wrapper} ${fill ? styles.fill : ''} ${selected ? styles.selected : ''} ${moving ? styles.moving : ''} ${leaving ? styles.leaving : ''}`}
       data-puzzle-id={leaving ? undefined : puzzle.id}
       tabIndex={leaving ? undefined : 0}
       role="group"
       aria-roledescription="puzzle"
-      aria-label={`${label}, ${puzzle.width} by ${puzzle.height}, row ${puzzle.y + 1}, column ${puzzle.x + 1}`}
+      aria-label={fill
+        ? `${label}, filling the space the other puzzles leave`
+        : `${label}, ${puzzle.width} by ${puzzle.height}, row ${puzzle.y + 1}, column ${puzzle.x + 1}`}
       onPointerDown={handlePointerDown}
       onKeyDown={leaving ? undefined : handleKeyDown}
       onClick={onSelect && ((e) => {
@@ -254,59 +264,63 @@ export default function PuzzleWrapper({ showAnswers = false, puzzle, onRemove, o
         height: `${puzzle.height * CELL_SIZE_MM}mm`,
       }}
     >
-      <div
-        className={styles.dragHandle}
-        onPointerDown={handleHandlePointerDown}
-        title="Drag to move"
-        aria-hidden="true"
-      >
-        ⋮⋮
-      </div>
-      <div className={styles.buttonGroup}>
-        {puzzleDef && (
-          <HelpButton
-            className={styles.helpButton}
-            tabIndex={-1}
-            subject={{
-              definition: puzzleDef,
-              label,
-              icon: entry?.icon ?? puzzleDef.icon,
-              category: entry?.category ?? puzzleDef.category,
-              ages: entry?.ages ?? puzzleDef.ages,
-              config: puzzle.config ?? puzzleDef.defaultConfig,
-            }}
-          />
-        )}
-        {onReroll && (
-          <button
-            type="button"
-            className={styles.rerollButton}
-            onClick={handleReroll}
-            tabIndex={-1}
-            title={`New ${label}`}
-            aria-label={`New ${label}`}
+      {!fill && (
+        <>
+          <div
+            className={styles.dragHandle}
+            onPointerDown={handleHandlePointerDown}
+            title="Drag to move"
+            aria-hidden="true"
           >
-            🎲
-          </button>
-        )}
-        {onRemove && (
-          <button
-            type="button"
-            className={styles.deleteButton}
-            onClick={() => onRemove(puzzle.id)}
-            tabIndex={-1}
-            title={`Remove ${label}`}
-            aria-label={`Remove ${label}`}
-          >
-            ×
-          </button>
-        )}
-      </div>
+            ⋮⋮
+          </div>
+          <div className={styles.buttonGroup}>
+            {puzzleDef && (
+              <HelpButton
+                className={styles.helpButton}
+                tabIndex={-1}
+                subject={{
+                  definition: puzzleDef,
+                  label,
+                  icon: entry?.icon ?? puzzleDef.icon,
+                  category: entry?.category ?? puzzleDef.category,
+                  ages: entry?.ages ?? puzzleDef.ages,
+                  config: puzzle.config ?? puzzleDef.defaultConfig,
+                }}
+              />
+            )}
+            {onReroll && (
+              <button
+                type="button"
+                className={styles.rerollButton}
+                onClick={handleReroll}
+                tabIndex={-1}
+                title={`New ${label}`}
+                aria-label={`New ${label}`}
+              >
+                🎲
+              </button>
+            )}
+            {onRemove && (
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => onRemove(puzzle.id)}
+                tabIndex={-1}
+                title={`Remove ${label}`}
+                aria-label={`Remove ${label}`}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </>
+      )}
 
       <div ref={contentRef} className={styles.content}>{renderPuzzle()}</div>
 
       {/* Resize handles */}
-      {resizable && onResize && (
+      {resizable && onResize && !fill && (
         <>
           {resizable.width && (
             <div

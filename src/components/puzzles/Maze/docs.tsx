@@ -32,6 +32,11 @@ const docs: PuzzleDoc<MazeConfig> = {
         There is exactly one way through and no loops. Every wrong turn is a dead end,
         so going back is always the fix.
       </p>
+      <p>
+        Under <em>Fill the gaps</em>, the maze fills the space the other puzzles leave,
+        and changes shape when you move them. If the space is in pieces, it takes the
+        biggest. The start and finish are the two ends furthest apart.
+      </p>
     </>
   ),
 
@@ -93,7 +98,7 @@ const docs: PuzzleDoc<MazeConfig> = {
           description: (
             <p>
               Rings around a centre. The start and finish are both on the outside edge,
-              not the middle.
+              not the middle. Not offered under Fill the gaps.
             </p>
           ),
           example: { config: { gridShape: 'circle' } },
@@ -176,7 +181,8 @@ const docs: PuzzleDoc<MazeConfig> = {
     <p>
       Bigger means more cells, not wider paths. On Large, each square of the page adds
       two cells across: 4×4 gives 6×6 cells, a full 10×14 page gives 18×26. Smaller cell
-      sizes multiply that. Minimum 4×4.
+      sizes multiply that. Minimum 4×4. To fill the gaps, it uses whatever space is left.
+      On Large, shapes other than Squares may not fit through a gap one square wide.
     </p>
   ),
 

@@ -19,11 +19,32 @@ export function collides(
   }
 
   return puzzles.some(puzzle => {
-    if (puzzle.id === excludeId) return false;
+    if (puzzle.id === excludeId || puzzle.fill) return false;
     const xOverlap = x < puzzle.x + puzzle.width && x + width > puzzle.x;
     const yOverlap = y < puzzle.y + puzzle.height && y + height > puzzle.y;
     return xOverlap && yOverlap;
   });
+}
+
+/**
+ * The squares of the page no puzzle covers, for a filler to draw in: a row
+ * of GRID_COLS characters per grid row, top first, '#' free and '.' taken,
+ * joined by '/'. A string so it compares by value, and a filler is only
+ * generated again when the space really changes.
+ */
+export function freeRegion(puzzles: PlacedPuzzle[]): string {
+  const rows = [];
+  for (let y = 0; y < GRID_ROWS; y++) {
+    let row = '';
+    for (let x = 0; x < GRID_COLS; x++) row += collides(puzzles, x, y, 1, 1) ? '.' : '#';
+    rows.push(row);
+  }
+  return rows.join('/');
+}
+
+/** Whether a square of the page is free in a `freeRegion`; off the page is not. */
+export function regionHas(region: string, x: number, y: number): boolean {
+  return x >= 0 && y >= 0 && x < GRID_COLS && y < GRID_ROWS && region[y * (GRID_COLS + 1) + x] === '#';
 }
 
 export interface Placement {

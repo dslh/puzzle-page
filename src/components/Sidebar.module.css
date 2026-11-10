@@ -454,3 +454,38 @@
     padding: 8px 0;
   }
 }
+
+/* Fill the gaps: one choice for the page, like the age switch */
+.fillChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--hover);
+}
+
+.fillChoice {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  transition: background-color 0.15s;
+}
+
+.fillChoice:hover:not(.selected) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.fillChoice.selected,
+.fillChoice.selected:hover {
+  background: var(--pencil);
+  border-color: var(--pencil-edge);
+  color: var(--ink);
+}

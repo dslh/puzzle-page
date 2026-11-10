@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { curvePath, wallRuns } from './curves';
 import { clearance } from './concentric';
-import { generateMaze, type Maze as MazeType } from './generator';
+import { generateMaze, generateRegionMaze, type Maze as MazeType } from './generator';
 import type { GridShape, Point } from './grids';
 import { MAZE_THEMES, themeId } from './themes';
 import type { PuzzleProps } from '../../../types/puzzle';
@@ -49,7 +49,7 @@ function getMazeDimensions(gridWidth: number, gridHeight: number, ratio: number)
   };
 }
 
-export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 4, seed = 0, config }: PuzzleProps<MazeConfig>) {
+export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 4, seed = 0, config, region }: PuzzleProps<MazeConfig>) {
   const gridShape = config?.gridShape ?? 'square';
   const ratio = config?.cellSizeRatio ?? 2;
   const branchiness = config?.branchiness ?? 'medium';
@@ -59,16 +59,19 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
 
-  const maze: MazeType = useMemo(() => {
-    return generateMaze(width, height, seed, branchiness, gridShape);
-  }, [width, height, seed, branchiness, gridShape]);
+  // A filler fills the free squares of the whole page instead
+  const maze: MazeType | null = useMemo(() => {
+    return region !== undefined
+      ? generateRegionMaze(region, ratio, seed, branchiness, gridShape)
+      : generateMaze(width, height, seed, branchiness, gridShape);
+  }, [region, ratio, width, height, seed, branchiness, gridShape]);
 
-  const answerClearance = useMemo(() => Math.min(...maze.solution.map(index => {
+  const answerClearance = useMemo(() => maze ? Math.min(...maze.solution.map(index => {
     const cell = maze.cells[index];
     return clearance(cell.center, cell.corners);
-  })), [maze]);
+  })) : 0, [maze]);
 
-  const runs = useMemo(() => (curvyWalls ? wallRuns(maze.walls) : []), [maze, curvyWalls]);
+  const runs = useMemo(() => (maze && curvyWalls ? wallRuns(maze.walls) : []), [maze, curvyWalls]);
 
   const theme = useMemo(() => {
     const chosen = MAZE_THEMES.find((t) => themeId(t) === themeChoice);
@@ -77,23 +80,31 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
     return MAZE_THEMES[themeIndex];
   }, [seed, themeChoice]);
 
+  // No room for a maze in the gaps
+  if (!maze) return null;
+
   // Calculate cell size dynamically based on available grid space
   // Grid cells are approximately 72px (19mm at 96 DPI)
   const GRID_CELL_SIZE_PX = 72;
   const wallThickness = 3;
 
-  // Calculate the maximum cell size that fits in the available space
+  // Calculate the maximum cell size that fits in the available space. A
+  // filler's maze is laid out on the page itself, so it is drawn to scale
+  // over the whole page and its walls keep clear of the other puzzles.
   const availableWidth = gridWidth * GRID_CELL_SIZE_PX - wallThickness;
   const availableHeight = gridHeight * GRID_CELL_SIZE_PX - wallThickness;
-  const cellSize = Math.floor(Math.min(availableWidth / maze.width, availableHeight / maze.height));
+  const cellSize = region !== undefined
+    ? GRID_CELL_SIZE_PX / ratio
+    : Math.floor(Math.min(availableWidth / maze.width, availableHeight / maze.height));
+  const inset = region !== undefined ? 0 : wallThickness / 2;
 
-  const svgWidth = maze.width * cellSize + wallThickness;
-  const svgHeight = maze.height * cellSize + wallThickness;
+  const svgWidth = maze.width * cellSize + 2 * inset;
+  const svgHeight = maze.height * cellSize + 2 * inset;
 
   // Maze coordinates to SVG pixels
   const toPx = (point: Point): Point => ({
-    x: point.x * cellSize + wallThickness / 2,
-    y: point.y * cellSize + wallThickness / 2,
+    x: point.x * cellSize + inset,
+    y: point.y * cellSize + inset,
   });
 
   const startCell = maze.cells[maze.start];
@@ -111,14 +122,20 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
       .join(' ');
 
   return (
-    <div className={styles.mazeContainer}>
+    <div className={region !== undefined ? styles.fillContainer : styles.mazeContainer}>
       <svg
-        className={styles.mazeSvg}
-        width={svgWidth}
-        height={svgHeight}
+        className={region !== undefined ? styles.fillSvg : styles.mazeSvg}
+        width={region !== undefined ? '100%' : svgWidth}
+        height={region !== undefined ? '100%' : svgHeight}
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         xmlns="http://www.w3.org/2000/svg"
       >
+        {/* A filler's own ground: paper under its cells, which is also what
+            takes a click or tap, and what the selection glow follows */}
+        {region !== undefined && maze.cells.map((cell, i) => (
+          <polygon key={`ground-${i}`} points={outline(cell.corners)} fill="#fff" stroke="#fff" strokeWidth={1} pointerEvents="fill" />
+        ))}
+
         {/* Draw cell backgrounds. Not with curvy walls: the tint is the cell's
             straight-sided shape and would show past the rounded corners. */}
         {!curvyWalls && (

@@ -1,6 +1,7 @@
 import type { MazeConfig } from './index';
 import type { GridShape } from './grids';
 import { MAZE_THEMES, themeId } from './themes';
+import { OUTLINES } from './concentric';
 import styles from './MazeConfigBar.module.css';
 
 const GRID_SHAPES: { group: string; shapes: [GridShape, string][] }[] = [
@@ -31,10 +32,12 @@ const GRID_SHAPES: { group: string; shapes: [GridShape, string][] }[] = [
 interface MazeConfigBarProps {
   value: MazeConfig;
   onChange: (config: MazeConfig) => void;
+  /** Filling the gaps, where rings have no outline to follow (they come out as squares) */
+  fill?: boolean;
 }
 
-export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
-  const gridShape = value.gridShape;
+export default function MazeConfigBar({ value, onChange, fill }: MazeConfigBarProps) {
+  const gridShape = fill && value.gridShape in OUTLINES ? 'square' : value.gridShape;
   const ratio = value.cellSizeRatio;
   const branchiness = value.branchiness;
   const theme = value.theme;
@@ -48,7 +51,7 @@ export default function MazeConfigBar({ value, onChange }: MazeConfigBarProps) {
         onChange={(e) => onChange({ ...value, gridShape: e.target.value as GridShape })}
         title="Grid shape"
       >
-        {GRID_SHAPES.map(({ group, shapes }) => (
+        {GRID_SHAPES.filter(({ group }) => !fill || group !== 'Rings').map(({ group, shapes }) => (
           <optgroup key={group} label={group}>
             {shapes.map(([shape, label]) => (
               <option key={shape} value={shape}>

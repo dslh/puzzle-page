@@ -45,6 +45,12 @@ export interface PlacedPuzzle {
   height: number; // cells height (6 for maze, 3 for sudoku3x3, 3 for sudoku4x4)
   config?: unknown; // Puzzle-specific configuration (e.g., sudoku size)
   entry?: string; // The sidebar entry it came from, e.g. 'matching:words'
+  /**
+   * A filler: covers the whole page, behind the other puzzles, and draws
+   * itself in whatever space they leave (`freeRegion`). Other puzzles never
+   * collide with it, and it is never moved or resized. One per page at most.
+   */
+  fill?: true;
 }
 
 /**
@@ -57,6 +63,11 @@ export interface PuzzleProps<TConfig = unknown> {
   config?: TConfig;    // Optional puzzle-specific configuration
   /** Presentation only: never changes the generated puzzle or saved config. */
   showAnswers?: boolean;
+  /**
+   * For a filler, the squares of the page it may use (see `freeRegion`). The
+   * filler is given the whole page, so gridWidth × gridHeight is the page.
+   */
+  region?: string;
 }
 
 export interface ResizableConfig {
@@ -75,6 +86,8 @@ export interface ResizableConfig {
 export interface PuzzleConfigProps<TConfig> {
   value: TConfig;
   onChange: (config: TConfig) => void;
+  /** Configuring a filler, so options that make no sense in a gap can go. */
+  fill?: boolean;
 }
 
 /**
@@ -124,6 +137,11 @@ export interface PuzzlePreset<TConfig = unknown> {
   defaultHeight?: number;
   ages?: AgeBand[];          // Defaults to the puzzle's ages
   ageConfig?: AgeConfig<TConfig>;
+  /**
+   * A filler (see `PlacedPuzzle.fill`): listed under Fill the gaps rather than
+   * in its category, and its component must draw inside `region`.
+   */
+  fill?: boolean;
 }
 
 export interface PuzzleDefinition<TConfig = unknown> {

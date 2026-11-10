@@ -90,6 +90,8 @@ export interface SidebarEntry {
   /** The size it is added at: the preset's, else the puzzle's. */
   defaultWidth: number;
   defaultHeight: number;
+  /** A filler, chosen under Fill the gaps (see `PlacedPuzzle.fill`). */
+  fill?: boolean;
 }
 
 export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(definition => [
@@ -113,6 +115,7 @@ export const SIDEBAR_ENTRIES: SidebarEntry[] = PUZZLE_DEFINITIONS.flatMap(defini
     ages: preset.ages ?? definition.ages,
     defaultWidth: preset.defaultWidth ?? definition.defaultWidth,
     defaultHeight: preset.defaultHeight ?? definition.defaultHeight,
+    fill: preset.fill,
   })),
 ]);
 

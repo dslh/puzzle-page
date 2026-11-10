@@ -87,13 +87,18 @@ const stringList = (value: unknown): string[] =>
 /**
  * Puzzles from storage or a backup file: unknown types and bad positions are
  * dropped, and configs are filled out with any settings added since they
- * were saved.
+ * were saved. A filler always covers the whole page, and only the first is
+ * kept.
  */
 function cleanPuzzles(value: unknown): PlacedPuzzle[] {
   if (!Array.isArray(value)) return [];
-  return value.flatMap(item => {
-    if (!isRecord(item) || typeof item.type !== 'string') return [];
-    const definition = getPuzzleDefinition(item.type);
+  let filled = false;
+  return value.flatMap(saved => {
+    if (!isRecord(saved) || typeof saved.type !== 'string') return [];
+    if (saved.fill === true && filled) return [];
+    filled ||= saved.fill === true;
+    const item = saved.fill === true ? { ...saved, x: 0, y: 0, width: GRID_COLS, height: GRID_ROWS } : saved;
+    const definition = getPuzzleDefinition(saved.type);
     const { x, y, width, height, seed } = item;
     if (!definition || ![x, y, width, height, seed].every(n => Number.isFinite(n))) return [];
     const puzzle = { x, y, width, height } as { x: number; y: number; width: number; height: number };
@@ -108,6 +113,7 @@ function cleanPuzzles(value: unknown): PlacedPuzzle[] {
       ...puzzle,
       seed: seed as number,
       config: defaults && isRecord(item.config) ? { ...defaults, ...item.config } : defaults,
+      ...(item.fill === true && { fill: true as const }),
     }];
   });
 }
@@ -218,7 +224,7 @@ export function updateChild(store: Store, id: string, change: (child: Child) => 
 // The same puzzles in the same places, whatever their ids
 const sameLayout = (a: PlacedPuzzle[], b: PlacedPuzzle[]) => {
   const layout = (puzzles: PlacedPuzzle[]) => JSON.stringify(puzzles.map(p => (
-    [p.type, p.entry, p.x, p.y, p.width, p.height, p.seed, p.config]
+    [p.type, p.entry, p.x, p.y, p.width, p.height, p.seed, p.config, p.fill]
   )));
   return layout(a) === layout(b);
 };

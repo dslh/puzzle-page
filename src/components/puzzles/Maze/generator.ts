@@ -1,4 +1,5 @@
-import { buildGrid, type GridCell, type GridShape, type Point } from './grids';
+import { buildGrid, type Grid, type GridCell, type GridShape, type Point } from './grids';
+import { buildRegionGrid } from './region';
 import { answerPath } from '../../../utils/answerPath';
 import { SeededRandom } from '../../../utils/random';
 
@@ -54,10 +55,32 @@ export function generateMaze(
   shape: GridShape = 'square'
 ): Maze {
   const random = seed ? new SeededRandom(seed) : null;
+  const next = () => (random ? random.next() : Math.random());
+  return carveMaze(buildGrid(shape, width, height, next), next, branchiness);
+}
+
+/**
+ * A maze over the free squares of a page (see `buildRegionGrid`), in square
+ * cells measured from the page's top left, `ratio` to a page square. Null
+ * when the space is too small for one.
+ */
+export function generateRegionMaze(
+  region: string,
+  ratio: number,
+  seed: number,
+  branchiness: Branchiness,
+  shape: GridShape
+): Maze | null {
+  const random = seed ? new SeededRandom(seed) : null;
+  const next = () => (random ? random.next() : Math.random());
+  const grid = buildRegionGrid(shape, region, ratio, next);
+  return grid && carveMaze(grid, next, branchiness);
+}
+
+function carveMaze(grid: Grid, next: () => number, branchiness: Branchiness): Maze {
   const branchProbability = getBranchProbability(branchiness);
 
   // Start with every wall standing
-  const grid = buildGrid(shape, width, height, () => (random ? random.next() : Math.random()));
   const { cells } = grid;
   const visited = cells.map(() => false);
   const passages = cells.map(() => new Set<number>());
@@ -68,25 +91,24 @@ export function generateMaze(
   stack.push(grid.start);
 
   while (stack.length > 0) {
-    const randomValue = random ? random.next() : Math.random();
+    const randomValue = next();
     const index =
       randomValue < branchProbability
-        ? Math.floor((random ? random.next() : Math.random()) * stack.length)
+        ? Math.floor(next() * stack.length)
         : stack.length - 1;
     const current = stack[index];
     const neighbors = [...new Set(cells[current].neighbors.filter((n) => n !== -1 && !visited[n]))];
 
     if (neighbors.length > 0) {
       // Choose random unvisited neighbor
-      const nextRandomValue = random ? random.next() : Math.random();
-      const next = neighbors[Math.floor(nextRandomValue * neighbors.length)];
+      const chosen = neighbors[Math.floor(next() * neighbors.length)];
 
-      // Remove wall between current and next
-      passages[current].add(next);
-      passages[next].add(current);
+      // Remove wall between current and the chosen neighbour
+      passages[current].add(chosen);
+      passages[chosen].add(current);
 
-      visited[next] = true;
-      stack.push(next);
+      visited[chosen] = true;
+      stack.push(chosen);
     } else {
       // No unvisited neighbors, remove this cell from the stack
       stack.splice(index, 1);

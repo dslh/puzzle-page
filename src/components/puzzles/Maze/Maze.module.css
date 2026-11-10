@@ -33,6 +33,18 @@
   background-color: #fff;
 }
 
+/* A filler: the whole page, drawn only where its cells are. Clicks pass
+   through everywhere else, to the page or the puzzle underneath. */
+.fillContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.fillSvg {
+  display: block;
+  pointer-events: none;
+}
+
 /* Print styles */
 @media print {
   .mazeContainer {

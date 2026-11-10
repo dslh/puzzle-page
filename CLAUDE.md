@@ -94,6 +94,7 @@ App (state holder)
     │   │        a drawer on narrow screens)
     │   ├── ProfilePicker (Who is it for?: a chip per child + Anyone; Anyone keeps the age switch)
     │   ├── favourites section, "Not yet" section (a child only)
+    │   ├── Fill the gaps (None or a filler; see **Fillers**)
     │   ├── + button (puts the puzzle in the first free space)
     │   ├── Settings disclosure (config UI, Back to age settings, Not yet)
     │   └── Backup (save / load a JSON backup file)
@@ -160,6 +161,28 @@ assume 72px a cell. The selection outline divides by `--sheet-scale` to stay
 4px. Every config bar fits the sheet at 360px wide, since they're built for the
 248px sidebar; keep new ones within that. The sheet scrolls sideways only as a
 fallback.
+
+### Fillers
+
+A filler fills whatever space the other puzzles leave, and changes shape
+as they move. It is a `PlacedPuzzle` with `fill: true`, covering the whole
+page (0, 0, 10×14) and drawn first, so it lies under the rest. `collides`
+ignores it, so placing, moving and resizing everything else works as if it
+weren't there; it is never moved or resized itself. One per page
+(`App.handleFill` replaces any there; `parseStore` keeps the first).
+
+- **Choosing one**: the sidebar's Fill the gaps section, after the
+  categories: None or each filler entry. Picking one selects it, so its
+  settings open in the dock or bottom sheet. Clear page takes it too.
+- **Making a puzzle a filler**: a preset with `fill: true` (listed only
+  under Fill the gaps, with its own learned settings, e.g. `maze:filler`).
+  Its component gets `region` (from `freeRegion` in `placement.ts`: the free
+  page squares as a string, so it compares by value) and must draw only
+  there, to scale over the whole page. It should paint its own ground with
+  `pointer-events` on: the wrapper takes none, so a tap on space it left
+  empty reaches the page. Its config bar gets `fill`, to drop options that
+  make no sense in a gap. Only Maze is one so far; Word Search, Find the
+  Pair and Missing Numbers' 100 square are the likely next.
 
 ## Adding a New Puzzle
 
@@ -651,7 +674,10 @@ Fifteen of these carry notes worth reading before editing them:
   draws on the RNG - it takes its points from the maze's own sequence before
   carving starts. The ring shapes (circle, star, heart, ...) all come from
   `concentric.ts`, which takes any outline that is star-shaped about the origin;
-  a new ring shape is just an outline. Curvy walls are
+  a new ring shape is just an outline. As a filler (`region.ts`) it lays
+  the tiling over the whole page and keeps the cells clear of taken
+  squares, the biggest piece only, start and finish at its two furthest
+  ends; rings come out as squares there. Curvy walls are
   a drawing option only (`curves.ts`): the same walls, joined into runs and
   drawn as corner-cutting curves, on any grid shape.
 - **Letter Formation** - every letterform in `letterForms.ts` is drawn by

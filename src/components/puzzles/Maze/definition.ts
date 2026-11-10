@@ -24,6 +24,10 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     theme: 'random',
     curvyWalls: false,
   },
+  presets: [
+    // Fills the space the other puzzles leave (see region.ts)
+    { id: 'filler', label: 'Maze', category: 'mazes', config: {}, fill: true },
+  ],
   resizable: {
     width: true,
     height: true,

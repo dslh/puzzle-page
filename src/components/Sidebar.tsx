@@ -17,6 +17,8 @@ interface SidebarProps {
   canSave: boolean;
   /** Puts the entry's puzzle in the first space it fits; false if none. */
   onAdd: (entry: SidebarEntry, config: unknown) => boolean;
+  /** Fills the gaps on the page with the entry's puzzle, in place of any filler there; null for none. */
+  onFill: (entry: SidebarEntry | null, config: unknown) => void;
   /** Drawer state, for narrow screens; ignored where the sidebar always shows. */
   open: boolean;
   onClose: () => void;
@@ -26,7 +28,7 @@ const RATING_NOTES = { easy: 'Too easy last time', hard: 'Too hard last time' } 
 
 const sameConfig = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
-export default function Sidebar({ store, onChange, canSave, onAdd, open, onClose }: SidebarProps) {
+export default function Sidebar({ store, onChange, canSave, onAdd, onFill, open, onClose }: SidebarProps) {
   const compact = useCompactLayout();
   const child = activeChild(store);
   const slot = activeSlot(store);
@@ -198,7 +200,9 @@ export default function Sidebar({ store, onChange, canSave, onAdd, open, onClose
   };
 
   const hidden = new Set(child?.notYet ?? []);
-  const listed = SIDEBAR_ENTRIES.filter(entry => isEntryForAge(entry, age) && !hidden.has(entry.key));
+  const listed = SIDEBAR_ENTRIES.filter(entry => isEntryForAge(entry, age) && !hidden.has(entry.key) && !entry.fill);
+  const fillers = SIDEBAR_ENTRIES.filter(entry => isEntryForAge(entry, age) && entry.fill);
+  const filler = slot.page.find(puzzle => puzzle.fill);
   const favourites = child
     ? child.favourites.flatMap(key => listed.filter(entry => entry.key === key))
     : [];
@@ -261,6 +265,33 @@ export default function Sidebar({ store, onChange, canSave, onAdd, open, onClose
           </section>
         );
       })}
+      {fillers.length > 0 && (
+        <section className={styles.category} data-category="fill">
+          <h3 className={styles.sectionTitle} id="fill-heading">
+            <span className={styles.tab} aria-hidden="true" />
+            Fill the gaps
+          </h3>
+          <p className={styles.instructions}>
+            Fills the space the other puzzles leave, and changes shape as you move them.
+          </p>
+          <div className={styles.fillChoices} role="group" aria-labelledby="fill-heading">
+            {[null, ...fillers].map(entry => {
+              const chosen = entry ? filler?.entry === entry.key : !filler;
+              return (
+                <button
+                  key={entry?.key ?? 'none'}
+                  type="button"
+                  className={`${styles.fillChoice} ${chosen ? styles.selected : ''}`}
+                  aria-pressed={chosen}
+                  onClick={() => onFill(entry, entry && configFor(entry))}
+                >
+                  {entry ? <><span aria-hidden="true">{entry.icon}</span> {entry.label}</> : 'None'}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
       {child && notYet.length > 0 && (
         <section className={styles.category} data-category="notyet">
           <h3 className={styles.categoryTitle}>

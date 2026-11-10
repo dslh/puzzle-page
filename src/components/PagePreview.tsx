@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { CELL_SIZE_MM, GRID_COLS, GRID_ROWS, type PlacedPuzzle } from '../types/puzzle';
 import { getPuzzleDefinition } from './puzzles';
+import { freeRegion } from '../utils/placement';
 import styles from './PagePreview.module.css';
 
 interface PagePreviewProps {
@@ -14,6 +15,7 @@ const SHEET_WIDTH_PX = (GRID_COLS * CELL_SIZE_MM * 96) / 25.4;
 
 /** A saved page drawn small: the real puzzles, laid out in mm, then zoomed down. */
 function PagePreview({ puzzles, width }: PagePreviewProps) {
+  const region = freeRegion(puzzles);
   return (
     <div
       className={styles.sheet}
@@ -24,7 +26,7 @@ function PagePreview({ puzzles, width }: PagePreviewProps) {
       }}
       aria-hidden="true"
     >
-      {puzzles.map(puzzle => {
+      {[...puzzles].sort((a, b) => Number(b.fill ?? 0) - Number(a.fill ?? 0)).map(puzzle => {
         const definition = getPuzzleDefinition(puzzle.type);
         if (!definition) return null;
         // Cast needed: registry aggregates heterogeneous puzzle types
@@ -33,6 +35,7 @@ function PagePreview({ puzzles, width }: PagePreviewProps) {
           gridHeight: number;
           seed: number;
           config: unknown;
+          region?: string;
         }>;
         return (
           <div
@@ -50,6 +53,7 @@ function PagePreview({ puzzles, width }: PagePreviewProps) {
               gridHeight={puzzle.height}
               seed={puzzle.seed}
               config={puzzle.config ?? definition.defaultConfig}
+              region={puzzle.fill ? region : undefined}
             />
           </div>
         );
