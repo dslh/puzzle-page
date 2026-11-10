@@ -108,7 +108,7 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
     y: composition.nextFloat(-5, 3),
     scale: composition.nextFloat(.84, 1),
     flipped: composition.nextInt(2) === 1,
-  }])) as Partial<Record<ScenePart, { x: number; y: number; scale: number; flipped: boolean }>>;
+  }])) as Partial<Record<ScenePart, { x: number; y: number; scale: number; flipped: boolean; lift?: number }>>;
   // Vary the landmarks within reserved regions, keeping their feet grounded.
   for (const [part, x] of [['tree', 100], ['cottage', 435], ['birdhouse', 235], ['kite', 244]] as const) {
     const scale = composition.nextFloat(.9, 1);
@@ -122,6 +122,9 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   }
   // The hull and its wake must stay on the water side of the tideline.
   if (theme === 'seaside') placements.tree!.y = -18;
+  // On a tall panel the middle ground object stands further back, so the
+  // spare height fills the ground rather than leaving one row along the bottom.
+  placements[(['flower', 'cat', 'can'] as const)[slots.indexOf(183)]]!.lift = .3;
   const pet = composition.pick(['cat', 'dog'] as const);
   const livestock = new SeededRandom(seed ^ 0x6661726d).pick(['sheep', 'pig'] as const);
   const playground = new SeededRandom(seed ^ 0x706c6179);

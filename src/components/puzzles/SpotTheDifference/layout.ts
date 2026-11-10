@@ -49,7 +49,7 @@ export function sceneLayout(aspect = SCENE_ASPECT, scene?: GeneratedScene) {
     const placement = scene?.placements[part];
     const flipped = isForeground(part) ? scene?.foregroundFlipped : scene?.backgroundFlipped;
     const cx = placement ? placement.x + dx * (placement.x / 600) : ax + dx * fx;
-    const cy = ay + dy * fy + (placement?.y ?? 0);
+    const cy = ay + dy * (fy - (placement?.lift ?? 0)) + (placement?.y ?? 0);
     return { ax, ay, cx: flipped ? width - cx : cx, cy,
       sx: partScale(part) * (flipped ? -1 : 1) * (placement?.flipped ? -1 : 1), sy: partScale(part) };
   };
@@ -63,4 +63,14 @@ export function sceneLayout(aspect = SCENE_ASPECT, scene?: GeneratedScene) {
     return `translate(${p.x} ${p.y}) scale(${sx} ${sy})`;
   };
   return { width, height, dx, dy, scale, partScale, point, transform };
+}
+
+/** A gently rolling skyline at height `y`, for the far distance. */
+export function ridge(width: number, y: number, amplitude = 14, phase = 1) {
+  const at = (x: number) => y + amplitude * Math.cos(x / width * Math.PI * 2.6 + phase);
+  const line = Array.from({ length: 41 }, (_, i) => {
+    const x = 4 + (width - 8) * i / 40;
+    return `${i ? 'L' : 'M'}${x.toFixed(1)} ${at(x).toFixed(1)}`;
+  }).join(' ');
+  return { at, line };
 }
