@@ -13,13 +13,13 @@ export const FEATURES = {
   kite: { x: 244, y: 112, radius: 30, label: 'The kite’s tail' },
   chimney: { x: 472, y: 106, radius: 25, label: 'The chimney' },
   window: { x: 474, y: 203, radius: 29, label: 'The window’s shape' },
-  door: { x: 390, y: 217, radius: 22, label: 'The little window in the door' },
+  door: { x: 390, y: 217, radius: 22, label: 'The shape on the door' },
   fruit: { x: 100, y: 146, radius: 48, label: 'The apples on the tree' },
   birdhouse: { x: 235, y: 182, radius: 23, label: 'The birdhouse entrance' },
-  flower: { x: 66, y: 302, radius: 28, label: 'The flower’s shape' },
+  flower: { x: 66, y: 302, radius: 28, label: 'The flower' },
   cat: { x: 209, y: 327, radius: 29, label: 'The cat’s tail' },
-  can: { x: 324, y: 300, radius: 18, label: 'The watering can’s rose' },
-  duck: { x: 477, y: 324, radius: 31, label: 'The way the duck faces' },
+  can: { x: 328, y: 303, radius: 24, label: 'The end of the watering can’s spout' },
+  duck: { x: 477, y: 324, radius: 31, label: 'The duck' },
 } as const;
 
 export type Feature = keyof typeof FEATURES;
@@ -39,7 +39,7 @@ interface FeatureSpec { x: number; y: number; radius: number; label: string }
 export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = {
   garden: FEATURES,
   playground: {
-    kite: { x: 240, y: 114, radius: 18, label: 'The bow on the balloon string' },
+    kite: { x: 236, y: 114, radius: 20, label: 'The balloon string' },
     chimney: { x: 437, y: 66, radius: 24, label: 'The play tower’s flag' },
     window: { x: 422, y: 156, radius: 19, label: 'The play tower’s window' },
     door: { x: 375, y: 211, radius: 18, label: 'The ladder’s steps' },
@@ -52,18 +52,18 @@ export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = 
   },
   farmyard: {
     kite: { x: 244, y: 96, radius: 36, label: 'The sun’s rays' },
-    chimney: { x: 473, y: 93, radius: 28, label: 'The way the weather vane points' },
+    chimney: { x: 473, y: 90, radius: 30, label: 'The weather vane' },
     window: { x: 476, y: 203, radius: 29, label: 'The barn window’s shape' },
-    door: { x: 410, y: 230, radius: 33, label: 'The cross on the barn door' },
+    door: { x: 410, y: 230, radius: 33, label: 'The pattern on the barn door' },
     fruit: { x: 100, y: 148, radius: 48, label: 'The apples on the tree' },
     birdhouse: { x: 235, y: 163, radius: 26, label: 'The scarecrow’s hat' },
     flower: { x: 65, y: 300, radius: 25, label: 'The vegetables in the basket' },
     cat: { x: 214, y: 328, radius: 18, label: 'The sheep’s tail' },
-    can: { x: 290, y: 296, radius: 23, label: 'The spade in the wheelbarrow' },
+    can: { x: 290, y: 296, radius: 23, label: 'The tool in the wheelbarrow' },
     duck: { x: 447, y: 342, radius: 23, label: 'The tractor wheel’s spokes' },
   },
   seaside: {
-    kite: { x: 244, y: 103, radius: 34, label: 'The way the seagull faces' },
+    kite: { x: 244, y: 103, radius: 34, label: 'The seagull' },
     chimney: { x: 486, y: 87, radius: 24, label: 'The lighthouse flag' },
     window: { x: 474, y: 198, radius: 25, label: 'The lighthouse window' },
     door: { x: 401, y: 240, radius: 20, label: 'The lifebuoy' },
@@ -82,21 +82,39 @@ export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = 
     fruit: { x: 100, y: 158, radius: 37, label: 'The owl’s eyes' },
     birdhouse: { x: 235, y: 184, radius: 30, label: 'The way the sign points' },
     flower: { x: 66, y: 310, radius: 29, label: 'The toadstool’s spots' },
-    cat: { x: 178, y: 325, radius: 40, label: 'The way the hedgehog faces' },
+    cat: { x: 178, y: 325, radius: 40, label: 'The hedgehog' },
     can: { x: 300, y: 302, radius: 22, label: 'The lantern handle' },
-    duck: { x: 488, y: 321, radius: 26, label: 'The picnic mug’s handle' },
+    duck: { x: 488, y: 314, radius: 30, label: 'The picnic mug' },
   },
 };
+
+// How many drawn versions each changeable part has (two if not listed). The
+// original picture shows one; a change swaps it for any other. More versions
+// mean both the pictures and the kinds of change vary from roll to roll.
+export const VERSIONS: Record<SceneTheme, Partial<Record<Feature, number>>> = {
+  garden: { kite: 3, chimney: 3, window: 4, door: 4, fruit: 3, birdhouse: 4, flower: 3, cat: 3, can: 3, duck: 3 },
+  seaside: { kite: 3, chimney: 3, window: 3, fruit: 3, birdhouse: 3, flower: 3, can: 3, duck: 3 },
+  camping: { kite: 3, chimney: 3, window: 3, door: 3, fruit: 3, flower: 3, cat: 3, can: 3, duck: 3 },
+  farmyard: { kite: 3, chimney: 3, window: 4, door: 3, fruit: 3, birdhouse: 3, flower: 3, cat: 3, can: 3, duck: 3 },
+  playground: { kite: 3, chimney: 3, window: 3, fruit: 3, flower: 3, duck: 3 },
+};
+export const versionCount = (theme: SceneTheme, key: Feature) => VERSIONS[theme][key] ?? 2;
 
 export function generateScene(seed: number, count: SpotTheDifferenceConfig['differences'], choice: SceneChoice = 'garden') {
   const random = new SeededRandom(seed);
   const features = Object.keys(FEATURES) as Feature[];
+  // Independent streams keep decoration and theme stable when the count changes.
+  const theme = choice === 'random' ? new SeededRandom(seed ^ 0x7468656d).pick(SCENES).id : choice;
   // A stable shuffled list means increasing the count keeps existing answers.
   const order = random.shuffle(features);
-  const variants = Object.fromEntries(features.map(key => [key, random.nextInt(2)])) as Record<Feature, number>;
-  // Independent streams keep decoration and theme stable when the count changes.
+  const variants = Object.fromEntries(features.map(key => [key, random.nextInt(versionCount(theme, key))])) as Record<Feature, number>;
+  // The version each part becomes when it is one of the changes.
+  const versions = new SeededRandom(seed ^ 0x76657273);
+  const swaps = Object.fromEntries(features.map(key => {
+    const count = versionCount(theme, key);
+    return [key, (variants[key] + 1 + versions.nextInt(count - 1)) % count];
+  })) as Record<Feature, number>;
   const decoration = new SeededRandom(seed ^ 0x7363656e);
-  const theme = choice === 'random' ? new SeededRandom(seed ^ 0x7468656d).pick(SCENES).id : choice;
   const composition = new SeededRandom(seed ^ 0x6c61796f);
   const backgroundFlipped = composition.nextInt(2) === 1;
   const foregroundFlipped = composition.nextInt(2) === 1;
@@ -156,6 +174,7 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
     decoration: decoration.nextInt(3),
     changes: order.slice(0, count),
     variants,
+    swaps,
     mirrored: random.nextInt(2) === 1,
     roof: random.nextInt(4),
     tree: random.nextInt(2),
@@ -167,3 +186,8 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
 }
 
 export type GeneratedScene = ReturnType<typeof generateScene>;
+
+/** Which version of a part to draw: its own, or its swap where it changes. */
+export function version(scene: GeneratedScene, key: Feature, second: boolean) {
+  return second && scene.changes.includes(key) ? scene.swaps[key] : scene.variants[key];
+}

@@ -1,4 +1,4 @@
-import type { Feature } from './generator';
+import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
 
@@ -9,7 +9,7 @@ export default function Camping(props: SceneProps) {
   const layout = sceneLayout(aspect, scene);
   const { width, height, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
-  const v = (key: Feature) => scene.variants[key] ^ Number(second && scene.changes.includes(key));
+  const v = (key: Feature) => version(scene, key, second);
   const far = ridge(width, 172 + dy * .3, 10, 2);
   const pine = 'M0 -66 L-15 -39 H-8 L-25 -17 H-13 L-31 0 H31 L13 -17 H25 L8 -39 H15Z';
   return (
@@ -26,7 +26,9 @@ export default function Camping(props: SceneProps) {
       {Array.from({ length: 7 + scene.decoration }, (_, i) => <path key={i} transform={`translate(${35 + i * (width - 70) / (6 + scene.decoration)} ${226 + dy * .48})`} d={pine} fill={fill(i % 2 ? '#b8c7af' : '#c9d2b9')} stroke={FAR} strokeWidth="2" />)}
       {Array.from({ length: 7 + scene.clouds }, (_, i) => <path key={i} transform={`translate(${44 + (i * 83 % 515) / 600 * width} ${29 + i % 3 * 19 + dy * .05})`} d={scene.detail === 1 && i % 2 ? 'M-4 0 H4 M0 -4 V4' : 'M0 -5 L2 -1 L6 0 L2 2 L0 6 L-2 2 L-5 0 L-2 -1Z'} fill={fill('#e8d7a2')} strokeWidth={FINE} />)}
       <g transform={transform('kite')}>
-        {v('kite') === 0 ? <path d="M256 76 A27 27 0 1 0 267 119 Q237 123 239 98 Q240 82 256 76Z" fill={fill('#f1ddb0')} /> : <circle cx="244" cy="100" r="26" fill={fill('#f1ddb0')} />}
+        {[<path key="crescent" d="M256 76 A27 27 0 1 0 267 119 Q237 123 239 98 Q240 82 256 76Z" fill={fill('#f1ddb0')} />,
+          <circle key="full" cx="244" cy="100" r="26" fill={fill('#f1ddb0')} />,
+          <path key="half" d="M244 74 A26 26 0 0 1 244 126Z" fill={fill('#f1ddb0')} />][v('kite')]}
       </g>
       {/* The tent, pitched beside a tree stump. */}
       <g transform={transform('cottage')}>
@@ -34,10 +36,11 @@ export default function Camping(props: SceneProps) {
         <path d={scene.style === 2 ? 'M329 262 Q356 173 390 119 Q423 177 455 262Z' : 'M329 262 L390 119 L455 262Z'} fill={fill('#e5cf9b')} />
         <path d="M390 119 H437 M455 262 H541" fill="none" /><path d="M331 258 L316 273 M534 258 L551 273 M316 268 V278 M551 268 V278" fill="none" strokeWidth="2" />
         <path d="M437 120 V77" />
-        {v('chimney') === 0 ? <path d="M437 80 H476 L466 91 L476 102 H437Z" fill={fill('#d29b78')} /> : <path d="M437 80 L477 91 L437 102Z" fill={fill('#d29b78')} />}
+        <path d={['M437 80 H476 L466 91 L476 102 H437Z', 'M437 80 L477 91 L437 102Z', 'M437 80 H473 V102 H437Z'][v('chimney')]} fill={fill('#d29b78')} />
         {v('door') === 0 ? <path d="M363 261 L390 195 L420 261Z" fill={fill('#6c8276')} /> : <path d="M363 261 L390 195 L420 261Z M390 195 V260" fill={fill('#e5cf9b')} />}
+        {v('door') === 2 && <g><path d="M363 261 L390 195 V261Z" fill={fill('#6c8276')} /><path d="M370 236 Q380 232 390 236" fill="none" strokeWidth="2.5" /></g>}
         <path d="M360 263 H424" strokeWidth="4" />
-        {v('window') === 0 ? <circle cx="474" cy="210" r="14" fill={fill('#eaf0de')} /> : <path d="M460 224 L474 195 L488 224Z" fill={fill('#eaf0de')} />}
+        <path d={['M460 210 A14 14 0 1 0 488 210 A14 14 0 1 0 460 210Z', 'M460 224 L474 195 L488 224Z', 'M461 198 H487 V223 H461Z'][v('window')]} fill={fill('#eaf0de')} />
         <path d="M474 199 V222" strokeWidth={FINE} />
         {scene.style === 1 && <path d="M428 150 L449 178 M445 150 L466 178 M459 168 L467 178" fill="none" strokeWidth={FINE} />}
         <path d="M324 234 V259 Q300 267 279 258 V232" fill={fill('#b29a77')} /><ellipse cx="301" cy="232" rx="23" ry="8" fill={fill('#dac6a0')} /><ellipse cx="301" cy="232" rx="13" ry="4" fill="none" strokeWidth={FINE} /><path d="M287 242 V252 M312 239 V254" strokeWidth={FINE} />
@@ -51,7 +54,10 @@ export default function Camping(props: SceneProps) {
         <ellipse cx="101" cy="170" rx="32" ry="43" fill={fill('#7c806a')} />
         <path d="M77 168 L77 135 L90 144 Q101 137 113 144 L125 135 V168 Q127 198 101 199 Q75 198 77 168Z" fill={fill('#d4b789')} />
         <path d="M81 174 Q87 187 95 190 M122 174 Q116 187 108 190" fill="none" strokeWidth={FINE} />
-        {v('fruit') === 0 ? <g><circle cx="91" cy="159" r="9" fill={fill('#fff7dc')} /><circle cx="112" cy="159" r="9" fill={fill('#fff7dc')} /><circle cx="91" cy="159" r="3" fill={INK} /><circle cx="112" cy="159" r="3" fill={INK} /></g> : <path d="M83 159 Q91 169 99 159 M104 159 Q112 169 120 159" fill="none" strokeWidth="2.8" />}
+        {v('fruit') !== 1 && <g><circle cx="91" cy="159" r="9" fill={fill('#fff7dc')} /><circle cx="91" cy="159" r="3" fill={INK} /></g>}
+        {v('fruit') === 0 && <g><circle cx="112" cy="159" r="9" fill={fill('#fff7dc')} /><circle cx="112" cy="159" r="3" fill={INK} /></g>}
+        {v('fruit') === 1 && <path d="M83 159 Q91 169 99 159" fill="none" strokeWidth="2.8" />}
+        {v('fruit') !== 0 && <path d="M104 159 Q112 169 120 159" fill="none" strokeWidth="2.8" />}
         <path d="M97 172 L102 179 L107 172Z" fill={fill('#d9a65d')} /><path d="M84 204 H128 M92 201 V207 M99 201 V207" strokeWidth="3" />
       </g>
       {/* A wooden trail sign. */}
@@ -66,20 +72,29 @@ export default function Camping(props: SceneProps) {
         <path d="M59 317 L56 350 Q66 354 76 350 L72 317Z" fill={fill('#f8ebcf')} />
         <path d="M44 320 Q66 326 90 320" fill="none" strokeWidth={FINE} />
         <path d={scene.style === 0 ? 'M36 320 Q44 279 66 285 Q90 280 98 320Z' : 'M36 320 Q65 266 98 320Z'} fill={fill('#c98c78')} />
-        {(v('flower') === 0 ? [[53, 309], [79, 308]] : [[53, 309], [79, 308], [66, 294]]).map(([x, y]) => <circle key={x} cx={x} cy={y} r="4" fill={fill('#fff4d9')} />)}
+        {[[[53, 309], [79, 308]], [[53, 309], [79, 308], [66, 294]], []][v('flower')].map(([x, y]) => <circle key={x} cx={x} cy={y} r="4" fill={fill('#fff4d9')} />)}
         <path d="M27 353 V340 M18 340 Q27 316 38 340Z" fill={fill('#b1b28c')} />
         {scene.decoration === 1 && <path d="M99 351 V338 M88 338 Q99 315 110 338Z" fill={fill('#b1b28c')} />}
       </g>
       {/* A hedgehog sniffing about beside the lantern. */}
-      <g transform={transform('cat')}><g transform={`translate(178 332) scale(${v('cat') ? -1.25 : 1.25} 1.25)`}>
+      <g transform={transform('cat')}>{v('cat') === 2 ? <g transform="translate(178 332) scale(1.25)">
+        <path d={Array.from({ length: 28 }, (_, i) => {
+          const a = i / 28 * Math.PI * 2;
+          const r = i % 2 ? 22 : 29;
+          return `${i ? 'L' : 'M'}${(Math.sin(a) * r).toFixed(1)} ${(-10 - Math.cos(a) * r).toFixed(1)}`;
+        }).join(' ') + 'Z'} fill={fill(scene.detail === 0 ? '#a58b70' : '#b59d7b')} />
+        <path d="M-10 -22 L-5 -17 M8 -24 L6 -18 M-14 -6 L-8 -8 M12 -7 L6 -9 M0 -2 V-8" fill="none" strokeWidth={FINE} />
+        <path d="M-22 6 Q-12 0 -6 8 Q-12 14 -22 6Z" fill={fill('#e6ceb0')} strokeWidth="2.2" /><circle cx="-22" cy="7" r="2.6" fill={INK} stroke="none" />
+      </g> : <g transform={`translate(178 332) scale(${v('cat') ? -1.25 : 1.25} 1.25)`}>
         <path d="M-28 9 L-34 -3 L-25 -5 L-29 -17 L-18 -17 L-17 -28 L-8 -24 L0 -34 L7 -25 L18 -27 L21 -17 L31 -15 L28 -5 L36 2 L28 13Z" fill={fill(scene.detail === 0 ? '#a58b70' : '#b59d7b')} />
         <path d="M-24 13 Q-20 -8 -7 -9 L5 -1 L26 12Z" fill={fill('#e6ceb0')} />
         <circle cx="-25" cy="10" r="3.5" fill={INK} />
         <circle cx="-13" cy="3" r="2" fill={INK} /><path d="M-10 15 L-15 18 M16 15 L20 18 M-14 -17 L-11 -13 M0 -24 L1 -18 M14 -18 L12 -13 M25 -7 L21 -5" fill="none" strokeWidth={FINE} />
-      </g></g>
+      </g>}</g>
       {/* Lantern with a removable carrying loop. */}
       <g transform={transform('can')}>
         {v('can') === 0 && <path d="M286 303 V290 Q300 270 314 290 V303" fill="none" strokeWidth="4" />}
+        {v('can') === 2 && <path d="M288 303 V285 H312 V303" fill="none" strokeWidth="4" />}
         <path d="M282 313 H318 L322 346 H278Z" fill={fill('#f1dda5')} />
         <path d="M278 310 H322 L312 299 H288Z M277 348 H323 V355 H277Z" fill={fill('#8ba39c')} />
         <path d="M285 315 L283 345 M315 315 L317 345" fill="none" />
@@ -90,7 +105,8 @@ export default function Camping(props: SceneProps) {
         <path d="M421 326 L520 318 L560 361 L450 373Z" fill={fill(TENTS[(scene.palette + 1) % 4])} />
         <g fill="none" strokeWidth={FINE}><path d="M437 325 L467 371 M463 323 L495 367 M491 321 L525 364 M431 342 L535 335 M440 356 L548 348" />{scene.decoration === 1 && <path d="M431 330 L460 372 M449 324 L480 370 M476 322 L509 366" />}</g>
         <path d="M472 311 V338 Q486 346 500 338 V311Z" fill={fill('#f8edcf')} />
-        {v('duck') === 0 && <path d="M501 316 Q524 311 517 332 Q512 339 501 331" fill="none" strokeWidth="4" />}
+        {v('duck') !== 1 && <path d="M501 316 Q524 311 517 332 Q512 339 501 331" fill="none" strokeWidth="4" />}
+        {v('duck') === 2 && <path d="M480 302 Q476 297 480 292 Q484 287 481 282 M492 302 Q488 297 492 292 Q496 287 493 282" fill="none" strokeWidth="2.2" />}
         <ellipse cx="486" cy="311" rx="14" ry="5" fill={fill('#b29b7c')} />
         <path d={scene.detail === 1 ? 'M440 329 L456 315 L468 333Z' : 'M440 329 L456 317 L468 333 L451 345Z'} fill={fill('#dfc195')} /><path d="M445 333 L457 324 L464 332" fill="none" strokeWidth={FINE} />
       </g>

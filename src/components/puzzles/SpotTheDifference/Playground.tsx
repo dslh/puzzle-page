@@ -1,4 +1,4 @@
-import type { Feature } from './generator';
+import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { Band, Birds, FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
 
@@ -10,7 +10,7 @@ export default function Playground(props: SceneProps) {
   const layout = sceneLayout(aspect, scene);
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
-  const v = (key: Feature) => scene.variants[key] ^ Number(second && scene.changes.includes(key));
+  const v = (key: Feature) => version(scene, key, second);
   const accent = COLOURS[scene.palette];
   const far = ridge(width, 166 + dy * .3, 10, .4);
   return (
@@ -43,12 +43,13 @@ export default function Playground(props: SceneProps) {
         <path d="M244 99 Q232 113 244 123 Q251 130 244 137" fill="none" strokeWidth={FINE} />
         {!outline && <ellipse cx="236" cy="56" rx="5" ry="8" fill="#fff" fillOpacity=".45" stroke="none" />}
         {v('kite') === 0 && <path d="M240 114 L230 107 V120Z M240 114 L250 107 V120Z" fill={fill('#e4bd70')} />}
+        {v('kite') === 2 && <g><path d="M240 114 L232 112" fill="none" strokeWidth={FINE} /><path d="M221 106 H233 V119 H221Z" fill={fill('#f6edd5')} strokeWidth="2.2" /><circle cx="230" cy="109.5" r="1.4" fill={INK} stroke="none" /></g>}
       </g>
       {/* A roofed play tower, its ladder and a slide that meets the ground. */}
       <g transform={transform('cottage')}>
         <path d="M389 262 V133 H397 V262 M448 262 V133 H456 V262" fill={fill(WOOD)} />
         <path d="M398 136 H447 V176 H398Z" fill={fill(COLOURS[(scene.palette + 1) % 4])} />
-        {v('window') === 0 ? <circle cx="422" cy="156" r="12" fill={fill('#f6edd5')} /> : <path d="M422 143 L435 156 L422 169 L409 156Z" fill={fill('#f6edd5')} />}
+        <path d={['M410 156 A12 12 0 1 0 434 156 A12 12 0 1 0 410 156Z', 'M422 143 L435 156 L422 169 L409 156Z', 'M411 145 H433 V167 H411Z'][v('window')]} fill={fill('#f6edd5')} />
         <path d="M386 176 H459 V185 H386Z" fill={fill(WOOD)} />
         <Band d="M375 190 H390 M362 232 H377 M355 253 H370" colour={fill(WOOD)} width={7} />
         {v('door') === 0 && <Band d="M368 211 H383" colour={fill(WOOD)} width={7} />}
@@ -57,7 +58,7 @@ export default function Playground(props: SceneProps) {
         <path d="M452 183 Q471 192 479 222 Q492 253 539 253 H548" fill="none" strokeWidth={FINE} />
         <path d={scene.style === 1 ? 'M378 135 L394 109 L423 95 L452 109 L468 135Z' : scene.style === 2 ? 'M378 135 Q423 55 468 135Z' : 'M378 135 L423 95 L468 135Z'} fill={fill(COLOURS[(scene.palette + 2) % 4])} />
         <path d="M423 95 V49" fill="none" strokeWidth="2.5" />
-        {v('chimney') === 0 ? <path d="M423 53 H450 V78 H423Z" fill={fill('#dfb867')} /> : <path d="M423 53 L451 66 L423 79Z" fill={fill('#dfb867')} />}
+        <path d={['M423 53 H450 V78 H423Z', 'M423 53 L451 66 L423 79Z', 'M423 53 H452 L443 66 L452 79 H423Z'][v('chimney')]} fill={fill('#dfb867')} />
         <path d="M383 264 H402 M443 264 H462 M347 264 H372" fill="none" strokeWidth="3" />
       </g>
       {/* A stable A-frame: both seat variants remain attached to both chains. */}
@@ -65,7 +66,9 @@ export default function Playground(props: SceneProps) {
         <Band d="M26 272 L55 124 L78 272 M130 272 L154 124 L179 272" colour={fill(WOOD)} width={10} />
         <Band d="M42 124 H167" colour={fill('#a48c6e')} width={11} />
         <path d="M85 125 V214 M119 125 V214" fill="none" strokeWidth="2" />
-        {v('fruit') === 0 ? <path d="M77 214 H127 V222 H77Z" fill={fill(accent)} /> : <path d="M82 200 H122 V217 Q102 236 82 217Z" fill={fill(accent)} />}
+        {[<path key="flat" d="M77 214 H127 V222 H77Z" fill={fill(accent)} />,
+          <path key="bucket" d="M82 200 H122 V217 Q102 236 82 217Z" fill={fill(accent)} />,
+          <g key="tyre"><ellipse cx="102" cy="219" rx="22" ry="9" fill={fill('#7d8980')} /><ellipse cx="102" cy="218" rx="11" ry="3.5" fill={fill('#f9f6eb')} strokeWidth="2" /></g>][v('fruit')]}
         <circle cx="55" cy="124" r="2" fill={INK} stroke="none" /><circle cx="154" cy="124" r="2" fill={INK} stroke="none" />
         {scene.decoration === 1 && <Band d="M37 236 H69 M139 236 H170" colour={fill(WOOD)} width={7} />}
       </g>
@@ -81,7 +84,9 @@ export default function Playground(props: SceneProps) {
         <Band d="M97 331 V301" colour={fill(WOOD)} width={7} /><path d="M92 288 H102 V297 Q97 306 92 297Z M90 331 H104 V341 Q97 352 90 341Z" fill={fill('#a6bbb0')} />
         <path d="M44 319 H89 L84 353 H49Z" fill={fill(accent)} /><ellipse cx="66" cy="319" rx="23" ry="5" fill={fill('#f0dfb8')} />
         <path d="M46 323 Q66 279 87 323" fill="none" />
-        {v('flower') === 0 ? <circle cx="66" cy="337" r="9" fill={fill('#f8ebc9')} /> : <path d="M66 326 L69 333 L77 333 L71 339 L73 347 L66 343 L59 347 L61 339 L55 333 L63 333Z" fill={fill('#f8ebc9')} />}
+        {[<circle key="circle" cx="66" cy="337" r="9" fill={fill('#f8ebc9')} />,
+          <path key="star" d="M66 326 L69 333 L77 333 L71 339 L73 347 L66 343 L59 347 L61 339 L55 333 L63 333Z" fill={fill('#f8ebc9')} />,
+          <path key="triangle" d="M66 327 L76 346 H56Z" fill={fill('#f8ebc9')} />][v('flower')]}
       </g>
       {/* The toy may be a teddy or bunny; the bow is a separate difference. */}
       <g transform={transform('cat')} fill={fill(scene.detail === 1 ? '#d3c5af' : '#d4b18b')}>
@@ -109,7 +114,7 @@ export default function Playground(props: SceneProps) {
         <path d="M414 319 L536 301 L567 354 L443 374Z" fill={fill('#b69e7c')} />
         <path d="M423 324 L531 309 L555 350 L448 366Z" fill={fill('#efddb0')} />
         <path d="M490 323 V282" fill="none" />
-        {v('duck') === 0 ? <path d="M490 282 L515 291 L490 300Z" fill={fill(accent)} /> : <path d="M490 282 H513 V300 H490Z" fill={fill(accent)} />}
+        <path d={['M490 282 L515 291 L490 300Z', 'M490 282 H513 V300 H490Z', 'M490 282 H516 L508 291 L516 300 H490Z'][v('duck')]} fill={fill(accent)} />
         <path d="M460 350 V322 H469 V329 H478 V322 H502 V329 H511 V322 H520 V350Z" fill={fill('#d3b17c')} />
         <path d="M483 350 V340 Q490 330 497 340 V350 M455 353 H525" fill="none" />
         {scene.decoration === 2 && <path d="M435 340 L441 337 M541 341 L545 345 M453 360 L459 359" strokeWidth={FINE} />}

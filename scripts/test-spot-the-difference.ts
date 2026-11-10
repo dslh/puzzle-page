@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Scene from '../src/components/puzzles/SpotTheDifference/Scene';
-import { FEATURES, SCENES, generateScene, type Feature, type GeneratedScene } from '../src/components/puzzles/SpotTheDifference/generator';
+import { FEATURES, SCENES, generateScene, versionCount, type Feature, type GeneratedScene } from '../src/components/puzzles/SpotTheDifference/generator';
 import { FEATURE_PART, pictureLayout, sceneLayout } from '../src/components/puzzles/SpotTheDifference/layout';
 
 function render(scene: GeneratedScene, second: boolean, outline = false, answers = false, aspect?: number) {
@@ -27,28 +27,42 @@ test('seeds reproduce scenes, counts are exact, and more differences keep previo
         assert.equal(new Set(scene.changes).size, count);
         assert.ok(scene.changes.every(key => key in FEATURES));
       }
+      for (const key of Object.keys(FEATURES) as Feature[]) {
+        assert.ok(large.variants[key] >= 0 && large.variants[key] < versionCount(id, key));
+        assert.ok(large.swaps[key] >= 0 && large.swaps[key] < versionCount(id, key));
+        assert.notEqual(large.swaps[key], large.variants[key]);
+      }
       assert.deepEqual(medium.changes.slice(0, 3), small.changes);
       assert.deepEqual(large.changes.slice(0, 5), medium.changes);
       assert.deepEqual(large.variants, small.variants);
+      assert.deepEqual(large.swaps, small.swaps);
       scenes.add(JSON.stringify(large));
     }
     assert.equal(scenes.size, 1000);
   }
 });
 
-test('each named change alters the SVG in colour and outline, with either starting variant', () => {
+/** Every ordered pair of versions of one part: the original, and what it changes to. */
+function versionPairs(id: GeneratedScene['theme'], key: Feature) {
+  const count = versionCount(id, key);
+  return Array.from({ length: count * count }, (_, i) => [Math.floor(i / count), i % count]).filter(([a, b]) => a !== b);
+}
+
+/** A scene whose only change turns `key` from version `from` into version `to`. */
+function changing(scene: GeneratedScene, key: Feature, from: number, to: number): GeneratedScene {
+  return { ...scene, changes: [key], variants: { ...scene.variants, [key]: from }, swaps: { ...scene.swaps, [key]: to } };
+}
+
+test('every pair of versions of every part alters the SVG in colour and outline', () => {
   for (const { id } of SCENES) {
     for (const outline of [false, true]) {
       for (const feature of Object.keys(FEATURES) as Feature[]) {
-        for (const value of [0, 1]) {
-          const scene = generateScene(42, 3, id);
-          scene.variants[feature] = value;
-          scene.changes = [];
-          assert.equal(render(scene, false, outline), render(scene, true, outline));
-          scene.changes = [feature];
-          assert.notEqual(render(scene, false, outline), render(scene, true, outline), feature);
+        for (const [from, to] of versionPairs(id, feature)) {
+          const scene = changing(generateScene(42, 3, id), feature, from, to);
+          assert.equal(render({ ...scene, changes: [] }, false, outline), render({ ...scene, changes: [] }, true, outline));
+          assert.notEqual(render(scene, false, outline), render(scene, true, outline), `${id}/${feature} ${from}→${to}`);
           // Switching that feature on the original produces precisely the second image.
-          const changed = { ...scene, changes: [], variants: { ...scene.variants, [feature]: value ^ 1 } };
+          const changed = { ...scene, changes: [], variants: { ...scene.variants, [feature]: to } };
           assert.equal(render(changed, false, outline), render(scene, true, outline), feature);
         }
       }
@@ -175,13 +189,10 @@ test('random layouts keep foreground footprints separate and answer circles with
 test('either pet keeps its tail difference visible in colour and outline', () => {
   for (const pet of ['cat', 'dog'] as const) {
     for (const outline of [false, true]) {
-      for (const value of [0, 1]) {
-        const scene = generateScene(42, 3);
-        scene.pet = pet;
-        scene.variants.cat = value;
-        scene.changes = ['cat'];
+      for (const [from, to] of versionPairs('garden', 'cat')) {
+        const scene = changing({ ...generateScene(42, 3), pet }, 'cat', from, to);
         assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: value ^ 1 } }, false, outline), render(scene, true, outline));
+        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: to } }, false, outline), render(scene, true, outline));
       }
     }
   }
@@ -201,12 +212,10 @@ test('farmyard rerolls include both animals and preserve their tail differences 
   assert.deepEqual([...animals].sort(), ['pig', 'sheep']);
   for (const livestock of ['pig', 'sheep'] as const) {
     for (const outline of [false, true]) {
-      for (const value of [0, 1]) {
-        const scene = { ...generateScene(42, 3, 'farmyard'), livestock };
-        scene.variants.cat = value;
-        scene.changes = ['cat'];
+      for (const [from, to] of versionPairs('farmyard', 'cat')) {
+        const scene = changing({ ...generateScene(42, 3, 'farmyard'), livestock }, 'cat', from, to);
         assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: value ^ 1 } }, false, outline), render(scene, true, outline));
+        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: to } }, false, outline), render(scene, true, outline));
       }
     }
   }
@@ -230,12 +239,10 @@ test('playground rerolls cover every toy and ride, with fair changes for every c
     for (const playRide of ['scooter', 'tricycle'] as const) {
       for (const outline of [false, true]) {
         for (const key of ['cat', 'can'] as const) {
-          for (const value of [0, 1]) {
-            const scene = { ...generateScene(42, 3, 'playground'), playToy, playRide };
-            scene.variants[key] = value;
-            scene.changes = [key];
+          for (const [from, to] of versionPairs('playground', key)) {
+            const scene = changing({ ...generateScene(42, 3, 'playground'), playToy, playRide }, key, from, to);
             assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-            assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, [key]: value ^ 1 } }, false, outline), render(scene, true, outline));
+            assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, [key]: to } }, false, outline), render(scene, true, outline));
           }
         }
       }
