@@ -23,6 +23,8 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     branchiness: 'medium',
     theme: 'random',
     curvyWalls: false,
+    grain: 'even',
+    turns: 'mixed',
   },
   presets: [
     // Fills the space the other puzzles leave (see region.ts)

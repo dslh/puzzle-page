@@ -43,6 +43,8 @@ export interface Grid {
   /** Indices into cells */
   start: number;
   end: number;
+  /** Centre of a ring maze, which Grain reads as out and round rather than down and across */
+  hub?: Point;
 }
 
 /**

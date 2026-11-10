@@ -394,5 +394,6 @@ export function buildConcentricGrid(spec: OutlineSpec, width: number, height: nu
     inradius: Math.min(clearance(cells[start].center, cells[start].corners), clearance(cells[end].center, cells[end].corners)),
     start,
     end,
+    hub: cells[0].center,
   };
 }

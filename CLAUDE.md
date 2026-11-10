@@ -630,7 +630,7 @@ The puzzles in registry order:
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, straight / curvy walls, start/finish pair |
+| Maze | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, direction (across / even / down; round / out on rings), turns (long runs / mixed / zig-zag), straight / curvy walls, start/finish pair |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
@@ -680,6 +680,10 @@ Fifteen of these carry notes worth reading before editing them:
   ends; rings come out as squares there. Curvy walls are
   a drawing option only (`curves.ts`): the same walls, joined into runs and
   drawn as corner-cutting curves, on any grid shape.
+  Direction and Turns weight the carver's pick of the next cell by the step
+  between centres (`stepWeight`), so they work on every grid; rings read
+  down as out from `Grid.hub`. Left at Even and Mixed, the carver draws
+  exactly as it always did, so saved pages print the same.
 - **Letter Formation** - every letterform in `letterForms.ts` is drawn by
   hand (`docs/letter-formation-research.md` says why). Capitals and digits
   sit on a 0..100 box and split at every change of direction into numbered

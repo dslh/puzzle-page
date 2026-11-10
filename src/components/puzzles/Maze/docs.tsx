@@ -150,6 +150,60 @@ const docs: PuzzleDoc<MazeConfig> = {
         },
       ],
     },
+    grain: {
+      label: 'Direction',
+      description: (
+        <p>
+          Which way the paths mostly run. It changes how the maze looks more than how hard
+          it is.
+        </p>
+      ),
+      options: [
+        {
+          label: 'Across (Round on rings)',
+          description: (
+            <p>
+              Long paths side to side, like rows of writing. On rings, they go round
+              the middle.
+            </p>
+          ),
+          example: { config: { grain: 'across', branchiness: 'low' } },
+        },
+        { label: 'Even', description: <p>Paths run every way. Default.</p> },
+        {
+          label: 'Down (Out on rings)',
+          description: (
+            <p>
+              Long paths up and down. On rings, they run out from the middle like
+              the spokes of a wheel.
+            </p>
+          ),
+          example: { config: { grain: 'down', branchiness: 'low' } },
+        },
+      ],
+    },
+    turns: {
+      label: 'Turns',
+      description: <p>Whether paths carry straight on or keep turning.</p>,
+      options: [
+        {
+          label: 'Long runs',
+          description: <p>Long straight stretches and sharp corners. Easier to follow by eye.</p>,
+          example: { config: { turns: 'straight' } },
+        },
+        { label: 'Mixed', description: <p>Some of each. Default.</p> },
+        {
+          label: 'Zig-zag',
+          description: (
+            <p>
+              Paths turn at almost every cell, like steps. Harder to follow, and more
+              practice at changing direction with a pencil.
+            </p>
+          ),
+          example: { config: { turns: 'zigzag' } },
+        },
+      ],
+    },
     theme: {
       label: 'Start and finish',
       description: (

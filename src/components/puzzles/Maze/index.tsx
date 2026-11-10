@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { curvePath, wallRuns } from './curves';
 import { clearance } from './concentric';
-import { generateMaze, generateRegionMaze, type Maze as MazeType } from './generator';
+import { generateMaze, generateRegionMaze, type Grain, type Maze as MazeType, type Turns } from './generator';
 import type { GridShape, Point } from './grids';
 import { MAZE_THEMES, themeId } from './themes';
 import type { PuzzleProps } from '../../../types/puzzle';
@@ -17,6 +17,10 @@ export interface MazeConfig {
   theme: string;
   /** Draw the walls as flowing curves rather than straight lines. */
   curvyWalls: boolean;
+  /** Which way the passages tend to run */
+  grain: Grain;
+  /** Whether the passages tend to run straight or zig-zag */
+  turns: Turns;
 }
 
 // Simple seeded random number generator
@@ -55,6 +59,8 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
   const branchiness = config?.branchiness ?? 'medium';
   const themeChoice = config?.theme ?? 'random';
   const curvyWalls = config?.curvyWalls ?? false;
+  const grain = config?.grain ?? 'even';
+  const turns = config?.turns ?? 'mixed';
 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
@@ -62,9 +68,9 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
   // A filler fills the free squares of the whole page instead
   const maze: MazeType | null = useMemo(() => {
     return region !== undefined
-      ? generateRegionMaze(region, ratio, seed, branchiness, gridShape)
-      : generateMaze(width, height, seed, branchiness, gridShape);
-  }, [region, ratio, width, height, seed, branchiness, gridShape]);
+      ? generateRegionMaze(region, ratio, seed, branchiness, gridShape, { grain, turns })
+      : generateMaze(width, height, seed, branchiness, gridShape, { grain, turns });
+  }, [region, ratio, width, height, seed, branchiness, gridShape, grain, turns]);
 
   const answerClearance = useMemo(() => maze ? Math.min(...maze.solution.map(index => {
     const cell = maze.cells[index];
