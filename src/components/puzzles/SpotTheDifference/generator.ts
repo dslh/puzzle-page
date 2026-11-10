@@ -98,7 +98,97 @@ export const VERSIONS: Record<SceneTheme, Partial<Record<Feature, number>>> = {
   farmyard: { kite: 3, chimney: 3, window: 4, door: 3, fruit: 3, birdhouse: 3, flower: 3, cat: 3, can: 3, duck: 3 },
   playground: { kite: 3, chimney: 3, window: 3, fruit: 3, flower: 3, duck: 3 },
 };
-export const versionCount = (theme: SceneTheme, key: Feature) => VERSIONS[theme][key] ?? 2;
+
+interface Prop extends Partial<FeatureSpec> { id: string; versions?: number }
+// Swappable objects: a slot holds any one of its objects, each with a change
+// of its own. The first is the slot's original object, described above; the
+// others give their own answer, bounds and number of versions (two if unset).
+export const PROPS: Record<SceneTheme, Partial<Record<Feature, readonly Prop[]>>> = {
+  garden: {
+    kite: [{ id: 'kite' }, { id: 'balloon', x: 244, y: 60, radius: 32, label: 'The pattern on the balloon', versions: 3 }],
+    flower: [
+      { id: 'bed' },
+      { id: 'gnome', x: 68, y: 292, radius: 18, label: 'The gnome’s hat', versions: 3 },
+      { id: 'snail', x: 72, y: 323, radius: 26, label: 'The snail’s shell', versions: 3 },
+      { id: 'beehive', x: 91, y: 295, radius: 20, label: 'The bees by the hive', versions: 3 },
+    ],
+    cat: [
+      { id: 'cat' },
+      { id: 'dog', label: 'The dog’s tail', versions: 3 },
+      { id: 'rabbit', x: 182, y: 307, radius: 28, label: 'The rabbit’s ears', versions: 3 },
+      { id: 'tortoise', x: 212, y: 335, radius: 18, label: 'The tortoise’s head', versions: 3 },
+    ],
+    can: [
+      { id: 'can' },
+      { id: 'birdbath', x: 290, y: 302, radius: 30, label: 'The birds on the bird bath', versions: 3 },
+      { id: 'wellies', x: 293, y: 324, radius: 38, label: 'The pattern on the boots', versions: 3 },
+    ],
+  },
+  seaside: {
+    kite: [{ id: 'gull' }, { id: 'balloon', x: 244, y: 60, radius: 32, label: 'The pattern on the balloon', versions: 3 }],
+    flower: [
+      { id: 'sandcastle' },
+      { id: 'rockpool', x: 70, y: 345, radius: 22, label: 'What is in the rock pool', versions: 3 },
+      { id: 'icecream', x: 66, y: 309, radius: 20, label: 'The ice cream on the sign', versions: 3 },
+    ],
+    cat: [
+      { id: 'crab' },
+      { id: 'starfish', x: 176, y: 321, radius: 15, label: 'The starfish’s face', versions: 3 },
+      { id: 'seal', x: 217, y: 305, radius: 18, label: 'What is on the seal’s nose', versions: 3 },
+    ],
+    can: [{ id: 'bucket' }, { id: 'deckchair', x: 290, y: 306, radius: 30, label: 'The pattern on the deckchair', versions: 3 }],
+  },
+  camping: {
+    flower: [{ id: 'toadstools' }, { id: 'campfire', x: 68, y: 315, radius: 26, label: 'The campfire', versions: 3 }],
+    cat: [
+      { id: 'hedgehog' },
+      { id: 'fox', x: 146, y: 319, radius: 32, label: 'The fox’s tail', versions: 3 },
+      { id: 'squirrel', x: 195, y: 316, radius: 14, label: 'What the squirrel is holding', versions: 3 },
+    ],
+    can: [
+      { id: 'lantern' },
+      { id: 'rucksack', x: 290, y: 328, radius: 20, label: 'The front of the rucksack', versions: 3 },
+      { id: 'logpile', x: 290, y: 320, radius: 34, label: 'The pile of logs' },
+    ],
+  },
+  farmyard: {
+    flower: [
+      { id: 'basket' },
+      { id: 'hen', x: 95, y: 341, radius: 20, label: 'The chicks', versions: 3 },
+      { id: 'haybale', x: 68, y: 303, radius: 26, label: 'The cat on the hay bale', versions: 3 },
+    ],
+    cat: [
+      { id: 'sheep' },
+      { id: 'pig', label: 'The pig’s tail', versions: 3 },
+      { id: 'goat', x: 194, y: 291, radius: 16, label: 'The goat’s horns', versions: 3 },
+    ],
+    can: [
+      { id: 'wheelbarrow' },
+      { id: 'churns', x: 302, y: 294, radius: 14, label: 'The lid on the milk churn' },
+      { id: 'pumpkin', x: 312, y: 302, radius: 18, label: 'The pumpkin’s stalk', versions: 3 },
+    ],
+  },
+  playground: {
+    flower: [{ id: 'bucket' }, { id: 'springhorse', x: 76, y: 305, radius: 14, label: 'The spring horse’s mane', versions: 3 }],
+    cat: [
+      { id: 'teddy' },
+      { id: 'bunny', label: 'The bunny’s bow tie' },
+      { id: 'dinosaur', x: 175, y: 313, radius: 26, label: 'The plates on the dinosaur’s back', versions: 3 },
+    ],
+    can: [
+      { id: 'scooter' },
+      { id: 'tricycle', label: 'The tricycle’s bell' },
+      { id: 'pram', x: 273, y: 299, radius: 24, label: 'The pram’s hood' },
+    ],
+  },
+};
+
+/** Where a slot's change is, what it is, and how many versions it has. */
+export function featureSpec(theme: SceneTheme, key: Feature, id?: string) {
+  const pool = PROPS[theme][key];
+  const prop = pool?.find(p => p.id === id);
+  return { ...SCENE_FEATURES[theme][key], versions: prop && prop !== pool![0] ? 2 : VERSIONS[theme][key] ?? 2, ...prop };
+}
 
 export function generateScene(seed: number, count: SpotTheDifferenceConfig['differences'], choice: SceneChoice = 'garden') {
   const random = new SeededRandom(seed);
@@ -107,11 +197,19 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   const theme = choice === 'random' ? new SeededRandom(seed ^ 0x7468656d).pick(SCENES).id : choice;
   // A stable shuffled list means increasing the count keeps existing answers.
   const order = random.shuffle(features);
-  const variants = Object.fromEntries(features.map(key => [key, random.nextInt(versionCount(theme, key))])) as Record<Feature, number>;
+  // Which object stands in each slot that has a choice.
+  const chooser = new SeededRandom(seed ^ 0x70726f70);
+  const chosen = Object.fromEntries(features.flatMap(key => {
+    const pool = PROPS[theme][key];
+    return pool ? [[key, chooser.pick(pool)]] : [];
+  })) as Partial<Record<Feature, Prop>>;
+  const props = Object.fromEntries(Object.entries(chosen).map(([key, prop]) => [key, prop.id])) as Partial<Record<Feature, string>>;
+  const featureSpecs = Object.fromEntries(features.map(key => [key, featureSpec(theme, key, props[key])])) as Record<Feature, FeatureSpec & { versions: number }>;
+  const variants = Object.fromEntries(features.map(key => [key, random.nextInt(featureSpecs[key].versions)])) as Record<Feature, number>;
   // The version each part becomes when it is one of the changes.
   const versions = new SeededRandom(seed ^ 0x76657273);
   const swaps = Object.fromEntries(features.map(key => {
-    const count = versionCount(theme, key);
+    const count = featureSpecs[key].versions;
     return [key, (variants[key] + 1 + versions.nextInt(count - 1)) % count];
   })) as Record<Feature, number>;
   const decoration = new SeededRandom(seed ^ 0x7363656e);
@@ -143,31 +241,13 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   // On a tall panel the middle ground object stands further back, so the
   // spare height fills the ground rather than leaving one row along the bottom.
   placements[(['flower', 'cat', 'can'] as const)[slots.indexOf(183)]]!.lift = .3;
-  const pet = composition.pick(['cat', 'dog'] as const);
-  const livestock = new SeededRandom(seed ^ 0x6661726d).pick(['sheep', 'pig'] as const);
-  const playground = new SeededRandom(seed ^ 0x706c6179);
-  const playToy = playground.pick(['teddy', 'bunny'] as const);
-  const playRide = playground.pick(['scooter', 'tricycle'] as const);
-  const specs = SCENE_FEATURES[theme];
   return {
     theme,
-    features: {
-      ...specs,
-      can: { ...specs.can, label: theme === 'playground' ? `The ${playRide}’s bell` : specs.can.label },
-      cat: {
-        ...specs.cat,
-        label: theme === 'garden' ? `The ${pet}’s tail`
-          : theme === 'farmyard' ? `The ${livestock}’s tail`
-          : theme === 'playground' ? `The ${playToy}’s bow tie` : specs.cat.label,
-      },
-    },
+    features: featureSpecs,
+    props,
     backgroundFlipped,
     foregroundFlipped,
     placements,
-    pet,
-    livestock,
-    playToy,
-    playRide,
     style: decoration.nextInt(3),
     palette: decoration.nextInt(4),
     detail: decoration.nextInt(3),

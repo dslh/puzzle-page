@@ -1,6 +1,7 @@
 import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { Band, Birds, FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
+import { Goat, HayBale, Hen, MilkChurns, Pumpkin } from './FarmyardProps';
 
 const PAINT = ['#bc7969', '#8ca8a0', '#c39b62', '#a195b0'];
 const WOOD = '#b39a75';
@@ -11,6 +12,7 @@ export default function Farmyard(props: SceneProps) {
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => version(scene, key, second);
+  const art = (key: Feature) => ({ v: v(key), fill, outline });
   const accent = PAINT[scene.palette];
   const far = ridge(width, 146 + dy * .3, 12, 2.2);
   return (
@@ -107,7 +109,9 @@ export default function Farmyard(props: SceneProps) {
           {v('birdhouse') === 2 && <path d="M225 167 H245" fill="none" stroke={outline ? INK : '#bc7969'} strokeWidth="3" />}<path d="M216 173 H254" strokeWidth="4" />
         </g>
         {/* A harvest basket; the extra vegetable changes shape with the crop. */}
-        <g transform={transform('flower')}>
+        <g transform={transform('flower')}>{scene.props.flower === 'hen' ? <g transform="translate(66 353)"><Hen {...art('flower')} /></g>
+          : scene.props.flower === 'haybale' ? <g transform="translate(66 353)"><HayBale {...art('flower')} fur={fill(['#dcb887', '#b9b4a4', '#e5d5c2'][scene.detail])} /></g>
+          : <g>
           <path d="M31 326 Q66 319 101 326 L94 353 H38Z" fill={fill('#d1af77')} />
           <Band d="M39 327 Q38 288 66 288 Q95 288 94 327" colour={fill('#d1af77')} width={9} />
           {[50, 80, ...(v('flower') === 0 ? [65] : [])].map((x, i) => <g key={x} transform={`translate(${x} ${i === 2 ? 303 : 319})`} strokeWidth="2.2">
@@ -115,14 +119,15 @@ export default function Farmyard(props: SceneProps) {
           </g>)}
           {v('flower') === 2 && <g transform="translate(65 304)"><circle r="13" fill={fill('#a7bc87')} strokeWidth="2.2" /><path d="M-9 -3 Q0 6 9 -3 M0 -12 V9 M-6 -9 Q-2 0 -7 7 M6 -9 Q2 0 7 7" fill="none" strokeWidth={FINE} /></g>}
           <path d="M35 331 Q66 340 98 331 L94 353 H38Z" fill={fill('#d1af77')} /><path d="M40 341 H94 M49 337 L51 351 M65 338 V352 M81 337 L79 351" fill="none" strokeWidth={FINE} />
-        </g>
+        </g>}</g>
         {/* A sheep or pig, with the same clear tail difference for either animal. */}
-        <g transform={transform('cat')}>
+        <g transform={transform('cat')}>{scene.props.cat === 'goat' ? <g transform="translate(176 351)"><Goat {...art('cat')} /></g>
+          : <g>
           {v('cat') !== 1 && <path d="M202 330 Q218 316 221 328 Q222 340 211 334" fill="none" strokeWidth="3" />}
           {v('cat') === 2 && <path d="M211 323 L203 317 V329Z M211 323 L219 317 V329Z" fill={fill('#bc7969')} strokeWidth="2" />}
           {v('cat') === 1 && <path d="M202 330 L219 323" fill="none" strokeWidth="3" />}
-          {[156, 166, 186, 196].map(x => <rect key={x} x={x} y="338" width="8" height="17" rx="2" fill={fill(scene.livestock === 'sheep' ? '#7f776a' : '#d9a194')} strokeWidth="2.2" />)}
-          {scene.livestock === 'sheep' ? <g>
+          {[156, 166, 186, 196].map(x => <rect key={x} x={x} y="338" width="8" height="17" rx="2" fill={fill(scene.props.cat === 'sheep' ? '#7f776a' : '#d9a194')} strokeWidth="2.2" />)}
+          {scene.props.cat === 'sheep' ? <g>
             <path d="M152 313 Q149 303 160 304 Q167 294 177 302 Q190 296 195 307 Q207 307 205 319 Q215 329 203 337 Q202 349 190 346 Q179 354 170 346 Q156 350 153 339 Q142 336 148 326 Q141 317 152 313Z" fill={fill('#f5ecd8')} />
             <path d="M162 318 q4 -4 8 0 M180 312 q4 -4 8 0 M186 330 q4 -4 8 0 M168 334 q4 -4 8 0" fill="none" strokeWidth={FINE} />
             <path d="M143 315 L134 307 Q134 298 145 305 L151 310" fill={fill('#7f776a')} strokeWidth="2.2" />
@@ -131,16 +136,18 @@ export default function Farmyard(props: SceneProps) {
             <ellipse cx="178" cy="329" rx="28" ry="20" /><path d="M146 318 L142 300 L154 309 L163 301 L164 320Z" strokeWidth="2.2" />
             <ellipse cx="151" cy="325" rx="17" ry="18" /><ellipse cx="140" cy="329" rx="9" ry="7" fill={fill('#ebbcac')} strokeWidth="2.2" /><path d="M137 327 V330 M142 327 V330" strokeWidth={FINE} /><circle cx="151" cy="319" r="1.8" fill={INK} stroke="none" />
           </g>}
-        </g>
+        </g>}</g>
         {/* Wheelbarrow and an optional spade; no floating or disconnected tools. */}
-        <g transform={transform('can')}>
+        <g transform={transform('can')}>{scene.props.can === 'churns' ? <g transform="translate(290 350)"><MilkChurns {...art('can')} /></g>
+          : scene.props.can === 'pumpkin' ? <g transform="translate(290 350)"><Pumpkin {...art('can')} /></g>
+          : <g>
           {v('can') === 0 && <g><Band d="M290 325 V292" colour={fill(WOOD)} width={8} /><path d="M283 279 H297 V287 Q290 298 283 287Z" fill={fill('#b1bcb0')} strokeWidth="2.2" /></g>}
           {v('can') === 2 && <g><Band d="M290 325 V292" colour={fill(WOOD)} width={8} /><path d="M281 291 H299 M283 291 V277 M289 291 V277 M295 291 V277" fill="none" strokeWidth="3" /></g>}
           <Band d="M310 321 L333 307 M296 334 L309 353" colour={fill(WOOD)} width={8} />
           <path d="M268 332 L268 345" fill="none" strokeWidth="4" />
           <path d="M251 316 H315 L305 338 H267Z" fill={fill(PAINT[(scene.palette + 1) % 4])} /><path d="M258 322 H310" fill="none" strokeWidth={FINE} />
           <circle cx="268" cy="345" r="10" fill={fill('#89958b')} /><circle cx="268" cy="345" r="3" fill={fill('#e4d2a8')} strokeWidth="2" />
-        </g>
+        </g>}</g>
         {/* Tractor: the large rear wheel has four or six visible spokes. */}
         <g transform={transform('pond')}>
           <path d="M441 314 V289 H487 V322 M438 285 H492" fill={fill(accent)} strokeWidth="4" />

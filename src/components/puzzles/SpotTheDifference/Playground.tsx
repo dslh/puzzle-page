@@ -1,6 +1,7 @@
 import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { Band, Birds, FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
+import { Dinosaur, Pram, SpringHorse } from './PlaygroundProps';
 
 const COLOURS = ['#cf927b', '#8faeab', '#c9ad6c', '#ab9bbb'];
 const WOOD = '#b69c78';
@@ -11,6 +12,7 @@ export default function Playground(props: SceneProps) {
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => version(scene, key, second);
+  const art = (key: Feature) => ({ v: v(key), fill, outline });
   const accent = COLOURS[scene.palette];
   const far = ridge(width, 166 + dy * .3, 10, .4);
   return (
@@ -80,35 +82,38 @@ export default function Playground(props: SceneProps) {
         <path d="M190 253 H280" strokeWidth="4" />
       </g>
       {/* A sand bucket and spade; the motif changes in outline as well as colour. */}
-      <g transform={transform('flower')}>
+      <g transform={transform('flower')}>{scene.props.flower === 'springhorse' ? <g transform="translate(66 353)"><SpringHorse {...art('flower')} accent={COLOURS[(scene.palette + 1) % 4]} /></g>
+        : <g>
         <Band d="M97 331 V301" colour={fill(WOOD)} width={7} /><path d="M92 288 H102 V297 Q97 306 92 297Z M90 331 H104 V341 Q97 352 90 341Z" fill={fill('#a6bbb0')} />
         <path d="M44 319 H89 L84 353 H49Z" fill={fill(accent)} /><ellipse cx="66" cy="319" rx="23" ry="5" fill={fill('#f0dfb8')} />
         <path d="M46 323 Q66 279 87 323" fill="none" />
         {[<circle key="circle" cx="66" cy="337" r="9" fill={fill('#f8ebc9')} />,
           <path key="star" d="M66 326 L69 333 L77 333 L71 339 L73 347 L66 343 L59 347 L61 339 L55 333 L63 333Z" fill={fill('#f8ebc9')} />,
           <path key="triangle" d="M66 327 L76 346 H56Z" fill={fill('#f8ebc9')} />][v('flower')]}
-      </g>
+      </g>}</g>
       {/* The toy may be a teddy or bunny; the bow is a separate difference. */}
-      <g transform={transform('cat')} fill={fill(scene.detail === 1 ? '#d3c5af' : '#d4b18b')}>
+      <g transform={transform('cat')}>{scene.props.cat === 'dinosaur' ? <g transform="translate(176 351)"><Dinosaur {...art('cat')} /></g>
+        : <g fill={fill(scene.detail === 1 ? '#d3c5af' : '#d4b18b')}>
         <ellipse cx="149" cy="328" rx="8" ry="12" transform="rotate(25 149 328)" /><ellipse cx="203" cy="328" rx="8" ry="12" transform="rotate(-25 203 328)" />
         <ellipse cx="176" cy="332" rx="21" ry="20" /><ellipse cx="163" cy="350" rx="10" ry="6" /><ellipse cx="189" cy="350" rx="10" ry="6" />
-        {scene.playToy === 'bunny' ? <g><ellipse cx="165" cy="297" rx="7" ry="15" transform="rotate(-12 165 297)" /><ellipse cx="187" cy="297" rx="7" ry="15" transform="rotate(12 187 297)" /></g> : <g><circle cx="162" cy="294" r="8" /><circle cx="190" cy="294" r="8" /></g>}
+        {scene.props.cat === 'bunny' ? <g><ellipse cx="165" cy="297" rx="7" ry="15" transform="rotate(-12 165 297)" /><ellipse cx="187" cy="297" rx="7" ry="15" transform="rotate(12 187 297)" /></g> : <g><circle cx="162" cy="294" r="8" /><circle cx="190" cy="294" r="8" /></g>}
         <circle cx="176" cy="310" r="19" /><ellipse cx="176" cy="316" rx="10" ry="7" fill={fill('#f2e2c7')} />
         <circle cx="169" cy="307" r="1.9" fill={INK} stroke="none" /><circle cx="183" cy="307" r="1.9" fill={INK} stroke="none" /><path d="M173 312 H179 L176 315Z" fill={INK} strokeWidth="1" /><path d="M176 315 V318 M172 320 Q176 323 180 320" fill="none" strokeWidth={FINE} />
         {v('cat') === 0 && <g fill={fill(COLOURS[(scene.palette + 2) % 4])}><path d="M176 331 L165 325 V338Z M176 331 L187 325 V338Z" /><circle cx="176" cy="331" r="3" /></g>}
-      </g>
+      </g>}</g>
       {/* Scooter or tricycle: both can carry the same little handlebar bell. */}
-      <g transform={transform('can')}>
+      <g transform={transform('can')}>{scene.props.can === 'pram' ? <g transform="translate(290 350)"><Pram {...art('can')} accent={COLOURS[(scene.palette + 3) % 4]} /></g>
+        : <g>
         <path d="M323 347 L308 301 M299 301 H319" fill="none" strokeWidth="4" />
-        {scene.playRide === 'tricycle' ? <g>
+        {scene.props.can === 'tricycle' ? <g>
           <circle cx="253" cy="338" r="7" fill={fill('#8e9c93')} /><path d="M253 338 L260 347" fill="none" strokeWidth="3" />
           <path d="M260 347 L276 322 L292 347 H260 M276 322 H298 L323 347 M292 347 L306 314" fill="none" strokeWidth="4" />
           <path d="M269 318 H286" strokeWidth="5" /><path d="M291 344 L286 350 M286 350 H280" fill="none" />
         </g> : <path d="M260 342 H310 L316 332" fill="none" strokeWidth="5" />}
-        <circle cx="260" cy="347" r="9" fill={fill('#8e9c93')} /><circle cx="323" cy="347" r={scene.playRide === 'tricycle' ? 12 : 9} fill={fill('#8e9c93')} />
+        <circle cx="260" cy="347" r="9" fill={fill('#8e9c93')} /><circle cx="323" cy="347" r={scene.props.can === 'tricycle' ? 12 : 9} fill={fill('#8e9c93')} />
         <circle cx="260" cy="347" r="3" fill={fill('#f2deb1')} /><circle cx="323" cy="347" r="3" fill={fill('#f2deb1')} />
         {v('can') === 0 && <g><path d="M319 301 V296" fill="none" /><path d="M313 296 A6 6 0 0 1 325 296Z" fill={fill('#e0ba68')} /></g>}
-      </g>
+      </g>}</g>
       {/* A timber sandpit anchors the foreground, independent of the play tower. */}
       <g transform={transform('pond')}>
         <path d="M414 319 L536 301 L567 354 L443 374Z" fill={fill('#b69e7c')} />

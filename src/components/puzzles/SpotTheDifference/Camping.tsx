@@ -1,6 +1,7 @@
 import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
+import { Campfire, Fox, LogPile, Rucksack, Squirrel } from './CampingProps';
 
 const TENTS = ['#c49869', '#86a5a0', '#c18876', '#b1a2ba'];
 
@@ -10,6 +11,7 @@ export default function Camping(props: SceneProps) {
   const { width, height, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => version(scene, key, second);
+  const art = (key: Feature) => ({ v: v(key), fill, outline });
   const far = ridge(width, 172 + dy * .3, 10, 2);
   const pine = 'M0 -66 L-15 -39 H-8 L-25 -17 H-13 L-31 0 H31 L13 -17 H25 L8 -39 H15Z';
   return (
@@ -68,16 +70,19 @@ export default function Camping(props: SceneProps) {
         {scene.detail === 2 && <path d="M214 220 H258 L267 229 L258 238 H214Z" fill={fill('#c1b492')} />}
       </g>
       {/* Toadstools growing at the edge of the clearing. */}
-      <g transform={transform('flower')}>
+      <g transform={transform('flower')}>{scene.props.flower === 'campfire' ? <g transform="translate(66 353)"><Campfire {...art('flower')} /></g>
+        : <g>
         <path d="M59 317 L56 350 Q66 354 76 350 L72 317Z" fill={fill('#f8ebcf')} />
         <path d="M44 320 Q66 326 90 320" fill="none" strokeWidth={FINE} />
         <path d={scene.style === 0 ? 'M36 320 Q44 279 66 285 Q90 280 98 320Z' : 'M36 320 Q65 266 98 320Z'} fill={fill('#c98c78')} />
         {[[[53, 309], [79, 308]], [[53, 309], [79, 308], [66, 294]], []][v('flower')].map(([x, y]) => <circle key={x} cx={x} cy={y} r="4" fill={fill('#fff4d9')} />)}
         <path d="M27 353 V340 M18 340 Q27 316 38 340Z" fill={fill('#b1b28c')} />
         {scene.decoration === 1 && <path d="M99 351 V338 M88 338 Q99 315 110 338Z" fill={fill('#b1b28c')} />}
-      </g>
+      </g>}</g>
       {/* A hedgehog sniffing about beside the lantern. */}
-      <g transform={transform('cat')}>{v('cat') === 2 ? <g transform="translate(178 332) scale(1.25)">
+      <g transform={transform('cat')}>{scene.props.cat === 'fox' ? <g transform="translate(176 351)"><Fox {...art('cat')} /></g>
+        : scene.props.cat === 'squirrel' ? <g transform="translate(176 351)"><Squirrel {...art('cat')} /></g>
+        : <g>{v('cat') === 2 ? <g transform="translate(178 332) scale(1.25)">
         <path d={Array.from({ length: 28 }, (_, i) => {
           const a = i / 28 * Math.PI * 2;
           const r = i % 2 ? 22 : 29;
@@ -90,16 +95,18 @@ export default function Camping(props: SceneProps) {
         <path d="M-24 13 Q-20 -8 -7 -9 L5 -1 L26 12Z" fill={fill('#e6ceb0')} />
         <circle cx="-25" cy="10" r="3.5" fill={INK} />
         <circle cx="-13" cy="3" r="2" fill={INK} /><path d="M-10 15 L-15 18 M16 15 L20 18 M-14 -17 L-11 -13 M0 -24 L1 -18 M14 -18 L12 -13 M25 -7 L21 -5" fill="none" strokeWidth={FINE} />
-      </g>}</g>
+      </g>}</g>}</g>
       {/* Lantern with a removable carrying loop. */}
-      <g transform={transform('can')}>
+      <g transform={transform('can')}>{scene.props.can === 'rucksack' ? <g transform="translate(290 350)"><Rucksack {...art('can')} accent={TENTS[(scene.palette + 2) % 4]} /></g>
+        : scene.props.can === 'logpile' ? <g transform="translate(290 350)"><LogPile {...art('can')} /></g>
+        : <g>
         {v('can') === 0 && <path d="M286 303 V290 Q300 270 314 290 V303" fill="none" strokeWidth="4" />}
         {v('can') === 2 && <path d="M288 303 V285 H312 V303" fill="none" strokeWidth="4" />}
         <path d="M282 313 H318 L322 346 H278Z" fill={fill('#f1dda5')} />
         <path d="M278 310 H322 L312 299 H288Z M277 348 H323 V355 H277Z" fill={fill('#8ba39c')} />
         <path d="M285 315 L283 345 M315 315 L317 345" fill="none" />
         <path d="M299 340 Q285 327 301 319 Q297 328 306 332 Q311 339 299 340Z" fill={fill('#d6aa65')} strokeWidth={FINE} />
-      </g>
+      </g>}</g>
       {/* A picnic blanket, mug and a packed snack. */}
       <g transform={transform('pond')}>
         <path d="M421 326 L520 318 L560 361 L450 373Z" fill={fill(TENTS[(scene.palette + 1) % 4])} />

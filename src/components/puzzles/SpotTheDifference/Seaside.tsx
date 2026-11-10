@@ -1,6 +1,8 @@
 import { version, type Feature } from './generator';
 import { sceneLayout } from './layout';
 import SceneFrame, { Band, FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
+import { Balloon } from './Props';
+import { Deckchair, IceCreamSign, RockPool, Seal, Starfish } from './SeasideProps';
 
 const COLOURS = ['#cf8773', '#83a9a7', '#d5af61', '#a39ab6'];
 const WOOD = '#b39a75';
@@ -11,6 +13,7 @@ export default function Seaside(props: SceneProps) {
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const v = (key: Feature) => version(scene, key, second);
+  const art = (key: Feature) => ({ v: v(key), fill, outline });
   const accent = COLOURS[scene.palette];
   // The sea rises to meet the sky on tall panels, rather than leaving sky.
   const sea = 180 + dy * .3;
@@ -33,11 +36,12 @@ export default function Seaside(props: SceneProps) {
       <g transform="translate(55 49)"><circle r="21" fill={fill('#efd080')} strokeWidth="2.5" />{Array.from({ length: 10 }, (_, i) => <path key={i} d="M0 -28 V-34" transform={`rotate(${i * 36})`} />)}</g>
       {Array.from({ length: scene.clouds }, (_, i) => <path key={i} transform={`translate(${321 + i * 87 + dx * (.5 + i * .12)} ${39 + i % 2 * 12 + dy * .15})`} d="M0 12 Q-5 -1 9 0 Q11 -17 29 -8 Q40 -17 49 0 Q66 -3 65 12Z" fill={fill('#fffdf5')} strokeWidth="2.2" />)}
       {/* A gull gliding above the sailing boat. */}
-      <g transform={transform('kite')}><g transform={`translate(244 103) scale(${v('kite') === 1 ? -1 : 1} 1)`}>
+      <g transform={transform('kite')}>{scene.props.kite === 'balloon' ? <Balloon {...art('kite')} />
+        : <g><g transform={`translate(244 103) scale(${v('kite') === 1 ? -1 : 1} 1)`}>
         <path d="M-16 5 L-29 -1 L-23 12 L-12 10 Q4 21 17 8 Q27 3 20 -6 Q12 -12 7 -2 L-2 0Z" fill={fill('#fffdf5')} />
         <path d="M23 -2 L30 1 L22 3Z" fill={fill('#d4a45d')} /><circle cx="17" cy="-3" r="1.6" fill={INK} stroke="none" /><path d="M-6 5 Q-10 -16 -28 -26 Q-3 -24 6 1" fill={fill('#fffdf5')} strokeWidth="2.2" />
         {v('kite') === 2 && <path d="M27 2 Q22 10 27 18 Q32 10 27 2Z M27 18 L23 24 H31Z" fill={fill('#94b3af')} strokeWidth="2" />}
-      </g></g>
+      </g></g>}</g>
       {/* Lighthouse and striped parasol on the shore. */}
       <g transform={transform('cottage')}>
         {/* A headland joins the beach and supports every shore structure. */}
@@ -86,25 +90,30 @@ export default function Seaside(props: SceneProps) {
         {scene.decoration === 2 && <path d="M230 170 Q225 165 230 163 L235 167 L240 163 Q245 165 240 170 L235 174Z" fill={fill(accent)} strokeWidth="1.2" />}
       </g>
       {/* Sandcastle with a flag, crab, bucket and a ball on a folded towel. */}
-      <g transform={transform('flower')}>
+      <g transform={transform('flower')}>{scene.props.flower === 'rockpool' ? <g transform="translate(66 353)"><RockPool {...art('flower')} /></g>
+        : scene.props.flower === 'icecream' ? <g transform="translate(66 353)"><IceCreamSign {...art('flower')} /></g>
+        : <g>
         <path d="M31 352 V322 H42 V329 H52 V322 H79 V329 H89 V322 H101 V352Z" fill={fill('#d8b67c')} />
         <path d="M55 351 V339 Q66 325 77 339 V351 M27 354 H106 M65 323 V277" fill="none" /><path d="M36 334 h6 M88 330 h6" fill="none" strokeWidth={FINE} />
         <path d={['M65 279 H86 V296 H65Z', 'M65 279 L89 288 L65 299Z', 'M65 279 H90 L82 288 L90 297 H65Z'][v('flower')]} fill={fill(accent)} />
         {scene.style === 1 && <path d="M39 339 H48 M83 339 H92 M45 346 H54 M78 346 H87" strokeWidth="1.3" />}
-      </g>
-      <g transform={transform('cat')}><g transform="translate(178 328)">
+      </g>}</g>
+      <g transform={transform('cat')}>{scene.props.cat === 'starfish' ? <g transform="translate(176 351)"><Starfish {...art('cat')} /></g>
+        : scene.props.cat === 'seal' ? <g transform="translate(176 351)"><Seal {...art('cat')} /></g>
+        : <g><g transform="translate(178 328)">
         <path d="M-20 -2 L-35 -9 L-43 -5 M-21 5 L-36 6 L-40 14 M-17 11 L-27 19 M20 -2 L35 -9 L43 -5 M21 5 L36 6 L40 14 M17 11 L27 19" fill="none" strokeWidth="2.5" />
         <path d="M-17 -8 L-28 -23 M17 -8 L29 -23" fill="none" strokeWidth="4" />
         <path d="M-29 -22 Q-45 -29 -34 -40 L-29 -31 L-23 -40 Q-15 -26 -29 -22Z" fill={fill('#ce8e78')} />
         {v('cat') === 0 ? <path d="M29 -22 Q14 -29 23 -40 L29 -31 L35 -40 Q45 -26 29 -22Z" fill={fill('#ce8e78')} /> : <ellipse cx="29" cy="-29" rx="10" ry="11" fill={fill('#ce8e78')} />}
         <ellipse rx="24" ry="15" fill={fill('#ce8e78')} /><path d="M-10 -11 L-10 -21 M10 -11 L10 -21" strokeWidth="2.2" /><circle cx="-10" cy="-23" r="4" fill={fill('#fff8e3')} strokeWidth="2" /><circle cx="10" cy="-23" r="4" fill={fill('#fff8e3')} strokeWidth="2" /><circle cx="-10" cy="-23" r="1.5" fill={INK} stroke="none" /><circle cx="10" cy="-23" r="1.5" fill={INK} stroke="none" /><path d="M-5 3 Q0 8 5 3" fill="none" strokeWidth={FINE} />
-      </g></g>
-      <g transform={transform('can')}>
+      </g></g>}</g>
+      <g transform={transform('can')}>{scene.props.can === 'deckchair' ? <g transform="translate(290 350)"><Deckchair {...art('can')} accent={accent} /></g>
+        : <g>
         {v('can') === 0 && <g transform="rotate(16 309 326)"><Band d="M309 334 V300" colour={fill(WOOD)} width={8} /><path d="M301 286 H317 V298 Q309 309 301 298Z" fill={fill('#94b3af')} strokeWidth="2.2" /></g>}
         {v('can') === 2 && <g transform="rotate(16 309 326)"><Band d="M309 334 V298" colour={fill(WOOD)} width={8} /><path d="M298 296 Q298 282 309 282 Q320 282 320 296 Q309 312 298 296Z" fill={fill('#efe6cf')} strokeWidth="2.2" /><path d="M303 286 L306 301 M309 283 V304 M315 286 L312 301 M299 292 H319" fill="none" strokeWidth="1.2" /></g>}
         <path d="M267 318 L274 354 H311 L318 318Z" fill={fill(accent)} /><ellipse cx="292" cy="318" rx="25" ry="6" fill={fill('#f7e7be')} /><path d="M268 324 Q289 285 316 324" fill="none" strokeWidth="2.5" />
         {scene.detail === 2 && <path d="M277 339 H308 M277 345 H308" fill="none" strokeWidth={FINE} />}
-      </g>
+      </g>}</g>
       <g transform={transform('pond')}>
         <path d="M420 346 L526 340 L552 367 L439 373Z" fill={fill('#c9b6b0')} />
         {Array.from({ length: 3 }, (_, i) => <path key={i} d={`M${433 + i * 29} 347 L${452 + i * 29} 369`} fill="none" strokeWidth={scene.decoration === 1 ? 5 : FINE} />)}

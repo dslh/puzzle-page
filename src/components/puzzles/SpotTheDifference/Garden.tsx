@@ -1,6 +1,8 @@
 import { version, type Feature } from './generator';
 import { ridge, sceneLayout } from './layout';
 import SceneFrame, { Band, Birds, FAR, FINE, INK, LINE, type SceneProps } from './SceneFrame';
+import { Balloon } from './Props';
+import { Beehive, BirdBath, Gnome, Rabbit, Snail, Tortoise, Wellies } from './GardenProps';
 
 const ROOFS = ['#c97c62', '#749399', '#a984a0', '#d9ac55'];
 const FUR = ['#dcb887', '#b9b4a4', '#e5d5c2'];
@@ -19,6 +21,7 @@ export default function Garden(props: SceneProps) {
   const { width, height, dx, dy, transform } = layout;
   const fill = (colour: string) => outline ? '#fff' : colour;
   const variant = (key: Feature) => version(scene, key, second);
+  const art = (key: Feature) => ({ v: variant(key), fill, outline });
   const fur = fill(FUR[scene.detail]);
   const lawn = dy * .48;
   // The far hills roll gently behind the lawn; their trees sit on the line.
@@ -55,13 +58,13 @@ export default function Garden(props: SceneProps) {
         <path d={`M4 ${237 + lawn} Q${width * .18} ${191 + lawn} ${width * .385} ${231 + lawn} Q${width * .647} ${174 + lawn} ${width - 4} ${231 + lawn} V${height - 16} Q${width - 4} ${height - 2} ${width - 19} ${height - 2} H19 Q4 ${height - 2} 4 ${height - 16}Z`} fill={fill('#e4ebce')} stroke="none" />
         <path d={`M4 ${277 + dy * .6} Q${width * .3} ${245 + dy * .6} ${width * .543} ${272 + dy * .6} T${width - 4} ${267 + dy * .6}`} fill="none" stroke={outline ? '#b2b2a4' : '#c9d5b4'} strokeWidth="2" />
         {/* Kite: the two tails are deliberately different silhouettes. */}
-        <g transform={transform('kite')}><g transform="translate(244 57)">
+        <g transform={transform('kite')}>{scene.props.kite === 'balloon' ? <Balloon {...art('kite')} /> : <g transform="translate(244 57)">
           <path d="M0 -29 L21 0 L0 28 L-21 0Z" fill={fill('#e4b469')} />
           <path d="M0 -29 L21 0 L0 0Z M0 0 L-21 0 L0 28Z" fill={fill('#d39a52')} strokeWidth={FINE} />
           <path d="M0 28 Q-16 46 1 59 Q17 72 0 85" fill="none" strokeWidth={FINE} />
           {variant('kite') === 0 && <g fill={fill('#bc7a79')} strokeWidth="2"><path d="M-3 42 L-13 35 V49Z M-3 42 L7 35 V49Z" /><path d="M5 64 L-5 57 V71Z M5 64 L15 57 V71Z" /></g>}
           {variant('kite') === 2 && <g fill={fill('#8eaeb0')} strokeWidth="2"><path d="M-6 39 L5 43 L-4 51Z M8 58 L-3 62 L6 70Z M2 76 L13 80 L4 88Z" /></g>}
-        </g></g>
+        </g>}</g>
         {/* Low fence stays behind every foreground object. */}
         <g fill={fill('#f6e9ce')} strokeWidth="2.2" transform={`translate(0 ${lawn})`}>
           <path d={`M5 229 H${width - 5} V239 H5Z`} />
@@ -145,7 +148,9 @@ export default function Garden(props: SceneProps) {
           <path d="M224 252 Q235 246 246 252" fill={fill('#9fb586')} strokeWidth={FINE} />
         </g>
         {/* Foreground flower bed, with a butterfly visiting. */}
-        <g transform={transform('flower')}>
+        <g transform={transform('flower')}>{scene.props.flower === 'gnome' ? <g transform="translate(66 353)"><Gnome {...art('flower')} /></g>
+          : scene.props.flower === 'snail' ? <g transform="translate(66 353)"><Snail {...art('flower')} /></g>
+          : scene.props.flower === 'beehive' ? <g transform="translate(66 353)"><Beehive {...art('flower')} /></g> : <g>
           <ellipse cx="70" cy="353" rx="43" ry="9" fill={fill('#dcc7a0')} strokeWidth="2" />
           <path d="M66 347 V311" fill="none" />
           <path d="M66 337 Q44 317 46 338 Q56 346 66 343 M66 328 Q86 308 86 328 Q77 337 66 335" fill={fill('#9fb586')} strokeWidth="2" />
@@ -159,9 +164,10 @@ export default function Garden(props: SceneProps) {
             <path d="M0 0 Q11 -12 12 -3 Q12 4 0 1 Q9 9 3 11 Q-1 9 0 1" fill={fill('#c7b3d6')} />
             <path d="M0 -4 V8 M0 -4 L-3 -10 M0 -4 L3 -10" fill="none" />
           </g>
-        </g>
+        </g>}</g>
         {/* A cat or dog watching the duck. The tail is outlined, not a solid stroke. */}
-        <g transform={transform('cat')}><g transform="translate(176 327)">
+        <g transform={transform('cat')}>{scene.props.cat === 'rabbit' ? <g transform="translate(176 351)"><Rabbit {...art('cat')} fur={fill(['#c9b29a', '#b9b4a4', '#d8c6b0'][scene.detail])} /></g>
+          : scene.props.cat === 'tortoise' ? <g transform="translate(176 351)"><Tortoise {...art('cat')} /></g> : <g transform="translate(176 327)">
           {(() => {
             const tail = variant('cat') === 1 ? 'M12 12 Q48 25 43 4 Q39 -7 30 0' : 'M12 12 Q46 13 38 -17 Q34 -28 30 -19';
             return <g><Band d={tail} colour={fur} />
@@ -170,19 +176,20 @@ export default function Garden(props: SceneProps) {
           })()}
           <ellipse cx="0" cy="0" rx="20" ry="24" fill={fur} />
           <path d="M-14 17 Q-15 25 -6 25 Q-1 25 -2 18 M14 17 Q15 25 6 25 Q1 25 2 18" fill={fur} strokeWidth="2" />
-          {scene.pet === 'cat' ? <path d="M-20 -26 L-22 -45 L-8 -36 Q0 -40 8 -36 L22 -45 L20 -26 Q19 -10 0 -10 Q-19 -10 -20 -26Z" fill={fur} /> : <g fill={fur}>
+          {scene.props.cat === 'cat' ? <path d="M-20 -26 L-22 -45 L-8 -36 Q0 -40 8 -36 L22 -45 L20 -26 Q19 -10 0 -10 Q-19 -10 -20 -26Z" fill={fur} /> : <g fill={fur}>
             <path d="M-19 -28 Q-24 -41 -10 -39 Q0 -43 13 -38 Q25 -36 20 -23 Q18 -10 0 -10 Q-18 -10 -19 -28Z" />
             <path d="M-16 -36 Q-34 -38 -28 -18 Q-24 -10 -17 -22Z M16 -36 Q33 -38 28 -18 Q23 -10 17 -22Z" fill={fill('#a78359')} />
             <ellipse cy="-19" rx="10" ry="7" fill={fill('#f2dfbd')} strokeWidth="2" />
           </g>}
-          {scene.pet === 'cat' && <path d="M-17 -39 L-12 -34 M17 -39 L12 -34" fill="none" strokeWidth={FINE} />}
+          {scene.props.cat === 'cat' && <path d="M-17 -39 L-12 -34 M17 -39 L12 -34" fill="none" strokeWidth={FINE} />}
           {scene.detail === 1 && <path d="M-18 -3 L-9 0 M-19 6 L-10 8 M13 -4 L19 -7 M8 -35 L4 -29 M-4 -35 L-6 -29" fill="none" strokeWidth="2.5" />}
           {scene.detail === 2 && <path d="M-10 12 Q-16 -1 -6 -6 Q6 -9 6 7 L5 19Z" fill={fill('#9f8a74')} stroke="none" />}
           <g fill="none" strokeWidth="1.7"><path d="M-11 -26 l4 1 M7 -25 l4 -1 M-3 -20 L0 -17 L3 -20 M0 -17 V-14" /></g>
-          {scene.pet === 'cat' && <path d="M-17 -20 L-29 -23 M-17 -16 L-29 -15 M17 -20 L29 -23 M17 -16 L29 -15" fill="none" strokeWidth="1.2" />}
-        </g></g>
+          {scene.props.cat === 'cat' && <path d="M-17 -20 L-29 -23 M-17 -16 L-29 -15 M17 -20 L29 -23 M17 -16 L29 -15" fill="none" strokeWidth="1.2" />}
+        </g>}</g>
         {/* Watering can beside the path. */}
-        <g transform={transform('can')}><g transform="translate(290 328)" fill={fill('#8eaeb0')}>
+        <g transform={transform('can')}>{scene.props.can === 'birdbath' ? <g transform="translate(290 350)"><BirdBath {...art('can')} /></g>
+          : scene.props.can === 'wellies' ? <g transform="translate(290 350)"><Wellies {...art('can')} /></g> : <g transform="translate(290 328)" fill={fill('#8eaeb0')}>
           <path d="M-15 -9 Q-48 -30 -42 -4 Q-39 6 -18 4" fill="none" stroke={INK} strokeWidth="8" />
           <path d="M-15 -9 Q-48 -30 -42 -4 Q-39 6 -18 4" fill="none" stroke={fill('#8eaeb0')} strokeWidth="3" />
           <path d="M8 -3 L31 -25 L36 -20 L19 13Z" />
@@ -190,7 +197,7 @@ export default function Garden(props: SceneProps) {
           {variant('can') !== 1 && <g><path d="M26 -29 L40 -18 L47 -28 L33 -40Z" /><path d="M36 -31 l1 1 M41 -27 l1 1 M38 -24 l1 1" fill="none" strokeWidth="2" /></g>}
           {variant('can') === 2 && <g fill={fill('#c7dfe0')} strokeWidth="2">{[[47, -14], [53, -4], [43, -2]].map(([x, y]) => <path key={x} d={`M${x} ${y - 6} Q${x + 5} ${y + 1} ${x} ${y + 3} Q${x - 5} ${y + 1} ${x} ${y - 6}Z`} />)}</g>}
           <path d="M-17 2 H10" fill="none" stroke={outline ? INK : '#e1eddf'} strokeWidth="2" />
-        </g></g>
+        </g>}</g>
         {/* Pond and duck; only the duck turns, not the pond or reeds. */}
         <g transform={transform('pond')}>
           <path d="M432 302 Q475 282 535 303 Q575 322 547 350 Q520 369 457 358 Q405 350 415 325 Q419 311 432 302Z" fill={fill('#c7dfe0')} />

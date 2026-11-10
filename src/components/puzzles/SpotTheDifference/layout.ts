@@ -74,3 +74,12 @@ export function ridge(width: number, y: number, amplitude = 14, phase = 1) {
   }).join(' ');
   return { at, line };
 }
+
+/** A star of `points` arms between two radii, as a path. */
+export function star(points: number, outer: number, inner: number, cx = 0, cy = 0) {
+  return Array.from({ length: points * 2 }, (_, i) => {
+    const a = i / points * Math.PI;
+    const r = i % 2 ? inner : outer;
+    return `${i ? 'L' : 'M'}${(cx + Math.sin(a) * r).toFixed(1)} ${(cy - Math.cos(a) * r).toFixed(1)}`;
+  }).join(' ') + 'Z';
+}

@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Scene from '../src/components/puzzles/SpotTheDifference/Scene';
-import { FEATURES, SCENES, generateScene, versionCount, type Feature, type GeneratedScene } from '../src/components/puzzles/SpotTheDifference/generator';
+import { FEATURES, PROPS, SCENES, featureSpec, generateScene, type Feature, type GeneratedScene } from '../src/components/puzzles/SpotTheDifference/generator';
 import { FEATURE_PART, pictureLayout, sceneLayout } from '../src/components/puzzles/SpotTheDifference/layout';
 
 function render(scene: GeneratedScene, second: boolean, outline = false, answers = false, aspect?: number) {
@@ -28,14 +28,15 @@ test('seeds reproduce scenes, counts are exact, and more differences keep previo
         assert.ok(scene.changes.every(key => key in FEATURES));
       }
       for (const key of Object.keys(FEATURES) as Feature[]) {
-        assert.ok(large.variants[key] >= 0 && large.variants[key] < versionCount(id, key));
-        assert.ok(large.swaps[key] >= 0 && large.swaps[key] < versionCount(id, key));
+        assert.ok(large.variants[key] >= 0 && large.variants[key] < large.features[key].versions);
+        assert.ok(large.swaps[key] >= 0 && large.swaps[key] < large.features[key].versions);
         assert.notEqual(large.swaps[key], large.variants[key]);
       }
       assert.deepEqual(medium.changes.slice(0, 3), small.changes);
       assert.deepEqual(large.changes.slice(0, 5), medium.changes);
       assert.deepEqual(large.variants, small.variants);
       assert.deepEqual(large.swaps, small.swaps);
+      assert.deepEqual(large.props, small.props);
       scenes.add(JSON.stringify(large));
     }
     assert.equal(scenes.size, 1000);
@@ -43,8 +44,7 @@ test('seeds reproduce scenes, counts are exact, and more differences keep previo
 });
 
 /** Every ordered pair of versions of one part: the original, and what it changes to. */
-function versionPairs(id: GeneratedScene['theme'], key: Feature) {
-  const count = versionCount(id, key);
+function versionPairs(count: number) {
   return Array.from({ length: count * count }, (_, i) => [Math.floor(i / count), i % count]).filter(([a, b]) => a !== b);
 }
 
@@ -53,19 +53,47 @@ function changing(scene: GeneratedScene, key: Feature, from: number, to: number)
   return { ...scene, changes: [key], variants: { ...scene.variants, [key]: from }, swaps: { ...scene.swaps, [key]: to } };
 }
 
-test('every pair of versions of every part alters the SVG in colour and outline', () => {
+/** The scene with object `id` standing in slot `key`. */
+function withProp(scene: GeneratedScene, key: Feature, id: string): GeneratedScene {
+  return { ...scene, props: { ...scene.props, [key]: id }, features: { ...scene.features, [key]: featureSpec(scene.theme, key, id) } };
+}
+
+/** Every object that can stand in a slot; a slot without a choice has one. */
+const objects = (id: GeneratedScene['theme'], key: Feature) => PROPS[id][key]?.map(prop => prop.id) ?? [undefined];
+
+test('every pair of versions of every object alters the SVG in colour and outline', () => {
   for (const { id } of SCENES) {
     for (const outline of [false, true]) {
       for (const feature of Object.keys(FEATURES) as Feature[]) {
-        for (const [from, to] of versionPairs(id, feature)) {
-          const scene = changing(generateScene(42, 3, id), feature, from, to);
-          assert.equal(render({ ...scene, changes: [] }, false, outline), render({ ...scene, changes: [] }, true, outline));
-          assert.notEqual(render(scene, false, outline), render(scene, true, outline), `${id}/${feature} ${from}→${to}`);
-          // Switching that feature on the original produces precisely the second image.
-          const changed = { ...scene, changes: [], variants: { ...scene.variants, [feature]: to } };
-          assert.equal(render(changed, false, outline), render(scene, true, outline), feature);
+        for (const object of objects(id, feature)) {
+          const base = object ? withProp(generateScene(42, 3, id), feature, object) : generateScene(42, 3, id);
+          for (const [from, to] of versionPairs(base.features[feature].versions)) {
+            const scene = changing(base, feature, from, to);
+            const name = `${id}/${feature}/${object ?? ''} ${from}→${to}`;
+            assert.equal(render({ ...scene, changes: [] }, false, outline), render({ ...scene, changes: [] }, true, outline));
+            assert.notEqual(render(scene, false, outline), render(scene, true, outline), name);
+            // Switching that feature on the original produces precisely the second image.
+            const changed = { ...scene, changes: [], variants: { ...scene.variants, [feature]: to } };
+            assert.equal(render(changed, false, outline), render(scene, true, outline), name);
+          }
         }
       }
+    }
+  }
+});
+
+test('objects in the same slot draw differently, and each names its own change', () => {
+  for (const { id } of SCENES) {
+    for (const feature of Object.keys(FEATURES) as Feature[]) {
+      const pool = PROPS[id][feature];
+      if (!pool) continue;
+      const base = generateScene(42, 3, id);
+      const drawings = pool.map(({ id: object }) => {
+        const scene = withProp(base, feature, object);
+        return render({ ...scene, variants: { ...scene.variants, [feature]: 0 } }, false);
+      });
+      assert.equal(new Set(drawings).size, pool.length, `${id}/${feature}`);
+      assert.equal(new Set(pool.map(({ id: object }) => featureSpec(id, feature, object).label)).size, pool.length, `${id}/${feature} labels`);
     }
   }
 });
@@ -127,24 +155,23 @@ test('surprise me covers every setting and stays stable when changing difficulty
 
 test('rerolls rearrange objects independently of mirroring and keep composition stable across difficulty', () => {
   const arrangements = new Set<string>();
-  const pets = new Set<string>();
+  const pets = new Set<string | undefined>();
   const background = new Set<boolean>();
   const foreground = new Set<boolean>();
   for (let seed = 0; seed < 100; seed++) {
     const scene = generateScene(seed, 3);
     const harder = generateScene(seed, 7);
     arrangements.add((['flower', 'cat', 'can'] as const).map(part => scene.placements[part]!.x.toFixed(0)).join(','));
-    pets.add(scene.pet);
+    pets.add(scene.props.cat);
     background.add(scene.backgroundFlipped);
     foreground.add(scene.foregroundFlipped);
     assert.deepEqual(scene.placements, harder.placements);
-    assert.equal(scene.pet, harder.pet);
+    assert.deepEqual(scene.props, harder.props);
     assert.equal(scene.backgroundFlipped, harder.backgroundFlipped);
     assert.equal(scene.foregroundFlipped, harder.foregroundFlipped);
-    assert.equal(scene.features.cat.label, `The ${scene.pet}’s tail`);
   }
   assert.ok(arrangements.size > 80);
-  assert.equal(pets.size, 2);
+  assert.equal(pets.size, PROPS.garden.cat!.length);
   assert.equal(background.size, 2);
   assert.equal(foreground.size, 2);
 });
@@ -186,63 +213,37 @@ test('random layouts keep foreground footprints separate and answer circles with
   }
 });
 
-test('either pet keeps its tail difference visible in colour and outline', () => {
-  for (const pet of ['cat', 'dog'] as const) {
-    for (const outline of [false, true]) {
-      for (const [from, to] of versionPairs('garden', 'cat')) {
-        const scene = changing({ ...generateScene(42, 3), pet }, 'cat', from, to);
-        assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: to } }, false, outline), render(scene, true, outline));
+test('rerolls bring out every object in every slot, with its own answer', () => {
+  for (const { id } of SCENES) {
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 200; seed++) {
+      const scene = generateScene(seed, 3, id);
+      for (const [feature, object] of Object.entries(scene.props) as [Feature, string][]) {
+        seen.add(`${feature}/${object}`);
+        assert.deepEqual(scene.features[feature], featureSpec(id, feature, object));
       }
     }
+    const all = (Object.entries(PROPS[id]) as [Feature, { id: string }[]][]).flatMap(([feature, pool]) => pool.map(prop => `${feature}/${prop.id}`));
+    assert.deepEqual([...seen].sort(), all.sort(), id);
   }
 });
 
-
-test('farmyard rerolls include both animals and preserve their tail differences and answer descriptions', () => {
-  const animals = new Set<string>();
-  for (let seed = 0; seed < 100; seed++) {
-    const scene = generateScene(seed, 3, 'farmyard');
-    animals.add(scene.livestock);
-    const harder = generateScene(seed, 7, 'farmyard');
-    assert.equal(scene.livestock, harder.livestock);
-    assert.deepEqual(scene.placements, harder.placements);
-    assert.equal(scene.features.cat.label, `The ${scene.livestock}’s tail`);
-  }
-  assert.deepEqual([...animals].sort(), ['pig', 'sheep']);
-  for (const livestock of ['pig', 'sheep'] as const) {
-    for (const outline of [false, true]) {
-      for (const [from, to] of versionPairs('farmyard', 'cat')) {
-        const scene = changing({ ...generateScene(42, 3, 'farmyard'), livestock }, 'cat', from, to);
-        assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-        assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, cat: to } }, false, outline), render(scene, true, outline));
-      }
-    }
-  }
-});
-
-
-test('playground rerolls cover every toy and ride, with fair changes for every combination', () => {
-  const combinations = new Set<string>();
-  for (let seed = 0; seed < 100; seed++) {
-    const scene = generateScene(seed, 3, 'playground');
-    const harder = generateScene(seed, 7, 'playground');
-    combinations.add(`${scene.playToy}/${scene.playRide}`);
-    assert.equal(scene.playToy, harder.playToy);
-    assert.equal(scene.playRide, harder.playRide);
-    assert.deepEqual(scene.placements, harder.placements);
-    assert.equal(scene.features.cat.label, `The ${scene.playToy}’s bow tie`);
-    assert.equal(scene.features.can.label, `The ${scene.playRide}’s bell`);
-  }
-  assert.equal(combinations.size, 4);
-  for (const playToy of ['teddy', 'bunny'] as const) {
-    for (const playRide of ['scooter', 'tricycle'] as const) {
-      for (const outline of [false, true]) {
-        for (const key of ['cat', 'can'] as const) {
-          for (const [from, to] of versionPairs('playground', key)) {
-            const scene = changing({ ...generateScene(42, 3, 'playground'), playToy, playRide }, key, from, to);
-            assert.notEqual(render(scene, false, outline), render(scene, true, outline));
-            assert.equal(render({ ...scene, changes: [], variants: { ...scene.variants, [key]: to } }, false, outline), render(scene, true, outline));
+test('every object’s answer circle stays inside the picture at every size', () => {
+  for (let columns = 6; columns <= 10; columns++) {
+    for (let rows = 5; rows <= 14; rows++) {
+      const { aspect } = pictureLayout(columns, rows);
+      for (const { id } of SCENES) {
+        for (let seed = 0; seed < 20; seed++) {
+          for (const [feature, pool] of Object.entries(PROPS[id]) as [Feature, { id: string }[]][]) {
+            for (const { id: object } of pool) {
+              const scene = withProp(generateScene(seed, 7, id), feature, object);
+              const layout = sceneLayout(aspect, scene);
+              const { x, y, radius } = scene.features[feature];
+              const part = FEATURE_PART[feature];
+              const p = layout.point(part, x, y);
+              const r = radius * layout.partScale(part);
+              assert.ok(p.x - r > 2 && p.x + r < layout.width - 2 && p.y - r > 2 && p.y + r < layout.height - 2, `${id}/${object}/${columns}x${rows}`);
+            }
           }
         }
       }
