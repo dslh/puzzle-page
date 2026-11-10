@@ -13,6 +13,7 @@ import { puzzleDefinition as whichIsTheSame } from './WhichIsTheSame/definition'
 import { puzzleDefinition as counting } from './Counting/definition';
 import { puzzleDefinition as ordering } from './Ordering/definition';
 import { puzzleDefinition as chess } from './Chess/definition';
+import { puzzleDefinition as chessMoves } from './ChessMoves/definition';
 import { puzzleDefinition as puzzleMaze } from './PuzzleMaze/definition';
 import { puzzleDefinition as handwriting } from './Handwriting/definition';
 import { puzzleDefinition as colourBySightWord } from './ColourBySightWord/definition';
@@ -51,6 +52,7 @@ export const PUZZLE_DEFINITIONS = [
   whichWayDidItTurn,
   counting,
   ordering,
+  chessMoves,
   chess,
   puzzleMaze,
   handwriting,

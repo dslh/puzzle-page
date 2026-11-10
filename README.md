@@ -46,6 +46,7 @@ Live at https://puzzle-page.fly.dev
 | More or Less (compare two groups with > = <) | worked example |
 | Initial Sounds (picture → first letter) | circle / write, case, limit to letters |
 | Directions (robot or treasure map routes) | follow / write / fix the route, arrows or counted steps or words, theme, length, spare boxes |
+| Where Can It Go? / Collect the Stars | one chess piece per small board: dot every square it can reach, or draw a route that lands on every star; piece, board size, pawns in the way, star count, fewest-moves hint |
 | Chess Puzzle | difficulty, mate or capture |
 | Handwriting | trace / copy / missing letters, case, custom words |
 | Letter Formation | letter, stroke guides, trace letters per line |
@@ -88,6 +89,13 @@ Which Way Did It Turn? has focused geometry, generation and rendering checks:
 ```bash
 node_modules/.bin/esbuild scripts/test-turns.ts --bundle --platform=node --jsx=automatic --loader:.css=empty --outfile=/tmp/puzzle-turn-tests.cjs
 node --test /tmp/puzzle-turn-tests.cjs
+```
+
+Where Can It Go? and Collect the Stars have move, route and layout checks:
+
+```bash
+node_modules/.bin/esbuild scripts/test-chess-moves.ts --bundle --platform=node --jsx=automatic --loader:.css=empty --loader:.svg=text --outfile=/tmp/chess-moves-tests.cjs
+node --test /tmp/chess-moves-tests.cjs
 ```
 
 Answer routes and chess data have focused checks too:

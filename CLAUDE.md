@@ -601,7 +601,7 @@ Halves, Size Ordering, Which Doesn't Belong?, Odd One Out, Find the Pair, Which 
 | Writing | Handwriting, Letter Formation, Pre-Writing Patterns, Dot Marker, Dot Letters *(preset)*, Draw the Other Half |
 | Numbers | Counting, Ordering, Sums, Take Away, More or Less, Missing Numbers |
 | Science & Nature | Life Cycles |
-| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Chess, Who Goes Where? |
+| Thinking & Logic | Sudoku, Which Doesn't Belong?, Pattern Sequence, Matching (shadows), Match the Halves *(preset)*, Picture Scramble, Odd One Out, Find the Pair *(preset)*, Which Is the Same?, Size Ordering *(preset)*, Where Can It Go?, Collect the Stars *(preset)*, Chess, Who Goes Where? |
 
 The puzzles in registry order:
 
@@ -620,6 +620,7 @@ The puzzles in registry order:
 | Which Is the Same? | `whichisthesame` | 6×6 | both (min width 4) | level (easy / medium / hard / mixed), 3 / 4 / 5 choices, flipped |
 | Counting | `counting` | 4×3 | both | - |
 | Ordering | `ordering` | 4×3 | both | numbers / emoji |
+| Where Can It Go? | `chessmoves` | 6×6 | both (min 4×4) | dot the moves / collect stars, rook / bishop / queen / king / knight / mix, 4×4 / 5×5 / 6×6 board, pawns in the way, 1-4 stars, fewest moves shown, first-board example |
 | Chess Puzzle | `chess` | 5×5 | fixed | difficulty, mate / capture |
 | Puzzle Maze | `puzzlemaze` | 4×4 | both (max 8×10) | emoji mode |
 | Handwriting | `handwriting` | 6×4 | both | trace / copy / missing, case, custom words |
@@ -672,6 +673,14 @@ Fifteen of these carry notes worth reading before editing them:
   were checked by eye in Noto Color Emoji: leave out anything whose mirror
   looks the same (front-facing faces) or is another emoji (moons, 🌛/🌜).
   Rows fill the height; width sets the picture size.
+- **Where Can It Go? / Collect the Stars** - the first steps of how young
+  children are taught chess: one piece's move on a small board, before any
+  game. Pawns in the way are the child's own pieces, so a piece stops before
+  them (the knight jumps them). A star counts only when the piece lands on
+  it; routes are a BFS over (square, stars landed on), kept to between
+  max(2, stars) and stars + 3 moves. Each board has its own seed, so bigger
+  puzzles add boards and keep the first ones. The pawn is left out on
+  purpose. Piece art is the Chess puzzle's.
 - **Chess** - `puzzleData.ts` is auto-generated from the Lichess puzzle database
   (mate-in-1 and capture puzzles filtered by popularity). Don't hand-edit it.
 - **Weaving Maze** - the generation algorithm is written up in
