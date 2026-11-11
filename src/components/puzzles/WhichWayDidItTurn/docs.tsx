@@ -50,7 +50,7 @@ const docs: PuzzleDoc<WhichWayDidItTurnConfig> = {
       ],
     },
   },
-  size: <p>The pictures stay at a comfortable printed size. Making the puzzle taller adds rows; extra width gives the row more room. Existing rows keep their shapes, turns and answer positions when resized. The smallest size has two rows, leaving one to try after the example.</p>,
+  size: <p>Width sets the size of the pictures; height sets how many rows fit. Existing rows keep their shapes, turns and answer positions when resized. At the smallest height there is one row, with no example, so it is all for them.</p>,
   easier: [
     'Keep First row on and explain why that picture is circled.',
     'Cut a matching shape from scrap paper. Turn it beside the boxed picture, then compare.',

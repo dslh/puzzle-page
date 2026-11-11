@@ -17,7 +17,7 @@ export const puzzleDefinition: PuzzleDefinition<WhichWayDidItTurnConfig> = {
   defaultConfig: { workedExample: true, turns: ['clockwise'], shapes: 'blocks' },
   resizable: {
     width: true, height: true,
-    minWidth: 6, maxWidth: GRID_COLS,
-    minHeight: 4, maxHeight: GRID_ROWS,
+    minWidth: 4, maxWidth: GRID_COLS,
+    minHeight: 2, maxHeight: GRID_ROWS,
   },
 };

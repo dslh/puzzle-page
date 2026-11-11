@@ -183,11 +183,25 @@ export function shapePath(shape: Shape): string {
   return path;
 }
 
+/** The turning arrow's design size: drawn for a 23mm slot, scaled with it. */
+export const ARROW_SLOT = 23;
+/** The arrow column's width, in slots. */
+export const ARROW_SPACE = 14 / ARROW_SLOT;
+/** Below this width the instruction takes two lines. */
+export const ONE_LINE_WIDTH = 85;
+
+/**
+ * Width sets the picture size; height then takes as many rows as fit, rounded
+ * to the nearest, shrinking the pictures a little rather than leaving most of
+ * a row empty. Any space left over is shared out between the rows.
+ */
 export function turnLayout(gridWidth: number, gridHeight: number) {
   const width = gridWidth * CELL_SIZE_MM;
   const height = gridHeight * CELL_SIZE_MM;
-  const slot = Math.min(23, (width - 4 - 14) / 4, (height - 10) / 2 - 2);
-  const rowHeight = slot + 2;
-  const rowCount = Math.max(1, Math.floor((height - 10) / rowHeight));
-  return { width, height, slot, rowHeight, rowCount };
+  const header = width < ONE_LINE_WIDTH ? 12.5 : 8.5;
+  const across = (width - 4) / (4 + ARROW_SPACE);
+  const room = height - header - 1;
+  const rowCount = Math.max(1, Math.round(room / (across + 2)));
+  const slot = Math.min(across, room / rowCount - 2);
+  return { width, height, header, slot, rowHeight: room / rowCount, rowCount };
 }

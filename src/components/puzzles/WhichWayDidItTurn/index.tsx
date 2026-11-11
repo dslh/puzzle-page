@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { PuzzleProps } from '../../../types/puzzle';
 import { sketchedLoop } from '../../../utils/sketchedLoop';
 import { CircleStroke } from '../../AnswerCircle';
-import { generateTurns, figurePath, turnArrow, turnArrowEnd, TURN_RADIUS, turnLayout, type Shape, type ShapeFamily, type ShapeStyle, type TurnKind } from './generator';
+import { generateTurns, figurePath, turnArrow, turnArrowEnd, TURN_RADIUS, turnLayout, ARROW_SLOT, ARROW_SPACE, ONE_LINE_WIDTH, type Shape, type ShapeFamily, type ShapeStyle, type TurnKind } from './generator';
 import styles from './WhichWayDidItTurn.module.css';
 
 export interface WhichWayDidItTurnConfig {
@@ -37,24 +37,33 @@ export default function WhichWayDidItTurn({ gridWidth, gridHeight, seed, config,
   const workedExample = config?.workedExample ?? true;
   const turns = config?.turns;
   const shapes = config?.shapes ?? 'blocks';
-  const { width, height, slot, rowHeight, rowCount } = turnLayout(gridWidth, gridHeight);
+  const { width, height, header, slot, rowHeight, rowCount } = turnLayout(gridWidth, gridHeight);
   const questions = useMemo(() => generateTurns(seed, rowCount, turns, shapes), [seed, rowCount, turns, shapes]);
-  const left = (width - (slot * 4 + 14)) / 2;
+  const arrowSpace = slot * ARROW_SPACE;
+  const left = (width - (slot * 4 + arrowSpace)) / 2;
+  // A lone row is the child's to do, not a worked example.
+  const showExample = workedExample && rowCount > 1;
+  const labelSize = Math.min(2.1, slot * 0.09);
 
   return <svg className={styles.puzzle} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Which way did it turn? Follow each turning arrow. Circle the matching picture.">
-    <text x={width / 2} y={5} textAnchor="middle" fontSize={3.1}>Turn the picture this way. Circle what it will look like.</text>
+    {width < ONE_LINE_WIDTH
+      ? <text x={width / 2} y={5} textAnchor="middle" fontSize={3.1}>
+        <tspan x={width / 2}>Turn the picture this way.</tspan>
+        <tspan x={width / 2} dy={4}>Circle what it will look like.</tspan>
+      </text>
+      : <text x={width / 2} y={5} textAnchor="middle" fontSize={3.1}>Turn the picture this way. Circle what it will look like.</text>}
     {questions.map((question, row) => {
       const colour = ROW_COLOURS[row % ROW_COLOURS.length];
-      const example = workedExample && row === 0;
-      const top = 9 + row * rowHeight;
+      const example = showExample && row === 0;
+      const top = header + row * rowHeight + (rowHeight - slot) / 2;
       const cy = top + slot / 2;
       const modelX = left + slot / 2;
       const [endX, endY] = turnArrowEnd(question.turn);
       return <g key={row} data-turn-row={row}>
         <rect x={left} y={top} width={slot} height={slot} rx={2} fill={colour.card} stroke={colour.border} strokeWidth={0.4} />
-        {example && <text x={modelX} y={top + 2.7} textAnchor="middle" fontSize={2.1} fill="#555b62">Example</text>}
+        {example && <text x={modelX} y={top + labelSize * 1.3} textAnchor="middle" fontSize={labelSize} fill="#555b62">Example</text>}
         <Picture fill={colour.shape} family={question.family} shape={question.model} x={modelX} y={cy} size={slot} />
-        <g transform={`translate(${left + slot + 7} ${cy})`} fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <g transform={`translate(${left + slot + arrowSpace / 2} ${cy}) scale(${slot / ARROW_SLOT})`} fill="none" strokeLinecap="round" strokeLinejoin="round">
           <circle r={TURN_RADIUS} stroke="#bbc5cd" strokeWidth={0.25} />
           <path d={`M 0 ${-TURN_RADIUS} L 0 0 L ${endX} ${endY}`} stroke="#bbc5cd" strokeWidth={0.25} />
           <circle r={0.35} fill="#9ca7ae" />
@@ -62,7 +71,7 @@ export default function WhichWayDidItTurn({ gridWidth, gridHeight, seed, config,
           <path data-turn-cue={question.turn} d={turnArrow(question.turn)} stroke="#3d4b56" strokeWidth={0.75} />
         </g>
         {question.choices.map((choice, index) => {
-          const cx = left + slot + 14 + slot * (index + 0.5);
+          const cx = left + slot + arrowSpace + slot * (index + 0.5);
           const correct = index === question.answer;
           return <g key={index} data-turn-choice={index}>
             <Picture fill={colour.shape} family={question.family} shape={choice} x={cx} y={cy} size={slot} />
