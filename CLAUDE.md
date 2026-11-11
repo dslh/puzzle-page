@@ -630,7 +630,7 @@ The puzzles in registry order:
 
 | Puzzle | `type` | Size | Resize | Config |
 |---|---|---|---|---|
-| Maze | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, direction (across / even / down; round / out on rings), turns (long runs / mixed / zig-zag), straight / curvy walls, start/finish pair |
+| Maze | `maze` | 4×4 | both | grid shape (square / hex / triangle / rhombille / snub square / Cairo pentagon / Voronoi tilings; circle / hexagon / octagon / star / heart rings), cell size, branchiness, direction (across / even / down; round / out on rings), turns (long runs / mixed / zig-zag), hidden picture or word drawn by the route (squares only), straight / curvy walls, start/finish pair |
 | Weaving Maze | `weavingmaze` | 5×5 | both | cell size, crossing density, branchiness |
 | Sudoku | `sudoku` | 3×3 | fixed | 3×3/4×4/5×5, colors / 1-5 / A-E / custom |
 | Which Doesn't Belong? | `whichdoesntbelong` | 4×1 | height | - |
@@ -685,6 +685,26 @@ Sixteen of these carry notes worth reading before editing them:
   between centres (`stepWeight`), so they work on every grid; rings read
   down as out from `Grid.hub`. Left at Even and Mixed, the carver draws
   exactly as it always did, so saved pages print the same.
+  A hidden picture makes the answer route trace a shape (Dot Marker's
+  `shapeVertices`, via `hidden.ts`) or spell a word (`word.ts`). The route
+  is carved first, with short side turnings off half its cells, and the
+  rest grows from there. `route.ts` turns a shape's outline into a chain of
+  neighbouring cells, cutting out any loop where it comes back on itself;
+  outlines are broken at the corner that loses least, near the top, so
+  start and finish sit side by side. An earlier try - grain one way inside
+  the shape, the other outside - stayed a blur. Squares only; shapes need 8
+  cells across.
+  Words use `blockFont.ts`, block capitals drawn for the route: a route
+  can't use a cell twice, so where a letter branches (H, K, E's middle bar)
+  the line comes back a cell over, and those parts look doubled. Each letter
+  has a clean form and, where that doesn't, one that starts and ends on the
+  bottom row. Joins drop from one letter, run along a lane two rows under
+  the word and rise into the next: joins at letter height, or over the top,
+  read as parts of letters (L and I joined over the top look like a pi).
+  `wordRoute` picks each letter's form and direction for the shortest joins
+  (Viterbi), at the biggest whole scale that fits. About 5 letters fit
+  across a page on Small; the config bar says how big a maze a word needs,
+  using the optional `size` that PuzzleSheet passes every config bar.
 - **Letter Formation** - every letterform in `letterForms.ts` is drawn by
   hand (`docs/letter-formation-research.md` says why). Capitals and digits
   sit on a 0..100 box and split at every change of direction into numbered

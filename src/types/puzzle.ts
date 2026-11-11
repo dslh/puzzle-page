@@ -89,6 +89,8 @@ export interface PuzzleConfigProps<TConfig> {
   onChange: (config: TConfig) => void;
   /** Configuring a filler, so options that make no sense in a gap can go. */
   fill?: boolean;
+  /** The placed puzzle's size in grid cells; absent in the sidebar, before it is placed */
+  size?: { width: number; height: number };
 }
 
 /**

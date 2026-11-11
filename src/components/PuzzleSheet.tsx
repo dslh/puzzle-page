@@ -41,6 +41,7 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
     value: unknown;
     onChange: (config: unknown) => void;
     fill?: boolean;
+    size?: { width: number; height: number };
   }> | undefined;
   const fill = puzzle.fill === true;
 
@@ -100,7 +101,12 @@ export default function PuzzleSheet({ puzzle, onReroll, onRemove, onConfigChange
       )}
       {ConfigComponent && config !== undefined && (
         <div className={styles.config}>
-          <ConfigComponent value={config} onChange={newConfig => onConfigChange(puzzle.id, newConfig)} fill={fill} />
+          <ConfigComponent
+            value={config}
+            onChange={newConfig => onConfigChange(puzzle.id, newConfig)}
+            fill={fill}
+            size={{ width: puzzle.width, height: puzzle.height }}
+          />
         </div>
       )}
     </section>

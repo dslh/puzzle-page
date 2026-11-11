@@ -204,6 +204,61 @@ const docs: PuzzleDoc<MazeConfig> = {
         },
       ],
     },
+    picture: {
+      label: 'Hidden picture',
+      description: (
+        <>
+          <p>
+            The way through draws a shape or spells a word, so the line they draw ends
+            up as a heart or their name. Nothing shows until it is done. Squares only.
+          </p>
+          <p>
+            The start and finish move onto the picture. Round a shape, they sit side by
+            side with a wall between, and the way is all the way round.
+          </p>
+        </>
+      ),
+      options: [
+        { label: 'No hidden picture', description: <p>Default.</p> },
+        {
+          label: 'Hidden heart, star, fish, ...',
+          description: (
+            <p>
+              Ask them what they drew when they finish. It needs at least 8 cells
+              across: 5×5 on Large, any size on Medium or Small.
+            </p>
+          ),
+          example: { config: { picture: 'heart', gridShape: 'square', cellSizeRatio: 3 } },
+        },
+        {
+          label: 'Hidden word',
+          description: <p>Spells the word you type, in blocky capitals. See Word.</p>,
+          example: { config: { picture: 'word', word: 'TED', gridShape: 'square', cellSizeRatio: 4 }, width: 6, height: 4 },
+        },
+      ],
+    },
+    word: {
+      label: 'Word',
+      description: (
+        <>
+          <p>
+            For Hidden word: a name or short word. Anything but letters and spaces
+            is left out.
+          </p>
+          <p>
+            Each letter is one line the route can follow. Where a letter branches,
+            like the middle of E or the stem of T, the line goes out and comes back
+            beside itself, so those parts look doubled. The letters are joined by a
+            line underneath, like a road they all stand on.
+          </p>
+          <p>
+            Words need a wide maze. The line under the word says how big. On Small,
+            TED needs 6×4 and ALEX 8×4; about 5 letters fit across the whole page. If
+            the maze is too small, it is drawn without the word.
+          </p>
+        </>
+      ),
+    },
     theme: {
       label: 'Start and finish',
       description: (

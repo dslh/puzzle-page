@@ -2,6 +2,9 @@ import { buildGrid, type Grid, type GridCell, type GridShape, type Point } from 
 import { buildRegionGrid } from './region';
 import { answerPath } from '../../../utils/answerPath';
 import { SeededRandom } from '../../../utils/random';
+import { hiddenLine } from './hidden';
+import { cellRoute } from './route';
+import { wordRoute } from './word';
 
 export interface Wall {
   from: Point;
@@ -32,6 +35,10 @@ export type Turns = 'straight' | 'mixed' | 'zigzag';
 export interface Steering {
   grain: Grain;
   turns: Turns;
+  /** A shape the answer route traces, so solving the maze draws it (see hidden.ts), or 'word' */
+  picture?: string;
+  /** The word the answer route spells when the picture is 'word' (see word.ts) */
+  word?: string;
 }
 
 const EVEN: Steering = { grain: 'even', turns: 'mixed' };
@@ -43,6 +50,16 @@ const EVEN: Steering = { grain: 'even', turns: 'mixed' };
  */
 const GRAIN_WEIGHT = 4;
 const TURNS_WEIGHT = 4;
+/** How much of the maze's width or height the hidden picture spans */
+const PICTURE_SCALE = 0.8;
+/** Fewer cells across than this can't draw a picture you would know */
+const PICTURE_MIN_CELLS = 8;
+/** A break point whose route is longer by this factor beats a higher one */
+const ROUTE_FULLER = 1.05;
+/** The share of the route's cells that get a side turning before the rest is carved */
+const ROUTE_BRANCHES = 0.5;
+/** Longest of those side turnings, in cells */
+const ROUTE_BRANCH_LENGTH = 3;
 
 function getBranchProbability(branchiness: Branchiness): number {
   switch (branchiness) {
@@ -77,7 +94,8 @@ export function generateMaze(
 ): Maze {
   const random = seed ? new SeededRandom(seed) : null;
   const next = () => (random ? random.next() : Math.random());
-  return carveMaze(buildGrid(shape, width, height, next), next, branchiness, steering);
+  const picture = shape === 'square' ? steering.picture : undefined;
+  return carveMaze(buildGrid(shape, width, height, next), next, branchiness, { ...steering, picture });
 }
 
 /**
@@ -133,9 +151,62 @@ function stepWeight(grid: Grid, from: Point, step: Point, heading: Point | null,
   return weight;
 }
 
+/**
+ * The answer route for a hidden picture or word. A picture's outline is
+ * fitted to the middle of the grid at PICTURE_SCALE and broken open near the
+ * top, so the start and finish are side by side and the way between is all
+ * the way round. Null for no picture, or when the grid is too small to draw
+ * it. Squares only: the grid is read as rows and columns.
+ */
+function pictureRoute(grid: Grid, picture: string | undefined, word: string | undefined): number[] | null {
+  if (picture === 'word') return word ? wordRoute(word, grid.width, grid.height) : null;
+  const line = picture ? hiddenLine(picture) : null;
+  if (!line || Math.min(grid.width, grid.height) < PICTURE_MIN_CELLS) return null;
+  const xs = line.points.map((v) => v.x);
+  const ys = line.points.map((v) => v.y);
+  const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const scale = PICTURE_SCALE * Math.min(grid.width / (maxX - minX), grid.height / (maxY - minY));
+  const points = line.points.map((v) => ({
+    x: grid.width / 2 + (v.x - (minX + maxX) / 2) * scale,
+    y: grid.height / 2 + (v.y - (minY + maxY) / 2) * scale,
+  }));
+  if (!line.closed) return cellRoute(points, grid.width, grid.height, false);
+
+  // Break an outline open near the top, where the start and finish are easy
+  // to find. Not at a sharp point, though: both sides of one share cells, and the
+  // outline coming back through them cuts out nearly all of it. So try a
+  // break at each corner and take the fullest route, the highest of ties.
+  let best: number[] | null = null;
+  let bestY = Infinity;
+  points.forEach((v, i) => {
+    const route = cellRoute([...points.slice(i), ...points.slice(0, i)], grid.width, grid.height, true);
+    if (!route) return;
+    const fuller = !best || route.length > best.length * ROUTE_FULLER;
+    const asFull = best && route.length >= best.length / ROUTE_FULLER;
+    if (fuller || (asFull && v.y < bestY)) {
+      best = route;
+      bestY = v.y;
+    }
+  });
+  return best;
+}
+
+/** A shuffled copy, drawing on the maze's own sequence */
+function shuffle<T>(items: readonly T[], next: () => number): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 function carveMaze(grid: Grid, next: () => number, branchiness: Branchiness, steering: Steering): Maze {
   const branchProbability = getBranchProbability(branchiness);
+  const route = pictureRoute(grid, steering.picture, steering.word);
   const steered = steering.grain !== 'even' || steering.turns !== 'mixed';
+  const start = route ? route[0] : grid.start;
+  const end = route ? route[route.length - 1] : grid.end;
 
   // Start with every wall standing
   const { cells } = grid;
@@ -146,8 +217,33 @@ function carveMaze(grid: Grid, next: () => number, branchiness: Branchiness, ste
 
   // Use Growing Tree algorithm to carve paths
   const stack: number[] = [];
-  visited[grid.start] = true;
-  stack.push(grid.start);
+  const carve = (from: number, to: number) => {
+    passages[from].add(to);
+    passages[to].add(from);
+    visited[to] = true;
+  };
+  if (route) {
+    // The route first, then a short side turning off half its cells, so
+    // there are choices all the way along; the rest grows from all of them
+    visited[route[0]] = true;
+    route.slice(1).forEach((cell, i) => carve(route[i], cell));
+    for (const cell of shuffle(route, next)) {
+      stack.push(cell);
+      if (next() >= ROUTE_BRANCHES) continue;
+      let tip = cell;
+      for (let step = Math.floor(next() * ROUTE_BRANCH_LENGTH); step >= 0; step--) {
+        const open = [...new Set(cells[tip].neighbors.filter((n) => n !== -1 && !visited[n]))];
+        if (open.length === 0) break;
+        const chosen = open[Math.floor(next() * open.length)];
+        carve(tip, chosen);
+        stack.push(chosen);
+        tip = chosen;
+      }
+    }
+  } else {
+    visited[start] = true;
+    stack.push(start);
+  }
 
   while (stack.length > 0) {
     const randomValue = next();
@@ -176,10 +272,7 @@ function carveMaze(grid: Grid, next: () => number, branchiness: Branchiness, ste
       }
 
       // Remove wall between current and the chosen neighbour
-      passages[current].add(chosen);
-      passages[chosen].add(current);
-
-      visited[chosen] = true;
+      carve(current, chosen);
       stack.push(chosen);
     } else {
       // No unvisited neighbors, remove this cell from the stack
@@ -205,12 +298,12 @@ function carveMaze(grid: Grid, next: () => number, branchiness: Branchiness, ste
 
   return {
     cells,
-    solution: answerPath(grid.start, grid.end, node => passages[node]),
+    solution: answerPath(start, end, node => passages[node]),
     walls,
     width: grid.width,
     height: grid.height,
     inradius: grid.inradius,
-    start: grid.start,
-    end: grid.end,
+    start,
+    end,
   };
 }

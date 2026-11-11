@@ -25,6 +25,8 @@ export const puzzleDefinition: PuzzleDefinition<MazeConfig> = {
     curvyWalls: false,
     grain: 'even',
     turns: 'mixed',
+    picture: 'none',
+    word: '',
   },
   presets: [
     // Fills the space the other puzzles leave (see region.ts)

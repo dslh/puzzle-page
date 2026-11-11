@@ -21,6 +21,10 @@ export interface MazeConfig {
   grain: Grain;
   /** Whether the passages tend to run straight or zig-zag */
   turns: Turns;
+  /** What the answer route draws: 'none', a shape's id ('heart', see hidden.ts) or 'word' */
+  picture: string;
+  /** The word it spells when picture is 'word' */
+  word: string;
 }
 
 // Simple seeded random number generator
@@ -61,6 +65,9 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
   const curvyWalls = config?.curvyWalls ?? false;
   const grain = config?.grain ?? 'even';
   const turns = config?.turns ?? 'mixed';
+  // Not in the gaps, which are no shape to centre a picture in
+  const picture = region === undefined && config?.picture && config.picture !== 'none' ? config.picture : undefined;
+  const word = config?.word ?? '';
 
   // Convert grid cells to maze cells
   const { width, height } = getMazeDimensions(gridWidth, gridHeight, ratio);
@@ -69,8 +76,8 @@ export default function Maze({ showAnswers = false, gridWidth = 4, gridHeight = 
   const maze: MazeType | null = useMemo(() => {
     return region !== undefined
       ? generateRegionMaze(region, ratio, seed, branchiness, gridShape, { grain, turns })
-      : generateMaze(width, height, seed, branchiness, gridShape, { grain, turns });
-  }, [region, ratio, width, height, seed, branchiness, gridShape, grain, turns]);
+      : generateMaze(width, height, seed, branchiness, gridShape, { grain, turns, picture, word });
+  }, [region, ratio, width, height, seed, branchiness, gridShape, grain, turns, picture, word]);
 
   const answerClearance = useMemo(() => maze ? Math.min(...maze.solution.map(index => {
     const cell = maze.cells[index];
