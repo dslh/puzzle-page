@@ -29,6 +29,7 @@ export const SCENES = [
   { id: 'camping', label: 'Woodland camp' },
   { id: 'farmyard', label: 'Farmyard' },
   { id: 'playground', label: 'Playground' },
+  { id: 'castle', label: 'Castle' },
 ] as const;
 export type SceneTheme = typeof SCENES[number]['id'];
 export type SceneChoice = SceneTheme | 'random';
@@ -38,6 +39,18 @@ interface FeatureSpec { x: number; y: number; radius: number; label: string }
 // different objects. Each scene supplies its own answer descriptions and bounds.
 export const SCENE_FEATURES: Record<SceneTheme, Record<Feature, FeatureSpec>> = {
   garden: FEATURES,
+  castle: {
+    kite: { x: 314, y: 58, radius: 22, label: 'What the dragon is breathing' },
+    chimney: { x: 505, y: 40, radius: 26, label: 'The flag on the tower' },
+    window: { x: 486, y: 158, radius: 18, label: 'The tower window’s shape' },
+    door: { x: 421, y: 234, radius: 28, label: 'The castle gate' },
+    fruit: { x: 104, y: 127, radius: 24, label: 'What is in the nest' },
+    birdhouse: { x: 235, y: 189, radius: 26, label: 'The pattern on the shield' },
+    flower: { x: 68, y: 292, radius: 25, label: 'The plume on the helmet' },
+    cat: { x: 176, y: 303, radius: 15, label: 'What is on the frog’s head' },
+    can: { x: 290, y: 316, radius: 27, label: 'The treasure chest' },
+    duck: { x: 446, y: 333, radius: 25, label: 'The baby swans' },
+  },
   playground: {
     kite: { x: 236, y: 114, radius: 20, label: 'The balloon string' },
     chimney: { x: 437, y: 66, radius: 24, label: 'The play tower’s flag' },
@@ -97,6 +110,7 @@ export const VERSIONS: Record<SceneTheme, Partial<Record<Feature, number>>> = {
   camping: { kite: 3, chimney: 3, window: 3, door: 3, fruit: 3, flower: 3, cat: 3, can: 3, duck: 3 },
   farmyard: { kite: 3, chimney: 3, window: 4, door: 3, fruit: 3, birdhouse: 3, flower: 3, cat: 3, can: 3, duck: 3 },
   playground: { kite: 3, chimney: 3, window: 3, fruit: 3, flower: 3, duck: 3 },
+  castle: { kite: 3, chimney: 3, window: 3, door: 3, fruit: 3, birdhouse: 4, flower: 3, cat: 3, can: 3, duck: 3 },
 };
 
 interface Prop extends Partial<FeatureSpec> { id: string; versions?: number }
@@ -181,6 +195,11 @@ export const PROPS: Record<SceneTheme, Partial<Record<Feature, readonly Prop[]>>
       { id: 'pram', x: 273, y: 299, radius: 24, label: 'The pram’s hood' },
     ],
   },
+  castle: {
+    flower: [{ id: 'helmet' }, { id: 'well', x: 66, y: 309, radius: 16, label: 'The well’s bucket' }],
+    cat: [{ id: 'frog' }, { id: 'goose', x: 204, y: 344, radius: 18, label: 'The golden eggs', versions: 3 }],
+    can: [{ id: 'chest' }, { id: 'crown', x: 290, y: 320, radius: 22, label: 'The points on the crown' }],
+  },
 };
 
 /** Where a slot's change is, what it is, and how many versions it has. */
@@ -194,7 +213,12 @@ export function generateScene(seed: number, count: SpotTheDifferenceConfig['diff
   const random = new SeededRandom(seed);
   const features = Object.keys(FEATURES) as Feature[];
   // Independent streams keep decoration and theme stable when the count changes.
-  const theme = choice === 'random' ? new SeededRandom(seed ^ 0x7468656d).pick(SCENES).id : choice;
+  // Scenes after the first five come from a draw of their own, so a saved
+  // Surprise me page keeps its scene unless it becomes one of the new ones.
+  const themes = new SeededRandom(seed ^ 0x7468656d);
+  const first = themes.pick(SCENES.slice(0, 5)).id;
+  const added = SCENES.slice(5);
+  const theme = choice !== 'random' ? choice : themes.nextInt(SCENES.length) < added.length ? themes.pick(added).id : first;
   // A stable shuffled list means increasing the count keeps existing answers.
   const order = random.shuffle(features);
   // Which object stands in each slot that has a choice.
